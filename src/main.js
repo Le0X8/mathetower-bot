@@ -2,6 +2,7 @@ import config from '../config.json' with { type: 'json' };
 import { examList } from './commands/exam/list.js';
 import { examGet } from './commands/exam/get.js';
 import { help } from './commands/help.js';
+import { mensamsg } from "./commands/mensa/mensa.js";
 import { formatDate, parseDate } from './helpers/date.js';
 const token = config.token;
 
@@ -86,14 +87,17 @@ client.on(Events.MessageCreate, (message) => {
     case 'exam.get':
       message.reply(examGet(store, command[1]));
       break;
-
+    
+    case '':
     case 'help':
     case 'info':
     case 'hilfe':
     case 'hilf':
       message.reply(help());
       break;
-
+    case 'mensa':
+      mensamsg(message);
+      break;
     case 'waow':
       message.reply({files: [{
         attachment: './media/waow-based.png',
