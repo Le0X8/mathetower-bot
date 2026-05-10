@@ -82,7 +82,7 @@ client.on(Events.MessageCreate, (message) => {
       message.reply(examList(store));
       break;
 
-    case 'klausur':
+    case 'klausur':                                   //holy spaghetti code dude
     case 'exam.get':
       message.reply(examGet(store, command[1]));
       break;
@@ -94,6 +94,13 @@ client.on(Events.MessageCreate, (message) => {
       message.reply(help());
       break;
 
+    case 'waow':
+      message.reply({files: [{
+        attachment: './media/waow-based.png',
+        name: 'waow.png'
+      }]
+    });
+    //INTENTIONAL FALLTHROUGH CAUSE MAD FUNNY!
     default:
       message.react('💔');
       break;
@@ -114,7 +121,7 @@ async function specialMessages(message) {
     content.includes('//www.instagram.com')
   ) {
     await message.reply(
-      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content
+      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content    //i may be blind but where is the tracker being removed
         .replace('//x.com', '//vxtwitter.com')
         .replace('//twitter.com', '//vxtwitter.com')
         .replace('//www.instagram.com', '//www.vxinstagram.com')}`
