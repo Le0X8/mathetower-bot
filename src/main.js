@@ -10,6 +10,7 @@ import { load, set, clear } from './store.js';
 const store = load();
 
 import {
+  ActivityType,
   Client,
   Events,
   GatewayIntentBits,
@@ -27,6 +28,16 @@ const client = new Client({
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+  client.user.setPresence({
+    activities: [
+      {
+        name: 'oh14.de/exit',
+        type: ActivityType.Custom,
+        url: 'https://oh14.de/exit',
+      },
+    ],
+    status: 'online',
+  });
 });
 
 client.on(Events.MessageCreate, (message) => {
@@ -82,7 +93,7 @@ client.on(Events.MessageCreate, (message) => {
       message.reply(examList(store));
       break;
 
-    case 'klausur':                                   //holy spaghetti code dude
+    case 'klausur': //holy spaghetti code dude
     case 'exam.get':
       message.reply(examGet(store, command[1]));
       break;
@@ -95,11 +106,14 @@ client.on(Events.MessageCreate, (message) => {
       break;
 
     case 'waow':
-      message.reply({files: [{
-        attachment: './media/waow-based.png',
-        name: 'waow.png'
-      }]
-    });
+      message.reply({
+        files: [
+          {
+            attachment: './media/waow-based.png',
+            name: 'waow.png',
+          },
+        ],
+      });
     //INTENTIONAL FALLTHROUGH CAUSE MAD FUNNY!
     default:
       message.react('💔');
@@ -121,7 +135,7 @@ async function specialMessages(message) {
     content.includes('//www.instagram.com')
   ) {
     await message.reply(
-      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content    //i may be blind but where is the tracker being removed
+      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content //i may be blind but where is the tracker being removed
         .replace('//x.com', '//vxtwitter.com')
         .replace('//twitter.com', '//vxtwitter.com')
         .replace('//www.instagram.com', '//www.vxinstagram.com')}`
