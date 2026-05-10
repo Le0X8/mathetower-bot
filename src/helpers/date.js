@@ -1,7 +1,8 @@
 export function parseDate(date) {
   if (!date) return new Date('2000-01-01');
-  const [day, month, year] = date.split('.').map(Number);
-  let d = new Date(year, month, day);
+  const [hour, part2] = date.split(':');
+  const [day, month, year] = part2.split('.').map(Number);
+  let d = new Date(year, month - 1, day, parseInt(hour));
   try {
     d.toISOString();
   } catch {
@@ -11,8 +12,6 @@ export function parseDate(date) {
 }
 
 export function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  const ts = Math.floor(date.getTime() / 1000);
+  return `<t:${ts}:f> (<t:${ts}:R>)`;
 }
