@@ -11,10 +11,25 @@ export function load() {
 
 export function set(data: Record<string, any>, key: string, value: any) {
   data[key] = value;
-  writeFileSync('./data.json', JSON.stringify(data, null, 2));
+  writeFileSync('./data.json', JSON.stringify(data));
 }
 
 export function clear(data: Record<string, any>, key: string) {
   delete data[key];
-  writeFileSync('./data.json', JSON.stringify(data, null, 2));
+  writeFileSync('./data.json', JSON.stringify(data));
+}
+
+export async function cache<T>(
+  data: Record<string, any>,
+  id: string,
+  match: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
+  if (data['cachematch+' + id] === match) {
+    return data['cache+' + id] as T;
+  }
+  const value = await fetcher();
+  set(data, 'cache+' + id, value);
+  set(data, 'cachematch+' + id, match);
+  return value;
 }

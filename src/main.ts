@@ -16,9 +16,8 @@ import {
   GatewayIntentBits,
   type Message,
   PermissionFlagsBits,
-  EmbedBuilder,
 } from 'discord.js';
-import { menuToday } from '@/commands/menu/today.ts';
+import { menuToday } from '@/commands/menu/all.ts';
 
 const client = new Client({
   intents: [
@@ -41,14 +40,6 @@ client.once(Events.ClientReady, (readyClient) => {
     status: 'online',
   });
 });
-
-async function reply(message: Message<boolean>, content: string | string[]) {
-  if (typeof content === 'string') await message.reply(content);
-  else
-    for (const c of content) {
-      await message.reply(c);
-    }
-}
 
 client.on(Events.MessageCreate, (message) => {
   if (message.author.bot) return;
@@ -100,54 +91,56 @@ client.on(Events.MessageCreate, (message) => {
 
     case 'klausuren':
     case 'exam.list':
-      message.reply(examList(store));
+      examList(store, message);
       break;
 
-    case 'klausur': //holy spaghetti code dude
+    case 'klausur':
     case 'exam.get':
-      message.reply(examGet(store, command[1]));
+      examGet(store, message, command[1]);
       break;
 
+    case '':
     case 'help':
     case 'info':
     case 'hilfe':
     case 'hilf':
-      message.reply(help());
+      help(message);
       break;
 
     case 'essen':
     case 'menü':
     case 'menu.all':
-      menuToday(message, command[1]);
+      menuToday(store, message, command[1]);
       break;
 
     case 'vegetarisch':
     case 'menu.vegetarian':
-      menuToday(message, 'v');
+      menuToday(store, message, 'v');
       break;
 
     case 'vegan':
     case 'menu.vegan':
-      menuToday(message, 'w');
+      menuToday(store, message, 'w');
       break;
 
     case 'foodfakultät':
     case 'foodfak':
     case 'menu.foodfak':
-      menuToday(message, 'f');
+      menuToday(store, message, 'f');
       break;
 
     case 'mensa':
     case 'menu.mensa':
-      menuToday(message, 'm');
+      menuToday(store, message, 'm');
       break;
 
     case 'galerie':
     case 'menu.galerie':
-      menuToday(message, 'g');
+      menuToday(store, message, 'g');
       break;
 
     case 'waow':
+      message.react('💔');
       message.reply({
         files: [
           {
@@ -156,9 +149,10 @@ client.on(Events.MessageCreate, (message) => {
           },
         ],
       });
-    //INTENTIONAL FALLTHROUGH CAUSE MAD FUNNY!
+      break;
+
     default:
-      message.react('💔');
+      message.react('<:pointlaugh:1474081749985267714>');
       break;
   }
 });
