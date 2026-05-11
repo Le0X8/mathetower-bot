@@ -17,6 +17,7 @@ import {
   Message,
   PermissionFlagsBits,
 } from 'discord.js';
+import { menuToday } from '@/commands/menu/today.ts';
 
 const client = new Client({
   intents: [
@@ -39,6 +40,14 @@ client.once(Events.ClientReady, (readyClient) => {
     status: 'online',
   });
 });
+
+async function reply(message: Message<boolean>, content: string | string[]) {
+  if (typeof content === 'string') await message.reply(content);
+  else
+    for (const c of content) {
+      await message.reply(c);
+    }
+}
 
 client.on(Events.MessageCreate, (message) => {
   if (message.author.bot) return;
@@ -103,6 +112,38 @@ client.on(Events.MessageCreate, (message) => {
     case 'hilfe':
     case 'hilf':
       message.reply(help());
+      break;
+
+    case 'essen':
+    case 'menü':
+    case 'menu.all':
+      menuToday(command[1]).then((menu) => reply(message, menu));
+      break;
+
+    case 'vegetarisch':
+    case 'menu.vegetarian':
+      menuToday('v').then((menu) => reply(message, menu));
+      break;
+
+    case 'vegan':
+    case 'menu.vegan':
+      menuToday('w').then((menu) => reply(message, menu));
+      break;
+
+    case 'foodfakultät':
+    case 'foodfak':
+    case 'menu.foodfak':
+      menuToday('f').then((menu) => reply(message, menu));
+      break;
+
+    case 'mensa':
+    case 'menu.mensa':
+      menuToday('m').then((menu) => reply(message, menu));
+      break;
+
+    case 'galerie':
+    case 'menu.galerie':
+      menuToday('g').then((menu) => reply(message, menu));
       break;
 
     case 'waow':

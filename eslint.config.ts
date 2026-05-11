@@ -15,12 +15,14 @@ const config: Linter.Config[] = [
       // Cast to any to avoid type incompatibility
       '@typescript-eslint': tsPlugin as any,
     },
-    rules: {
-      'import-x/extensions': ['error', 'always'],
-    },
   },
   rules.typescript.base,
   rules.typescript.imports,
+  {
+    rules: {
+      'import-x/extensions': 'off',
+    },
+  },
 ];
 
 export default config;
