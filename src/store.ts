@@ -9,12 +9,12 @@ export function load() {
   return JSON.parse(readFileSync('./data.json', 'utf8'));
 }
 
-export function set(data, key, value) {
+export function set(data: Record<string, any>, key: string, value: any) {
   data[key] = value;
   writeFileSync('./data.json', JSON.stringify(data, null, 2));
 }
 
-export function clear(data, key) {
+export function clear(data: Record<string, any>, key: string) {
   delete data[key];
   writeFileSync('./data.json', JSON.stringify(data, null, 2));
 }

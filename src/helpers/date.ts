@@ -1,4 +1,4 @@
-export function parseDate(date) {
+export function parseDate(date: string) {
   if (!date) return new Date('2000-01-01');
   const [hour, part2] = date.split(':');
   if (!hour || !part2) return new Date('2000-01-01');
@@ -13,7 +13,7 @@ export function parseDate(date) {
   return d;
 }
 
-export function formatDate(date) {
+export function formatDate(date: Date) {
   const ts = Math.floor(date.getTime() / 1000);
   return `<t:${ts}:f> (<t:${ts}:R>)`;
 }

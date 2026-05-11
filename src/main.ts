@@ -1,12 +1,12 @@
 import config from '../config.json' with { type: 'json' };
-import { examList } from './commands/exam/list.js';
-import { examGet } from './commands/exam/get.js';
-import { help } from './commands/help.js';
-import { formatDate, parseDate } from './helpers/date.js';
+import { examList } from './commands/exam/list.ts';
+import { examGet } from './commands/exam/get.ts';
+import { help } from './commands/help.ts';
+import { formatDate, parseDate } from './helpers/date.ts';
 const token = config.token;
 
-import { reactions } from './reactions.js';
-import { load, set, clear } from './store.js';
+import { reactions } from './reactions.ts';
+import { load, set, clear } from './store.ts';
 const store = load();
 
 import {
@@ -28,7 +28,7 @@ const client = new Client({
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-  client.user.setPresence({
+  client.user?.setPresence({
     activities: [
       {
         name: 'oh14.de/exit',
@@ -42,8 +42,8 @@ client.once(Events.ClientReady, (readyClient) => {
 
 client.on(Events.MessageCreate, (message) => {
   if (message.author.bot) return;
-  const isAdmin = message.member.permissions.has(
-    PermissionFlagsBits.Administrator
+  const isAdmin = message.member?.permissions.has(
+    PermissionFlagsBits.Administrator,
   );
 
   const isShortCmd = message.content.startsWith('%%');
@@ -74,7 +74,7 @@ client.on(Events.MessageCreate, (message) => {
           date2.toISOString(),
         ]);
         message.reply(
-          `Klausur für ${subject.toUpperCase()} gesetzt auf ${formatDate(date1)} und ${formatDate(date2)}.`
+          `Klausur für ${subject.toUpperCase()} gesetzt auf ${formatDate(date1)} und ${formatDate(date2)}.`,
         );
       }
 
@@ -123,10 +123,7 @@ client.on(Events.MessageCreate, (message) => {
 
 client.login(token);
 
-/**
- * @param {Message<boolean>} message
- */
-async function specialMessages(message) {
+async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
   if (
@@ -138,7 +135,7 @@ async function specialMessages(message) {
       `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content //i may be blind but where is the tracker being removed
         .replace('//x.com', '//vxtwitter.com')
         .replace('//twitter.com', '//vxtwitter.com')
-        .replace('//www.instagram.com', '//www.vxinstagram.com')}`
+        .replace('//www.instagram.com', '//www.vxinstagram.com')}`,
     );
     message.delete();
     return;
