@@ -14,8 +14,9 @@ import {
   Client,
   Events,
   GatewayIntentBits,
-  Message,
+  type Message,
   PermissionFlagsBits,
+  EmbedBuilder,
 } from 'discord.js';
 import { menuToday } from '@/commands/menu/today.ts';
 
@@ -117,33 +118,33 @@ client.on(Events.MessageCreate, (message) => {
     case 'essen':
     case 'menü':
     case 'menu.all':
-      menuToday(command[1]).then((menu) => reply(message, menu));
+      menuToday(message, command[1]);
       break;
 
     case 'vegetarisch':
     case 'menu.vegetarian':
-      menuToday('v').then((menu) => reply(message, menu));
+      menuToday(message, 'v');
       break;
 
     case 'vegan':
     case 'menu.vegan':
-      menuToday('w').then((menu) => reply(message, menu));
+      menuToday(message, 'w');
       break;
 
     case 'foodfakultät':
     case 'foodfak':
     case 'menu.foodfak':
-      menuToday('f').then((menu) => reply(message, menu));
+      menuToday(message, 'f');
       break;
 
     case 'mensa':
     case 'menu.mensa':
-      menuToday('m').then((menu) => reply(message, menu));
+      menuToday(message, 'm');
       break;
 
     case 'galerie':
     case 'menu.galerie':
-      menuToday('g').then((menu) => reply(message, menu));
+      menuToday(message, 'g');
       break;
 
     case 'waow':

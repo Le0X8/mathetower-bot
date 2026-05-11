@@ -1,3 +1,6 @@
+import { embed } from '@/helpers/message.ts';
+import { Message } from 'discord.js';
+
 const mensa = 341;
 const foodfak = 474;
 const galerie = 451;
@@ -25,69 +28,119 @@ async function getMenu(id: number, filter: string[] = []) {
     .filter((meal: any) =>
       meal.type.some((t: string) => filter.includes(t) || filter.length === 0),
     )
+    .sort((a: any, b: any) => a.title.de.localeCompare(b.title.de))
     .map((meal: any) => {
       const [speise, ...beilagen] = meal.title.de
         .split('|')
         .map((part: string) => part.split('(')[0].trim());
+      beilagen.sort((a: string, b: string) => a.localeCompare(b));
       const types = meal.type
         .map((t: string) => typeEmojis[t])
         .filter((e: string) => e);
-      return `- **${speise}** \`${meal.price.student}\`${types.length > 0 ? ' ' + types.join('') : ''}${beilagen.length > 0 ? ' mit\n  - ' : ''}${beilagen.join('\n  - ')}`;
-    })
-    .join('\n');
+      return [
+        `\`${meal.price.student.replace(' ', '')}\` • ${speise}${types.length > 0 ? ' ' + types.join('') : ''}`,
+        `${beilagen.length > 0 ? 'mit ' : ''}${beilagen.map((b: string) => '**' + b + '**').join(', ')}`,
+      ];
+    });
 }
 
-export async function menuToday(location?: string) {
+export async function menuToday(message: Message<boolean>, location?: string) {
   switch (location?.charAt(0).toLowerCase()) {
     case 'w':
-      return (
-        '# Heutiges Menü 🌱 (vegan)\n## Mensa\n' +
-        (await getMenu(mensa, ['N'])) +
-        '\n## FoodFakultät\n' +
-        (await getMenu(foodfak, ['N'])) +
-        '\n## Galerie\n' +
-        (await getMenu(galerie, ['N'])) +
-        '\n-# 🌱 vegan'
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Mensa',
+        await getMenu(mensa, ['N']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
       );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## FoodFakultät',
+        await getMenu(foodfak, ['N']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Galerie',
+        await getMenu(galerie, ['N']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      break;
     case 'v':
-      return (
-        '# Heutiges Menü 🥪 (vegetarisch)\n## Mensa\n' +
-        (await getMenu(mensa, ['N', 'V'])) +
-        '\n## FoodFakultät\n' +
-        (await getMenu(foodfak, ['N', 'V'])) +
-        '\n## Galerie\n' +
-        (await getMenu(galerie, ['N', 'V'])) +
-        '\n-# 🌱 vegan | 🥪 vegetarisch'
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Mensa',
+        await getMenu(mensa, ['N', 'V']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
       );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## FoodFakultät',
+        await getMenu(foodfak, ['N', 'V']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Galerie',
+        await getMenu(galerie, ['N', 'V']),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      break;
     case 'm':
-      return (
-        '# Heutiges Menü\n## Mensa\n' +
-        (await getMenu(mensa)) +
-        '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein'
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Mensa',
+        await getMenu(mensa),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
       );
+      break;
     case 'f':
-      return (
-        '# Heutiges Menü\n## FoodFakultät\n' +
-        (await getMenu(mensa)) +
-        '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein'
+      embed(
+        message,
+        'Heutiges Menü',
+        '## FoodFakultät',
+        await getMenu(foodfak),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
       );
+      break;
     case 'g':
-      return (
-        '# Heutiges Menü\n## Galerie\n' +
-        (await getMenu(mensa)) +
-        '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein'
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Galerie',
+        await getMenu(galerie),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
       );
+      break;
     default:
-      return [
-        '# Heutiges Menü\n## Mensa\n' +
-          (await getMenu(mensa)) +
-          '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
-        '\n## FoodFakultät\n' +
-          (await getMenu(foodfak)) +
-          '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
-        '\n## Galerie\n' +
-          (await getMenu(galerie)) +
-          '\n-# 🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
-      ];
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Mensa',
+        await getMenu(mensa),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## FoodFakultät',
+        await getMenu(foodfak),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      embed(
+        message,
+        'Heutiges Menü',
+        '## Galerie',
+        await getMenu(galerie),
+        '🌱 vegan | 🥪 vegetarisch | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein',
+      );
+      break;
   }
 }
