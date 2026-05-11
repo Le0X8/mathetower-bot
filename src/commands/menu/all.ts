@@ -7,12 +7,12 @@ const foodfak = 474;
 const galerie = 451;
 
 const typeEmojis: Record<string, string> = {
-  F: '\\🐟', // mit Fisch
-  N: '\\🌱', // vegan
-  G: '\\🐔', // mit Geflügel
-  R: '\\🐄', // mit Rind
-  S: '\\🐖', // mit Schwein
-  V: '\\🥪', // vegetarisch
+  F: '🐟', // mit Fisch
+  N: '🌱', // vegan
+  G: '🐔', // mit Geflügel
+  R: '🐄', // mit Rind
+  S: '🐖', // mit Schwein
+  V: '🥪', // vegetarisch
 };
 
 const typesVegan = '🌱 vegan';
