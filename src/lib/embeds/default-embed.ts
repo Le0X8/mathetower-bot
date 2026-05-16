@@ -1,7 +1,6 @@
-import { EmbedBuilder, type Message } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
-export async function embed(
-  message: Message<boolean>,
+export async function buildEmbed(
   title: string,
   description: string | null,
   content: [string, string][],
@@ -13,5 +12,5 @@ export async function embed(
     .setDescription(description)
     .addFields(...content.map(([name, value]) => ({ name, value })))
     .setFooter(footer ? { text: footer } : null);
-  await message.reply({ embeds: [embed] });
+  return embed;
 }

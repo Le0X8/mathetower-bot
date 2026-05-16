@@ -1,23 +1,26 @@
 import config from '../config.json' with { type: 'json' };
-import { examList } from './commands/exam/list.ts';
-import { examGet } from './commands/exam/get.ts';
-import { help } from './commands/help.ts';
-import { formatDate, parseDate } from './helpers/date.ts';
 const token = config.token;
-
-import { reactions } from './reactions.ts';
-import { load, set, clear } from './store.ts';
-const store = load();
 
 import {
   ActivityType,
   Client,
+  EmbedBuilder,
   Events,
   GatewayIntentBits,
   type Message,
   PermissionFlagsBits,
 } from 'discord.js';
-import { menuToday } from '@/commands/menu/all.ts';
+
+import { reactions } from '@/reactions.ts';
+import { load, set, clear } from '@/store.ts';
+import { getCommands } from '@/lib/helpers/get-commands.ts';
+import { registerCommands } from '@/lib/helpers/register-commands.ts';
+import { formatDate, parseDate } from './lib/helpers/date.ts';
+import { examGet, examList } from './lib/embeds/exam.ts';
+import { menuToday } from './lib/embeds/menu.ts';
+import { MENSA_IDS } from './config/mensa.ts';
+import { help } from './lib/embeds/help.ts';
+const store = load();
 
 const client = new Client({
   intents: [
@@ -28,6 +31,7 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, (readyClient) => {
+  registerCommands(readyClient);
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
   client.user?.setPresence({
     activities: [
@@ -39,6 +43,33 @@ client.once(Events.ClientReady, (readyClient) => {
     ],
     status: 'online',
   });
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+if (!interaction.isChatInputCommand()) return;
+
+  const localCommands = await getCommands();
+
+  try {
+    const commandObject = localCommands.find(
+      (cmd) => cmd.name === interaction.commandName
+    );
+
+    if (!commandObject) return;
+
+    if (commandObject.isAdminCommand) {
+      if (!interaction.memberPermissions?.has( PermissionFlagsBits.Administrator )) {
+        interaction.reply({
+          content: 'Not enough permissions.',
+          ephemeral: true,
+        });
+      }
+    }
+
+    commandObject.callback(interaction);
+  } catch (error) {
+    console.log(`There was an error running this command: ${error}`);
+  }
 });
 
 client.on(Events.MessageCreate, (message) => {
@@ -91,12 +122,16 @@ client.on(Events.MessageCreate, (message) => {
 
     case 'klausuren':
     case 'exam.list':
-      examList(store, message);
+      examList().then((embed: EmbedBuilder) => 
+        message.reply({ embeds: [embed] })
+      )
       break;
 
     case 'klausur':
     case 'exam.get':
-      examGet(store, message, command[1]);
+      examGet(command[1]).then((embed: EmbedBuilder) => 
+        message.reply({ embeds: [embed] })
+      )
       break;
 
     case '':
@@ -104,39 +139,53 @@ client.on(Events.MessageCreate, (message) => {
     case 'info':
     case 'hilfe':
     case 'hilf':
-      help(message);
+      help().then((embed: EmbedBuilder) => 
+        message.reply({ embeds: [embed] })
+      );
       break;
 
     case 'essen':
     case 'menü':
     case 'menu.all':
-      menuToday(store, message, command[1]);
+      menuToday(-1).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'vegetarisch':
     case 'menu.vegetarian':
-      menuToday(store, message, 'v');
+      menuToday(-1, 2).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'vegan':
     case 'menu.vegan':
-      menuToday(store, message, 'w');
+      menuToday(-1, 1).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'foodfakultät':
     case 'foodfak':
     case 'menu.foodfak':
-      menuToday(store, message, 'f');
+      menuToday(MENSA_IDS.FOODFAK).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'mensa':
     case 'menu.mensa':
-      menuToday(store, message, 'm');
+      menuToday(MENSA_IDS.MENSA).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'galerie':
     case 'menu.galerie':
-      menuToday(store, message, 'g');
+      menuToday(MENSA_IDS.GALERIE).then((embeds: EmbedBuilder[]) => 
+        message.reply({ embeds: embeds })
+      );
       break;
 
     case 'waow':
