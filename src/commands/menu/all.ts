@@ -43,6 +43,9 @@ async function getMenu(
       )[todayString],
   )) as any;
 
+  // TODO: bitte schöner
+  if (!mensaMenu) return [];
+
   return mensaMenu
     .filter((meal: any) =>
       meal.type.some((t: string) => filter.includes(t) || filter.length === 0),
