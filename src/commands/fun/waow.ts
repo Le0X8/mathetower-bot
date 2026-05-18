@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-const waowCommand = {
+export default {
   name: 'waow',
   description: 'waow',
 
@@ -15,5 +15,3 @@ const waowCommand = {
     });
   },
 };
-
-export default waowCommand;

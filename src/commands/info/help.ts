@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { help } from '@/lib/embeds/help.ts';
 
-const klausurenCommand = {
+export default {
   name: 'help',
   description: 'Zeigt die Hilfsnachricht an',
 
@@ -9,5 +9,3 @@ const klausurenCommand = {
     interaction.reply({ embeds: [await help()] });
   },
 };
-
-export default klausurenCommand;

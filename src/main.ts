@@ -12,16 +12,10 @@ import {
 } from 'discord.js';
 
 import { reactions } from '@/reactions.ts';
-import { load, set, clear } from '@/store.ts';
+import '@/store.ts';
 import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
-import { formatDate, parseDate } from './lib/helpers/date.ts';
-import { examGet, examList } from './lib/embeds/exam.ts';
-import { menuToday } from './lib/embeds/menu.ts';
-import { MENSA_IDS } from './config/mensa.ts';
-import { help } from './lib/embeds/help.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
-const store = load();
 
 const client = new Client({
   intents: [

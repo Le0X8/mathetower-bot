@@ -4,7 +4,7 @@ import {
 } from 'discord.js';
 import { examGet, examList } from '@/lib/embeds/exam.ts';
 
-const klausurenCommand = {
+export default {
   name: 'klausuren',
   description: 'Zeigt die Klausurtermine von einem Modul',
   options: [
@@ -25,5 +25,3 @@ const klausurenCommand = {
     }
   },
 };
-
-export default klausurenCommand;

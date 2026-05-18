@@ -1,15 +1,13 @@
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { buildErrorEmbed } from '@/lib/embeds/error-embed.ts';
 import { formatDate, parseDate } from '@/lib/helpers/date.ts';
-import { load, set } from '@/store.ts';
 import {
   ApplicationCommandOptionType,
   ChatInputCommandInteraction,
-  EmbedBuilder,
   MessageFlags,
 } from 'discord.js';
 
-const klausurenCommand = {
+export default {
   name: 'set-exams',
   description: 'Setze die Klausurtermine für ein Modul',
   isAdminCommand: true,
@@ -61,7 +59,7 @@ const klausurenCommand = {
       return;
     }
 
-    set(load(), 'exam+' + subject.toLowerCase(), [
+    store.set('exam', subject.toLowerCase(), [
       date1.toISOString(),
       date2.toISOString(),
     ]);
@@ -76,5 +74,3 @@ const klausurenCommand = {
     await interaction.reply({ embeds: [embed] });
   },
 };
-
-export default klausurenCommand;

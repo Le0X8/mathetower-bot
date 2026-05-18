@@ -1,10 +1,8 @@
-import { load } from '@/store.ts';
 import { formatDate } from '@/lib/helpers/date.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 
 export async function examGet(subject: string) {
-  const data = load();
-  const value = data['exam+' + subject.toLowerCase()];
+  const value = store.get('exam+' + subject.toLowerCase());
   subject = subject.toUpperCase();
   const embed = await buildEmbed(
     `${subject}-Klausurtermine`,
@@ -19,9 +17,8 @@ export async function examGet(subject: string) {
 }
 
 export async function examList() {
-  const data: Record<string, any> = load();
-  const klausuren = Object.entries(data)
-    .filter(([key]) => key.startsWith('exam+'))
+  const klausuren = store
+    .entries('exam')
     .sort(([, valueA], [, valueB]) => {
       const dateA = Number(new Date(valueA[0]));
       const dateB = Number(new Date(valueB[0]));

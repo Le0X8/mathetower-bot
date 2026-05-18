@@ -1,6 +1,5 @@
-import { MENSA_IDS } from '@/config/mensa.ts';
+import { Mensa } from '@/config/mensa.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
-import { cache, load } from '@/store.ts';
 import { EmbedBuilder } from 'discord.js';
 import { buildErrorEmbed } from './error-embed.ts';
 
@@ -13,16 +12,11 @@ const typeEmojis: Record<string, string> = {
   V: '🥪', // vegetarisch
 };
 
-async function getMenu(
-  data: Record<string, any>,
-  id: number,
-  filter: string[] = [],
-) {
+async function getMenu(id: number, filter: string[] = []) {
   const today = new Date();
   const todayString = today.toISOString().split('T')[0];
 
-  const mensaMenu = (await cache(
-    data,
+  const mensaMenu = (await store.cache(
     'menu+' + id,
     todayString,
     async () =>
@@ -57,11 +51,11 @@ async function getMenu(
 
 function getTitle(location: number) {
   switch (location) {
-    case MENSA_IDS.MENSA:
+    case Mensa.Mensa:
       return 'Mensa';
-    case MENSA_IDS.FOODFAK:
+    case Mensa.FoodFak:
       return 'FoodFakultät';
-    case MENSA_IDS.GALERIE:
+    case Mensa.Galerie:
       return 'Galerie';
     default:
       return '';
@@ -69,9 +63,7 @@ function getTitle(location: number) {
 }
 
 export async function menuToday(location: number, filter?: number) {
-  const data = load();
-
-  const locations = location === -1 ? Object.values(MENSA_IDS) : [location];
+  const locations = location === -1 ? Object.values(Mensa) : [location];
   const filterArr = filter === 1 ? ['N'] : filter === 2 ? ['V', 'N'] : [];
   const todayStr =
     'Heutiges Menü' +
@@ -91,15 +83,15 @@ export async function menuToday(location: number, filter?: number) {
       embeds.push(
         await buildEmbed(
           todayStr,
-          '## ' + getTitle(id),
-          await getMenu(data, id, filterArr),
+          '## ' + getTitle(id as number),
+          await getMenu(id as number, filterArr),
           typesStr,
         ),
       );
     } catch (error) {
       embeds.push(
         await buildErrorEmbed(
-          `Keine Daten für die Mensa **${getTitle(id)}** verfügbar.`,
+          `Keine Daten für die Mensa **${getTitle(id as number)}** verfügbar.`,
         ),
       );
     }
