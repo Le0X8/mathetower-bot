@@ -8,6 +8,7 @@ import {
   Events,
   GatewayIntentBits,
   type Message,
+  MessageFlags,
   PermissionFlagsBits,
 } from 'discord.js';
 
@@ -20,6 +21,7 @@ import { examGet, examList } from './lib/embeds/exam.ts';
 import { menuToday } from './lib/embeds/menu.ts';
 import { MENSA_IDS } from './config/mensa.ts';
 import { help } from './lib/embeds/help.ts';
+import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
 const store = load();
 
 const client = new Client({
@@ -59,10 +61,8 @@ if (!interaction.isChatInputCommand()) return;
 
     if (commandObject.isAdminCommand) {
       if (!interaction.memberPermissions?.has( PermissionFlagsBits.Administrator )) {
-        interaction.reply({
-          content: 'Not enough permissions.',
-          ephemeral: true,
-        });
+        interaction.reply({ embeds: [await buildErrorEmbed('Not enough permissions.')], flags: MessageFlags.Ephemeral });
+        return;
       }
     }
 
