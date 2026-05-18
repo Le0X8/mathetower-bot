@@ -1,11 +1,10 @@
-import { ChatInputCommandInteraction } from 'discord.js';
 import { help } from '@/lib/embeds/help.ts';
+import { Command } from '$commands';
 
-export default {
-  name: 'help',
-  description: 'Zeigt die Hilfsnachricht an',
-
-  async callback(interaction: ChatInputCommandInteraction) {
+export default new Command(
+  'help',
+  'Zeigt die Hilfsnachricht an',
+  async (interaction) => {
     interaction.reply({ embeds: [await help()] });
   },
-};
+);

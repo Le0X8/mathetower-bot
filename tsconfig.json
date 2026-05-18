@@ -2,7 +2,9 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "$config": ["./config.json"]
+      "$config": ["./config.json"],
+      "$commands": ["./src/commands/commands.ts"],
+      "$commands/*": ["./src/commands/*"]
     },
 
     "ignoreDeprecations": "6.0",

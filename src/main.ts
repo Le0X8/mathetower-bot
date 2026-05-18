@@ -1,4 +1,4 @@
-import config from '../config.json' with { type: 'json' };
+import config from '$config' with { type: 'json' };
 const token = config.token;
 
 import {
@@ -56,26 +56,41 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (
         !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)
       ) {
-        interaction.reply({
-          embeds: [await buildErrorEmbed('Not enough permissions.')],
-          flags: MessageFlags.Ephemeral,
-        });
-        return;
+        throw new Error('Not enough permissions.');
       }
     }
 
-    commandObject.callback(interaction);
+    await commandObject.callback(interaction);
   } catch (error) {
-    console.log(`There was an error running this command: ${error}`);
+    console.log(error);
+    try {
+      await interaction.reply({
+        embeds: [await buildErrorEmbed(error as Error)],
+        flags: MessageFlags.Ephemeral,
+      });
+      await client.users.fetch(config.owner).then(async (user) => {
+        user
+          .send({
+            embeds: [
+              await buildErrorEmbed(
+                error as Error,
+                `Error in command: \`${interaction.commandName}\` with args: \`${JSON.stringify(interaction.options.data)}\``,
+              ),
+            ],
+            flags: MessageFlags.SuppressNotifications,
+          })
+          .catch(console.error);
+      });
+    } catch {}
   }
 });
 
 client.login(token);
 
-client.on(Events.MessageCreate, (message) => {
+client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
-  specialMessages(message);
+  specialMessages(message).catch(console.error);
 });
 
 async function specialMessages(message: Message<boolean>) {
