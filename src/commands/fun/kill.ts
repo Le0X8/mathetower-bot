@@ -79,12 +79,12 @@ export default new Command(
   async (interaction) => {
     const colorRng = Math.floor(Math.random() * 16);
     const source =
-      interaction.options.getString('customSource', false) ??
+      interaction.options.getString('customsource', false) ??
       (interaction.member as GuildMember).nickname ??
       interaction.user.globalName ??
       interaction.user.username;
     const target =
-      interaction.options.getString('customTarget', false) ??
+      interaction.options.getString('customtarget', false) ??
       (interaction.member as GuildMember)?.guild.members.cache.get(
         interaction.options.getUser('target', true).id,
       )?.nickname ??
@@ -92,7 +92,7 @@ export default new Command(
       interaction.options.getUser('target', true).username ??
       source;
     const assist =
-      interaction.options.getString('customAssist', false) ??
+      interaction.options.getString('customassist', false) ??
       (interaction.member as GuildMember)?.guild.members.cache.get(
         interaction.options.getUser('assist', false)?.id ?? '',
       )?.nickname ??
@@ -202,19 +202,19 @@ export default new Command(
       required: false,
     },
     {
-      name: 'customTarget',
+      name: 'customtarget',
       description: 'der Name der getötet wird (überschreibt die Ziel-Person)',
       type: ApplicationCommandOptionType.String,
       required: false,
     },
     {
-      name: 'customAssist',
+      name: 'customassist',
       description: 'der Name der assistiert (überschreibt die Assist-Person)',
       type: ApplicationCommandOptionType.String,
       required: false,
     },
     {
-      name: 'customSource',
+      name: 'customsource',
       description: 'der Name des Killers (überschreibt dich)',
       type: ApplicationCommandOptionType.String,
       required: false,
