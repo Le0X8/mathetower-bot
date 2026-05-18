@@ -16,6 +16,7 @@ import '@/store.ts';
 import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
+import { catchBanane } from '@/commands/debug/error.ts';
 
 const client = new Client({
   intents: [
@@ -68,6 +69,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
         embeds: [await buildErrorEmbed(error as Error)],
         flags: MessageFlags.Ephemeral,
       });
+      if ((error as Error).message === 'banane 🍌') {
+        return await catchBanane(interaction);
+      }
       await client.users.fetch(config.owner).then(async (user) => {
         user
           .send({
@@ -81,7 +85,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
           })
           .catch(console.error);
       });
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 });
 

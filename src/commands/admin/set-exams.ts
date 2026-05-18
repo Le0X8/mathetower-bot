@@ -38,7 +38,7 @@ export default {
 
     if (!subject || !date1Str || !date2Str) {
       await interaction.reply({
-        embeds: [await buildErrorEmbed('Fehlende Eingaben.')],
+        embeds: [await buildErrorEmbed(new Error('Fehlende Eingaben.'))],
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -51,7 +51,7 @@ export default {
       await interaction.reply({
         embeds: [
           await buildErrorEmbed(
-            'Ungültiges Datumsformat. Bitte DD.MM.YYYY verwenden.',
+            new Error('Ungültiges Datumsformat. Bitte H:DD.MM.YYYY verwenden.'),
           ),
         ],
         flags: MessageFlags.Ephemeral,
