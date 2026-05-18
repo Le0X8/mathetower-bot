@@ -6,9 +6,10 @@ export default new Command('error', 'schlägt fehl', async (_interaction) => {
 });
 
 enum Banane {
-  Gelb, // 60%
-  Grün, // 30%
-  Braun, // 10%
+  Gelb = 0, // 60%
+  Grün = 1, // 29%
+  Braun = 2, // 10%
+  Bewaffnet = 99, // 1%
 }
 
 function bananeStrings(banane: Banane): [string, string, string] {
@@ -31,25 +32,34 @@ function bananeStrings(banane: Banane): [string, string, string] {
         '<:braun:1505973784249761923>',
         'würd ich jetzt nicht mehr essen 🤮',
       ];
+    case Banane.Bewaffnet:
+      return [
+        'schwer bewaffnete 😳',
+        '<:bewaffnet:1505976549051207760>',
+        '🤚 "Hände hoch" ✋',
+      ];
   }
 }
 
-const bananeRanges: Record<Banane, [number, number]> = {
-  [Banane.Gelb]: [0, 60],
-  [Banane.Grün]: [60, 90],
-  [Banane.Braun]: [90, 100],
+const bananeRanges: Record<Banane, number> = {
+  [Banane.Gelb]: 60,
+  [Banane.Grün]: 89,
+  [Banane.Braun]: 99,
+  [Banane.Bewaffnet]: 100,
 };
 
 function bananeRng(): Banane {
   const rng = Math.ceil(Math.random() * 100);
 
   for (const range of Object.entries(bananeRanges))
-    if (range[1][0] < rng && range[1][1] >= rng)
-      return parseInt(range[0]) as Banane;
+    if (range[1] <= rng) return parseInt(range[0]) as Banane;
   return Banane.Gelb;
 }
 
-export async function catchBanane(interaction: ChatInputCommandInteraction) {
+export async function catchBanane(
+  interaction: ChatInputCommandInteraction,
+  fromError: boolean = true,
+) {
   if (!(interaction.channel instanceof TextChannel)) return;
   const banane = bananeRng();
   const s = bananeStrings(banane);
@@ -60,7 +70,8 @@ export async function catchBanane(interaction: ChatInputCommandInteraction) {
   counter[banane]++;
 
   await interaction.channel.send(
-    `-# <@${interaction.user.id}> used \`/error\`\n\ndanke bro, hier hast du eine **${s[0]} Banane**. ${s[1]}\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
+    (fromError ? `-# <@${interaction.user.id}> used \`/error\`\n\n` : '') +
+      `danke bro, hier hast du eine **${s[0]} Banane**. ${s[1]}\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
   );
   store.set(interaction.user.id, 'banane', counter);
 }
