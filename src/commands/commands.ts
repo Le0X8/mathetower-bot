@@ -8,6 +8,7 @@ export interface Option {
   description: string;
   type: ApplicationCommandOptionType;
   required: boolean;
+  choices?: { name: string; value: string | number }[];
 }
 
 export class Command {

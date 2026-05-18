@@ -96,7 +96,6 @@ client.login(token);
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
-  console.log(message.member);
   specialMessages(message).catch(console.error);
 });
 
