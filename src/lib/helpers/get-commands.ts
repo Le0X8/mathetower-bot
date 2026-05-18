@@ -1,11 +1,18 @@
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 export async function getCommands() {
+  if (!process.argv[1].includes('/src/'))
+    return JSON.parse(fs.readFileSync('commands.json', 'utf-8'));
+
   const localCommands = [];
 
-  const commandsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..', 'commands');
+  const commandsPath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../..',
+    'commands',
+  );
   const categories = fs.readdirSync(commandsPath);
 
   for (const category of categories) {

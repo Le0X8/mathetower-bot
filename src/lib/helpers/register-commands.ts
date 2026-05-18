@@ -1,24 +1,15 @@
-import config from '../../../config.json' with { type: 'json' };
+import config from '$config' with { type: 'json' };
 const guildId = config.gid;
 
-import {
-  Client,
-  ApplicationCommandDataResolvable,
-} from 'discord.js';
+import { Client, ApplicationCommandDataResolvable } from 'discord.js';
 
 import { getCommands } from './get-commands.ts';
 
-function areCommandsDifferent(
-  existingCommand: any,
-  localCommand: any
-) {
-  const areChoicesDifferent = (
-    existingChoices: any[],
-    localChoices: any[]
-  ) => {
+function areCommandsDifferent(existingCommand: any, localCommand: any) {
+  const areChoicesDifferent = (existingChoices: any[], localChoices: any[]) => {
     for (const localChoice of localChoices) {
       const existingChoice = existingChoices?.find(
-        (choice) => choice.name === localChoice.name
+        (choice) => choice.name === localChoice.name,
       );
 
       if (!existingChoice) {
@@ -33,13 +24,10 @@ function areCommandsDifferent(
     return false;
   };
 
-  const areOptionsDifferent = (
-    existingOptions: any[],
-    localOptions: any[]
-  ) => {
+  const areOptionsDifferent = (existingOptions: any[], localOptions: any[]) => {
     for (const localOption of localOptions) {
       const existingOption = existingOptions?.find(
-        (option) => option.name === localOption.name
+        (option) => option.name === localOption.name,
       );
 
       if (!existingOption) {
@@ -47,16 +35,14 @@ function areCommandsDifferent(
       }
 
       if (
-        localOption.description !==
-          existingOption.description ||
+        localOption.description !== existingOption.description ||
         localOption.type !== existingOption.type ||
-        (localOption.required || false) !==
-          existingOption.required ||
+        (localOption.required || false) !== existingOption.required ||
         (localOption.choices?.length || 0) !==
           (existingOption.choices?.length || 0) ||
         areChoicesDifferent(
           localOption.choices || [],
-          existingOption.choices || []
+          existingOption.choices || [],
         )
       ) {
         return true;
@@ -67,14 +53,9 @@ function areCommandsDifferent(
   };
 
   if (
-    existingCommand.description !==
-      localCommand.description ||
-    existingCommand.options?.length !==
-      (localCommand.options?.length || 0) ||
-    areOptionsDifferent(
-      existingCommand.options,
-      localCommand.options || []
-    )
+    existingCommand.description !== localCommand.description ||
+    existingCommand.options?.length !== (localCommand.options?.length || 0) ||
+    areOptionsDifferent(existingCommand.options, localCommand.options || [])
   ) {
     return true;
   }
@@ -82,9 +63,7 @@ function areCommandsDifferent(
   return false;
 }
 
-export async function registerCommands(
-  client: Client
-) {
+export async function registerCommands(client: Client) {
   try {
     const localCommands = await getCommands();
 
@@ -93,54 +72,32 @@ export async function registerCommands(
     const applicationCommands = await guild.commands.fetch();
 
     for (const localCommand of localCommands) {
-      const {
-        name,
-        description,
-        options,
-        deleted,
-      } = localCommand;
+      const { name, description, options, deleted } = localCommand;
 
-      const existingCommand =
-        applicationCommands.find(
-          (cmd) => cmd.name === name
-        );
+      const existingCommand = applicationCommands.find(
+        (cmd) => cmd.name === name,
+      );
 
       if (existingCommand) {
         if (deleted) {
-          await guild.commands.delete(
-            existingCommand.id
-          );
+          await guild.commands.delete(existingCommand.id);
 
-          console.log(
-            `Deleted command "${name}".`
-          );
+          console.log(`Deleted command "${name}".`);
 
           continue;
         }
 
-        if (
-          areCommandsDifferent(
-            existingCommand,
-            localCommand
-          )
-        ) {
-          await guild.commands.edit(
-            existingCommand.id,
-            {
-              description,
-              options,
-            }
-          );
+        if (areCommandsDifferent(existingCommand, localCommand)) {
+          await guild.commands.edit(existingCommand.id, {
+            description,
+            options,
+          });
 
-          console.log(
-            `Edited command "${name}".`
-          );
+          console.log(`Edited command "${name}".`);
         }
       } else {
         if (deleted) {
-          console.log(
-            `Skipped registering command "${name}".`
-          );
+          console.log(`Skipped registering command "${name}".`);
 
           continue;
         }
@@ -151,9 +108,7 @@ export async function registerCommands(
           options,
         } as ApplicationCommandDataResolvable);
 
-        console.log(
-          `Registered command "${name}".`
-        );
+        console.log(`Registered command "${name}".`);
       }
     }
   } catch (error) {

@@ -47,20 +47,25 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const localCommands = await getCommands();
 
   try {
     const commandObject = localCommands.find(
-      (cmd) => cmd.name === interaction.commandName
+      (cmd: { name: string }) => cmd.name === interaction.commandName,
     );
 
     if (!commandObject) return;
 
     if (commandObject.isAdminCommand) {
-      if (!interaction.memberPermissions?.has( PermissionFlagsBits.Administrator )) {
-        interaction.reply({ embeds: [await buildErrorEmbed('Not enough permissions.')], flags: MessageFlags.Ephemeral });
+      if (
+        !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)
+      ) {
+        interaction.reply({
+          embeds: [await buildErrorEmbed('Not enough permissions.')],
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
     }
