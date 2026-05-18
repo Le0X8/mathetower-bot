@@ -1,7 +1,6 @@
 import {
   ChatInputCommandInteraction
 } from 'discord.js';
-import { help } from '@/lib/embeds/help.ts';
 
 const waowCommand = {
   name: 'waow',

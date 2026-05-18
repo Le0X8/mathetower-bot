@@ -4,7 +4,6 @@ const token = config.token;
 import {
   ActivityType,
   Client,
-  EmbedBuilder,
   Events,
   GatewayIntentBits,
   type Message,
