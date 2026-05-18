@@ -7,8 +7,70 @@ const colorT = '#fbbf24';
 const colorCT = '#60a5fa';
 
 const weapons: Record<string, string> = {
+  'AK-47': '\ue008',
+  AUG: '\ue060',
   AWP: '\ue007',
+  Bajonet: '\ue014',
+  'Bowie Knife': '\ue052',
+  'Classic Knife': '\ue04c',
+  'CZ75-Auto': '\ue02b',
+  'Decoy Grenade': '\ue028',
+  'Desert Eagle': '\ue04a',
+  'Dual Berettas': '\ue056',
+  'Falchion Knife': '\ue013',
+  FAMAS: '\ue025',
+  Fire: '\ue016',
+  'Five-SeveN': '\ue03a',
+  Flashbang: '\ue05e',
+  'Flip Knife': '\ue01c',
+  G3SG1: '\ue04b',
+  'Galil AR': '\ue000',
+  'Glock-18': '\ue023',
+  'Gut Knife': '\ue041',
+  'HE Grenade': '\ue00b',
+  'Huntsman Knife': '\ue010',
+  'Incendiary Grenade': '\ue01a',
   Karambit: '\ue048',
+  'Knife (CT)': '\ue044',
+  'Knife (T)': '\ue045',
+  'Kukri Knife': '\ue02f',
+  M249: '\ue055',
+  M4A1: '\ue05c',
+  'M4A1-S': '\ue015',
+  M4A4: '\ue042',
+  'M9 Bayonet': '\ue030',
+  'MAC-10': '\ue049',
+  'MAG-7': '\ue032',
+  Molotov: '\ue024',
+  'MP5-SD': '\ue039',
+  MP7: '\ue047',
+  MP9: '\ue040',
+  'Navaja Knife': '\ue011',
+  Negev: '\ue019',
+  'Nomad Knife': '\ue058',
+  Nova: '\ue02d',
+  P250: '\ue04f',
+  P90: '\ue0e5',
+  'Paracord Knife': '\ue05d',
+  'PP-Bizon': '\ue00c',
+  'R8 Revolver': '\ue003',
+  'Sawed-Off': '\ue031',
+  'SCAR-20': '\ue009',
+  'SG 553': '\ue00d',
+  'Shadow Daggers': '\ue046',
+  'Skeleton Knife': '\ue005',
+  'Smoke Grenade': '\ue02e',
+  'SSG 08': '\ue03e',
+  'Stiletto Knife': '\ue054',
+  'Survival Knife': '\ue002',
+  'Talon Knife': '\ue004',
+  'Tec-9': '\ue00e',
+  'UMP-45': '\ue01f',
+  'Ursus Knife': '\ue03c',
+  USP: '\ue053',
+  'USP-S': '\ue037',
+  XM1014: '\ue01d',
+  'Zeus x27': '\ue021',
 };
 
 export default new Command(
@@ -17,10 +79,12 @@ export default new Command(
   async (interaction) => {
     const colorRng = Math.floor(Math.random() * 16);
     const source =
+      interaction.options.getString('customSource', false) ??
       (interaction.member as GuildMember).nickname ??
       interaction.user.globalName ??
       interaction.user.username;
     const target =
+      interaction.options.getString('customTarget', false) ??
       (interaction.member as GuildMember)?.guild.members.cache.get(
         interaction.options.getUser('target', true).id,
       )?.nickname ??
@@ -28,6 +92,7 @@ export default new Command(
       interaction.options.getUser('target', true).username ??
       source;
     const assist =
+      interaction.options.getString('customAssist', false) ??
       (interaction.member as GuildMember)?.guild.members.cache.get(
         interaction.options.getUser('assist', false)?.id ?? '',
       )?.nickname ??
@@ -36,7 +101,7 @@ export default new Command(
 
     const weaponList = Object.keys(weapons);
     const weapon =
-      interaction.options.getString('weapon', false) ??
+      weapons[interaction.options.getString('weapon', false) ?? ''] ??
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
 
     GlobalFonts.registerFromPath(join('media', 'stratum2.woff2'), 'Stratum2');
@@ -135,10 +200,24 @@ export default new Command(
       description: 'die Waffe mit der getötet wird',
       type: ApplicationCommandOptionType.String,
       required: false,
-      choices: Object.entries(weapons).map(([name, value]) => ({
-        name,
-        value,
-      })),
+    },
+    {
+      name: 'customTarget',
+      description: 'der Name der getötet wird (überschreibt die Ziel-Person)',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    },
+    {
+      name: 'customAssist',
+      description: 'der Name der assistiert (überschreibt die Assist-Person)',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    },
+    {
+      name: 'customSource',
+      description: 'der Name des Killers (überschreibt dich)',
+      type: ApplicationCommandOptionType.String,
+      required: false,
     },
   ],
 );
