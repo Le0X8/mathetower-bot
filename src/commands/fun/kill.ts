@@ -187,7 +187,8 @@ export default new Command(
       '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     ctx.fillStyle = colorRng % 2 == 0 ? colorT : colorCT;
     ctx.fillText(source, 50, 40);
-    if (colorRng < 14) ctx.fillStyle = colorRng % 2 == 0 ? colorCT : colorT;
+    if (colorRng < 14 && target != source)
+      ctx.fillStyle = colorRng % 2 == 0 ? colorCT : colorT;
     ctx.fillText(
       target,
       50 + sourceWidth + 20 + weaponWidth + 20 + plusWidth + assistWidth,
