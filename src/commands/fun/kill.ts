@@ -49,10 +49,14 @@ export default new Command(
       join('media', 'DejaVuSansCondensed.ttf'),
       'DejaVuSansCondensed',
     );
+    GlobalFonts.registerFromPath(
+      join('media', 'STIXTwoMath.ttf'),
+      'STIXTwoMath',
+    );
     const measureCanvas = createCanvas(0, 0);
     const measureContext = measureCanvas.getContext('2d');
     measureContext.font =
-      '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed';
+      '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     const sourceWidth = Math.ceil(measureContext.measureText(source).width);
     const plusWidth = assist
       ? Math.ceil(measureContext.measureText('  +  ').width)
@@ -83,7 +87,8 @@ export default new Command(
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(33, 3, boxWidth - 66, canvas.height - 6);
 
-    ctx.font = '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed';
+    ctx.font =
+      '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     ctx.fillStyle = colorRng % 2 == 0 ? colorT : colorCT;
     ctx.fillText(source, 50, 40);
     if (colorRng < 14) ctx.fillStyle = colorRng % 2 == 0 ? colorCT : colorT;
