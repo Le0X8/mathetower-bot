@@ -55,25 +55,20 @@ async function getMenu(
     });
 }
 
-function getTitle(
-  location: number
-) {
+function getTitle(location: number) {
   switch (location) {
     case MENSA_IDS.MENSA:
-      return "Mensa";
+      return 'Mensa';
     case MENSA_IDS.FOODFAK:
-      return "FoodFakultät";
+      return 'FoodFakultät';
     case MENSA_IDS.GALERIE:
-      return "Galerie";
+      return 'Galerie';
     default:
-      return "";
+      return '';
   }
 }
 
-export async function menuToday(
-  location: number,
-  filter?: number
-) {
+export async function menuToday(location: number, filter?: number) {
   const data = load();
 
   const locations = location === -1 ? Object.values(MENSA_IDS) : [location];
@@ -81,24 +76,31 @@ export async function menuToday(
   const todayStr =
     'Heutiges Menü' +
     (filter === 1 ? ' (vegan)' : filter === 2 ? ' (vegetarisch)' : '') +
-    ' • ' + new Date().toLocaleDateString('de-DE', { dateStyle: 'long' });
+    ' • ' +
+    new Date().toLocaleDateString('de-DE', { dateStyle: 'long' });
   const typesStr =
     '🌱 vegan' +
     (filter !== 1 ? ' | 🥪 vegetarisch' : '') +
-    (!filter ? ' | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein' : '');
+    (!filter
+      ? ' | 🐟 mit Fisch | 🐔 mit Geflügel | 🐄 mit Rind | 🐖 mit Schwein'
+      : '');
 
   const embeds: EmbedBuilder[] = [];
   for (const id of locations) {
     try {
-      embeds.push(await buildEmbed(
-        todayStr,
-        '## ' + getTitle(id),
-        await getMenu(data, id, filterArr),
-        typesStr,
-      ));
+      embeds.push(
+        await buildEmbed(
+          todayStr,
+          '## ' + getTitle(id),
+          await getMenu(data, id, filterArr),
+          typesStr,
+        ),
+      );
     } catch (error) {
       embeds.push(
-        await buildErrorEmbed(`Keine Daten für die Mensa **${getTitle(id)}** verfügbar.`)
+        await buildErrorEmbed(
+          `Keine Daten für die Mensa **${getTitle(id)}** verfügbar.`,
+        ),
       );
     }
   }

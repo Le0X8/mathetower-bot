@@ -6,7 +6,7 @@ import {
   ApplicationCommandOptionType,
   ChatInputCommandInteraction,
   EmbedBuilder,
-  MessageFlags
+  MessageFlags,
 } from 'discord.js';
 
 const klausurenCommand = {
@@ -39,7 +39,10 @@ const klausurenCommand = {
     const date2Str = interaction.options.getString('date2');
 
     if (!subject || !date1Str || !date2Str) {
-      await interaction.reply({ embeds: [await buildErrorEmbed('Fehlende Eingaben.')], flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        embeds: [await buildErrorEmbed('Fehlende Eingaben.')],
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
@@ -47,7 +50,14 @@ const klausurenCommand = {
     const date2 = parseDate(date2Str);
 
     if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
-      await interaction.reply({ embeds: [await buildErrorEmbed('Ungültiges Datumsformat. Bitte DD.MM.YYYY verwenden.')], flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        embeds: [
+          await buildErrorEmbed(
+            'Ungültiges Datumsformat. Bitte DD.MM.YYYY verwenden.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
@@ -59,11 +69,12 @@ const klausurenCommand = {
     const embed = await buildEmbed(
       'Klausurtermine gesetzt',
       `Klausur für **${subject.toUpperCase()}** gesetzt auf **${formatDate(date1)}** und **${formatDate(date2)}**.`,
-      [], null
-    )
+      [],
+      null,
+    );
 
-    await interaction.reply({ embeds: [embed]  });
-  }
-}
+    await interaction.reply({ embeds: [embed] });
+  },
+};
 
 export default klausurenCommand;

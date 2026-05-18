@@ -19,7 +19,7 @@ export async function examGet(subject: string) {
 }
 
 export async function examList() {
-  const data: Record<string, any> = load()
+  const data: Record<string, any> = load();
   const klausuren = Object.entries(data)
     .filter(([key]) => key.startsWith('exam+'))
     .sort(([, valueA], [, valueB]) => {
