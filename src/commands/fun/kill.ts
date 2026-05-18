@@ -36,7 +36,7 @@ export default new Command(
 
     const weaponList = Object.keys(weapons);
     const weapon =
-      interaction.options.getString('weapon', true) ??
+      interaction.options.getString('weapon', false) ??
       weaponList[Math.floor(Math.random() * weaponList.length)];
 
     GlobalFonts.registerFromPath(join('media', 'stratum2.woff2'), 'Stratum2');
