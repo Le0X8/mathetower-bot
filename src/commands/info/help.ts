@@ -1,8 +1,6 @@
 import {
-  ApplicationCommandOptionType,
   ChatInputCommandInteraction
 } from 'discord.js';
-import { examGet, examList } from '@/lib/embeds/exam.ts';
 import { help } from '@/lib/embeds/help.ts';
 
 const klausurenCommand = {
