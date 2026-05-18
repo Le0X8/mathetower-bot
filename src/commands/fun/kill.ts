@@ -73,6 +73,34 @@ const weapons: Record<string, string> = {
   'Zeus x27': '\ue021',
 };
 
+const goodWeapons: Record<string, string> = {
+  'AK-47': weapons['AK-47'],
+  AWP: weapons['AWP'],
+  'Desert Eagle': weapons['Desert Eagle'],
+  'Dual Berettas': weapons['Dual Berettas'],
+  FAMAS: weapons['FAMAS'],
+  'Five-SeveN': weapons['Five-SeveN'],
+  'Galil AR': weapons['Galil AR'],
+  'Glock-18': weapons['Glock-18'],
+  'Knife (CT)': weapons['Knife (CT)'],
+  'Knife (T)': weapons['Knife (T)'],
+  'M4A1-S': weapons['M4A1-S'],
+  M4A4: weapons['M4A4'],
+  'MAC-10': weapons['MAC-10'],
+  'MP5-SD': weapons['MP5-SD'],
+  MP7: weapons['MP7'],
+  MP9: weapons['MP9'],
+  P90: weapons['P90'],
+  Negev: weapons['Negev'],
+  Nova: weapons['Nova'],
+  'SG 553': weapons['SG 553'],
+  'SSG 08': weapons['SSG 08'],
+  'Tec-9': weapons['Tec-9'],
+  'UMP-45': weapons['UMP-45'],
+  'USP-S': weapons['USP-S'],
+  XM1014: weapons['XM1014'],
+};
+
 export default new Command(
   'kill',
   'tötet jemanden',
@@ -99,10 +127,13 @@ export default new Command(
       interaction.options.getUser('assist', false)?.globalName ??
       interaction.options.getUser('assist', false)?.username;
 
-    const weaponList = Object.keys(weapons);
+    const weaponList = Object.keys(goodWeapons);
     const weapon =
-      weapons[interaction.options.getString('weapon', false) ?? ''] ??
-      weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
+      weapons[
+        interaction.options.getString('customweapon', false) ??
+          interaction.options.getString('weapon', false) ??
+          ''
+      ] ?? weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
 
     GlobalFonts.registerFromPath(join('media', 'stratum2.woff2'), 'Stratum2');
     GlobalFonts.registerFromPath(join('media', 'CS2EquipmentIcons.ttf'), 'CS2');
@@ -198,6 +229,16 @@ export default new Command(
     {
       name: 'weapon',
       description: 'die Waffe mit der getötet wird',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+      choices: Object.keys(goodWeapons).map((weapon) => ({
+        name: weapon,
+        value: weapon,
+      })),
+    },
+    {
+      name: 'customweapon',
+      description: 'die Waffe mit der getötet wird (überschreibt die Waffe)',
       type: ApplicationCommandOptionType.String,
       required: false,
     },
