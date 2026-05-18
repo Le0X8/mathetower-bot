@@ -78,6 +78,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 client.login(token);
 
+client.on(Events.MessageCreate, (message) => {
+  if (message.author.bot) return;
+
+  specialMessages(message);
+});
+
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
