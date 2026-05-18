@@ -1,13 +1,5 @@
 import config from '../config.json' with { type: 'json' };
-import { examList } from './commands/exam/list.ts';
-import { examGet } from './commands/exam/get.ts';
-import { help } from './commands/help.ts';
-import { formatDate, parseDate } from './helpers/date.ts';
 const token = config.token;
-
-import { reactions } from './reactions.ts';
-import { load, set, clear } from './store.ts';
-const store = load();
 
 import {
   ActivityType,
@@ -15,9 +7,21 @@ import {
   Events,
   GatewayIntentBits,
   type Message,
+  MessageFlags,
   PermissionFlagsBits,
 } from 'discord.js';
-import { menuToday } from '@/commands/menu/all.ts';
+
+import { reactions } from '@/reactions.ts';
+import { load, set, clear } from '@/store.ts';
+import { getCommands } from '@/lib/helpers/get-commands.ts';
+import { registerCommands } from '@/lib/helpers/register-commands.ts';
+import { formatDate, parseDate } from './lib/helpers/date.ts';
+import { examGet, examList } from './lib/embeds/exam.ts';
+import { menuToday } from './lib/embeds/menu.ts';
+import { MENSA_IDS } from './config/mensa.ts';
+import { help } from './lib/embeds/help.ts';
+import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
+const store = load();
 
 const client = new Client({
   intents: [
@@ -28,6 +32,7 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, (readyClient) => {
+  registerCommands(readyClient);
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
   client.user?.setPresence({
     activities: [
@@ -41,119 +46,28 @@ client.once(Events.ClientReady, (readyClient) => {
   });
 });
 
-client.on(Events.MessageCreate, (message) => {
-  if (message.author.bot) return;
-  const isAdmin = message.member?.permissions.has(
-    PermissionFlagsBits.Administrator,
-  );
+client.on(Events.InteractionCreate, async (interaction) => {
+if (!interaction.isChatInputCommand()) return;
 
-  const isShortCmd = message.content.startsWith('%%');
-  const isCommand =
-    isShortCmd ||
-    message.content.includes(`<@${config.uid}>`) ||
-    message.content.includes(`<@&${config.rid}>`);
-  if (!isCommand) return specialMessages(message);
+  const localCommands = await getCommands();
 
-  const command = message.content
-    .replace(`<@${config.uid}>`, '')
-    .replace(`<@&${config.rid}>`, '')
-    .slice(isShortCmd ? 2 : 0)
-    .trim()
-    .split(' ');
-  switch (command[0].toLowerCase()) {
-    case 'echo':
-      message.reply(command.slice(1).join(' '));
-      break;
-    case 'exam.set':
-      if (!isAdmin) message.react('<:pointlaugh:1474081749985267714>');
-      else {
-        const subject = command[1];
-        const date1 = parseDate(command[2]);
-        const date2 = parseDate(command[3]);
-        set(store, 'exam+' + subject.toLowerCase(), [
-          date1.toISOString(),
-          date2.toISOString(),
-        ]);
-        message.reply(
-          `Klausur für ${subject.toUpperCase()} gesetzt auf ${formatDate(date1)} und ${formatDate(date2)}.`,
-        );
+  try {
+    const commandObject = localCommands.find(
+      (cmd) => cmd.name === interaction.commandName
+    );
+
+    if (!commandObject) return;
+
+    if (commandObject.isAdminCommand) {
+      if (!interaction.memberPermissions?.has( PermissionFlagsBits.Administrator )) {
+        interaction.reply({ embeds: [await buildErrorEmbed('Not enough permissions.')], flags: MessageFlags.Ephemeral });
+        return;
       }
+    }
 
-      break;
-    case 'exam.clear':
-      if (!isAdmin) message.react('<:pointlaugh:1474081749985267714>');
-      else {
-        const subject = command[1];
-        clear(store, 'exam+' + subject.toLowerCase());
-        message.reply(`Klausur für ${subject.toUpperCase()} gelöscht.`);
-      }
-      break;
-
-    case 'klausuren':
-    case 'exam.list':
-      examList(store, message);
-      break;
-
-    case 'klausur':
-    case 'exam.get':
-      examGet(store, message, command[1]);
-      break;
-
-    case '':
-    case 'help':
-    case 'info':
-    case 'hilfe':
-    case 'hilf':
-      help(message);
-      break;
-
-    case 'essen':
-    case 'menü':
-    case 'menu.all':
-      menuToday(store, message, command[1]);
-      break;
-
-    case 'vegetarisch':
-    case 'menu.vegetarian':
-      menuToday(store, message, 'v');
-      break;
-
-    case 'vegan':
-    case 'menu.vegan':
-      menuToday(store, message, 'w');
-      break;
-
-    case 'foodfakultät':
-    case 'foodfak':
-    case 'menu.foodfak':
-      menuToday(store, message, 'f');
-      break;
-
-    case 'mensa':
-    case 'menu.mensa':
-      menuToday(store, message, 'm');
-      break;
-
-    case 'galerie':
-    case 'menu.galerie':
-      menuToday(store, message, 'g');
-      break;
-
-    case 'waow':
-      message.react('💔');
-      message.reply({
-        files: [
-          {
-            attachment: './media/waow-based.png',
-            name: 'waow.png',
-          },
-        ],
-      });
-      break;
-
-    default:
-      message.react('<:pointlaugh:1474081749985267714>');
-      break;
+    commandObject.callback(interaction);
+  } catch (error) {
+    console.log(`There was an error running this command: ${error}`);
   }
 });
 
