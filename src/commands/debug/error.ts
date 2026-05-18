@@ -52,7 +52,7 @@ function bananeRng(): Banane {
   const rng = Math.ceil(Math.random() * 100);
 
   for (const range of Object.entries(bananeRanges))
-    if (range[1] <= rng) return parseInt(range[0]) as Banane;
+    if (rng <= range[1]) return parseInt(range[0]) as Banane;
   return Banane.Gelb;
 }
 
