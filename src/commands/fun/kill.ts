@@ -12,6 +12,7 @@ const weapons: Record<string, string> = {
   AWP: '\ue007',
   Bajonet: '\ue014',
   'Bowie Knife': '\ue052',
+  'Butterfly Knife': '\ue026',
   'Classic Knife': '\ue04c',
   'CZ75-Auto': '\ue02b',
   'Decoy Grenade': '\ue028',
