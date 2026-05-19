@@ -183,6 +183,33 @@ class KillfeedBuilder {
     this.#noscope = isSniper
       ? (this.#noscope ?? Math.floor(Math.random() * 50) === 0)
       : false;
+    const hasNoBullets =
+      this.#weapon === weapons['Zeus x27'] ||
+      this.#weapon === weapons['Incendiary Grenade'] ||
+      this.#weapon === weapons['Decoy Grenade'] ||
+      this.#weapon === weapons['HE Grenade'] ||
+      this.#weapon === weapons['Molotov'] ||
+      this.#weapon === weapons['Flashbang'] ||
+      this.#weapon === weapons['Smoke Grenade'] ||
+      this.#weapon === weapons['Knife (CT)'] ||
+      this.#weapon === weapons['Knife (T)'] ||
+      this.#weapon === weapons['Bajonet'] ||
+      this.#weapon === weapons['Bone Knife'] ||
+      this.#weapon === weapons['Butterfly Knife'] ||
+      this.#weapon === weapons['Classic Knife'] ||
+      this.#weapon === weapons['Flip Knife'] ||
+      this.#weapon === weapons['Gut Knife'] ||
+      this.#weapon === weapons['Huntsman Knife'] ||
+      this.#weapon === weapons['Karambit'] ||
+      this.#weapon === weapons['M9 Bayonet'] ||
+      this.#weapon === weapons['Navaja Knife'] ||
+      this.#weapon === weapons['Nomad Knife'] ||
+      this.#weapon === weapons['Paracord Knife'] ||
+      this.#weapon === weapons['Skeleton Knife'] ||
+      this.#weapon === weapons['Stiletto Knife'] ||
+      this.#weapon === weapons['Survival Knife'] ||
+      this.#weapon === weapons['Talon Knife'] ||
+      this.#weapon === weapons['Ursus Knife'];
 
     const inner = 50;
     const gap = 20;
@@ -265,7 +292,7 @@ class KillfeedBuilder {
 
     let noscopeWidth = 0;
     let noscopeImage: Image | null = null;
-    if (this.#noscope && !suicideImage) {
+    if (this.#noscope && !suicideImage && !hasNoBullets) {
       noscopeImage = await loadImage(
         join('media', 'kill-icons', 'noscope.svg'),
       );
@@ -274,7 +301,7 @@ class KillfeedBuilder {
 
     let smokeWidth = 0;
     let smokeImage: Image | null = null;
-    if (this.#smoke && !suicideImage) {
+    if (this.#smoke && !suicideImage && !hasNoBullets) {
       smokeImage = await loadImage(
         join('media', 'kill-icons', 'smoke_kill.svg'),
       );
@@ -283,7 +310,7 @@ class KillfeedBuilder {
 
     let wallbangWidth = 0;
     let wallbangImage: Image | null = null;
-    if (this.#wallbang && !suicideImage) {
+    if (this.#wallbang && !suicideImage && !hasNoBullets) {
       wallbangImage = await loadImage(
         join('media', 'kill-icons', 'penetrate.svg'),
       );
@@ -292,7 +319,7 @@ class KillfeedBuilder {
 
     let headshotWidth = 0;
     let headshotImage: Image | null = null;
-    if (this.#headshot && !suicideImage) {
+    if (this.#headshot && !suicideImage && !hasNoBullets) {
       headshotImage = await loadImage(
         join('media', 'kill-icons', 'icon_headshot.svg'),
       );
