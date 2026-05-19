@@ -34,7 +34,7 @@ export default {
           hourCycle: 'h23',
         }).format(d.actualDeparture);
 
-        const label = `S1 Richtung ${d.direction ?? ''}`.trim();
+        const label = `S1 → ${d.direction ?? ''}`.trim();
 
         const description =
           d.delayMinutes > 0
