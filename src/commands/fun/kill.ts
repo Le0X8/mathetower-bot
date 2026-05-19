@@ -107,11 +107,13 @@ class KillfeedBuilder {
   #weapon: string;
   #assist?: string;
   #airborne: boolean;
+  #headshot: boolean;
 
   constructor(source: string, target: string) {
     this.#source = source;
     this.#target = target;
     this.#airborne = Math.floor(Math.random() * 20) === 0;
+    this.#headshot = Math.floor(Math.random() * 20) === 0;
     const weaponList = Object.keys(goodWeapons);
     this.#weapon =
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
@@ -129,6 +131,11 @@ class KillfeedBuilder {
 
   airborne(airborne?: boolean) {
     if (airborne !== undefined) this.#airborne = airborne;
+    return this;
+  }
+
+  headshot(headshot?: boolean) {
+    if (headshot !== undefined) this.#headshot = headshot;
     return this;
   }
 
@@ -194,12 +201,22 @@ class KillfeedBuilder {
       gapLeft = 5;
     }
 
+    let headshotWidth = 0;
+    let headshotImage: Image | null = null;
+    if (this.#headshot && !suicideImage) {
+      headshotImage = await loadImage(
+        join('media', 'kill-icons', 'icon_headshot.svg'),
+      );
+      headshotWidth = 50;
+    }
+
     const boxWidth =
       inner +
       sourceWidth +
       gapLeft +
       weaponWidth +
       gap +
+      headshotWidth +
       targetWidth +
       inner +
       plusWidth +
@@ -222,6 +239,23 @@ class KillfeedBuilder {
     ctx.fillText(this.#source, 50, 40);
     if (Math.floor(Math.random() * 20) !== 0 && this.#target != this.#source)
       ctx.fillStyle = sourceT ? colorCT : colorT;
+    if (headshotImage) {
+      ctx.drawImage(
+        headshotImage,
+        50 +
+          sourceWidth +
+          gapLeft +
+          weaponWidth +
+          20 +
+          plusWidth +
+          assistWidth +
+          airborneWidth -
+          5,
+        8,
+        45,
+        45,
+      );
+    }
     ctx.fillText(
       this.#target,
       50 +
@@ -231,7 +265,8 @@ class KillfeedBuilder {
         20 +
         plusWidth +
         assistWidth +
-        airborneWidth,
+        airborneWidth +
+        headshotWidth,
       40,
     );
     if (Math.floor(Math.random() * 10) !== 0)
@@ -245,7 +280,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         suicideImage,
         50 + sourceWidth + 20 + plusWidth + assistWidth,
-        10,
+        8,
         weaponWidth,
         45,
       );
@@ -313,7 +348,8 @@ export default new Command(
             ''
         ],
       )
-      .airborne(interaction.options.getBoolean('airborne', false) ?? undefined);
+      .airborne(interaction.options.getBoolean('airborne', false) ?? undefined)
+      .headshot(interaction.options.getBoolean('headshot', false) ?? undefined);
 
     await interaction.reply({
       files: [await killfeed.render()],
