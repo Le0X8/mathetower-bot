@@ -112,6 +112,7 @@ class KillfeedBuilder {
   #smoke: boolean;
   #wallbang: boolean;
   #blinded: boolean;
+  #flashassist: boolean;
 
   constructor(source: string, target: string) {
     this.#source = source.slice(0, 50);
@@ -121,6 +122,7 @@ class KillfeedBuilder {
     this.#smoke = Math.floor(Math.random() * 20) === 0;
     this.#wallbang = Math.floor(Math.random() * 20) === 0;
     this.#blinded = Math.floor(Math.random() * 40) === 0;
+    this.#flashassist = Math.floor(Math.random() * 10) === 0;
     const weaponList = Object.keys(goodWeapons);
     this.#weapon =
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
@@ -163,6 +165,11 @@ class KillfeedBuilder {
 
   blinded(blinded?: boolean) {
     if (blinded !== undefined) this.#blinded = blinded;
+    return this;
+  }
+
+  flashassist(flashassist?: boolean) {
+    if (flashassist !== undefined) this.#flashassist = flashassist;
     return this;
   }
 
@@ -236,6 +243,15 @@ class KillfeedBuilder {
       blindedWidth = 50;
     }
 
+    let flashassistWidth = 0;
+    let flashassistImage: Image | null = null;
+    if (this.#flashassist && !suicideImage && this.#assist) {
+      flashassistImage = await loadImage(
+        join('media', 'kill-icons', 'flashbang_assist.svg'),
+      );
+      flashassistWidth = 50;
+    }
+
     let airborneWidth = 0;
     let airborneImage: Image | null = null;
     if (this.#airborne) {
@@ -289,6 +305,7 @@ class KillfeedBuilder {
       smokeWidth = 0;
       wallbangWidth = 0;
       blindedWidth = 0;
+      flashassistWidth = 0;
       gapLeft = gap;
     }
 
@@ -307,6 +324,7 @@ class KillfeedBuilder {
       assistWidth +
       smokeWidth +
       wallbangWidth +
+      flashassistWidth +
       airborneWidth;
 
     const canvas = createCanvas(boxWidth > 1000 ? boxWidth : 1000, 60);
@@ -333,6 +351,7 @@ class KillfeedBuilder {
         noscopeImage,
         50 +
           blindedWidth +
+          flashassistWidth +
           sourceWidth +
           gapLeft +
           weaponWidth +
@@ -350,6 +369,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         smokeImage,
         50 +
+          flashassistWidth +
           blindedWidth +
           sourceWidth +
           gapLeft +
@@ -369,6 +389,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         wallbangImage,
         50 +
+          flashassistWidth +
           blindedWidth +
           sourceWidth +
           gapLeft +
@@ -389,6 +410,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         headshotImage,
         50 +
+          flashassistWidth +
           blindedWidth +
           sourceWidth +
           gapLeft +
@@ -409,6 +431,7 @@ class KillfeedBuilder {
     ctx.fillText(
       this.#target,
       50 +
+        flashassistWidth +
         blindedWidth +
         sourceWidth +
         gapLeft +
@@ -425,10 +448,19 @@ class KillfeedBuilder {
     );
     if (Math.floor(Math.random() * 10) !== 0)
       ctx.fillStyle = sourceT ? colorT : colorCT;
+    if (flashassistImage) {
+      ctx.drawImage(
+        flashassistImage,
+        50 + blindedWidth + sourceWidth + plusWidth - 5,
+        8,
+        45,
+        45,
+      );
+    }
     if (this.#assist)
       ctx.fillText(
         this.#assist,
-        50 + blindedWidth + sourceWidth + plusWidth,
+        50 + blindedWidth + sourceWidth + plusWidth + flashassistWidth,
         40,
       );
 
@@ -438,7 +470,13 @@ class KillfeedBuilder {
     if (suicideImage) {
       ctx.drawImage(
         suicideImage,
-        50 + blindedWidth + sourceWidth + 20 + plusWidth + assistWidth,
+        50 +
+          blindedWidth +
+          flashassistWidth +
+          sourceWidth +
+          20 +
+          plusWidth +
+          assistWidth,
         8,
         weaponWidth,
         45,
@@ -448,7 +486,13 @@ class KillfeedBuilder {
         ctx.save();
         const rotation = (5 * Math.PI) / 180;
         const x =
-          50 + blindedWidth + sourceWidth + gapLeft + plusWidth + assistWidth;
+          50 +
+          blindedWidth +
+          flashassistWidth +
+          sourceWidth +
+          gapLeft +
+          plusWidth +
+          assistWidth;
         const y = 10;
         ctx.translate(x + 45 / 2, y + 45 / 2);
         ctx.rotate(rotation);
@@ -462,6 +506,7 @@ class KillfeedBuilder {
           blindedWidth +
           sourceWidth +
           gapLeft +
+          flashassistWidth +
           plusWidth +
           assistWidth +
           airborneWidth,
@@ -519,7 +564,10 @@ export default new Command(
       .noscope(interaction.options.getBoolean('noscope', false) ?? undefined)
       .smoke(interaction.options.getBoolean('smoke', false) ?? undefined)
       .wallbang(interaction.options.getBoolean('wallbang', false) ?? undefined)
-      .blinded(interaction.options.getBoolean('blinded', false) ?? undefined);
+      .blinded(interaction.options.getBoolean('blinded', false) ?? undefined)
+      .flashassist(
+        interaction.options.getBoolean('flashassist', false) ?? undefined,
+      );
 
     await interaction.reply({
       files: [await killfeed.render()],
@@ -582,6 +630,12 @@ export default new Command(
     {
       name: 'blinded',
       description: 'ob es ein Blinded Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'flashassist',
+      description: 'ob es ein Flash Assist Kill sein soll',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
