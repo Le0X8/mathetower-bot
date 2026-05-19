@@ -110,8 +110,7 @@ export default {
         embeds: [
           await buildEmbed(
             '<:sbahn:1450544266026680463> Verspätung eingetragen!',
-            `<@${interaction.user.id}> hat **+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** gutgeschrieben 
-            bekommen und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}**`,
+            `<@${interaction.user.id}> hat **+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** gutgeschrieben bekommen und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}**`,
             [
               [
                 selectedOption.label.replace('→', 'nach'),
