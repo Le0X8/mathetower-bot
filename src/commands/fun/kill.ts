@@ -108,10 +108,11 @@ class KillfeedBuilder {
   #assist?: string;
   #airborne: boolean;
   #headshot: boolean;
+  #noscope?: boolean;
 
   constructor(source: string, target: string) {
-    this.#source = source;
-    this.#target = target;
+    this.#source = source.slice(0, 50);
+    this.#target = target.slice(0, 50);
     this.#airborne = Math.floor(Math.random() * 20) === 0;
     this.#headshot = Math.floor(Math.random() * 20) === 0;
     const weaponList = Object.keys(goodWeapons);
@@ -120,7 +121,7 @@ class KillfeedBuilder {
   }
 
   assist(assist?: string) {
-    if (assist) this.#assist = assist;
+    if (assist) this.#assist = assist.slice(0, 50);
     return this;
   }
 
@@ -139,7 +140,21 @@ class KillfeedBuilder {
     return this;
   }
 
+  noscope(noscope?: boolean) {
+    if (noscope !== undefined) this.#noscope = noscope;
+    return this;
+  }
+
   async render() {
+    const isSniper =
+      this.#weapon === weapons['AWP'] ||
+      this.#weapon === weapons['SSG 08'] ||
+      this.#weapon === weapons['SCAR-20'] ||
+      this.#weapon === weapons['G3SG1'];
+    this.#noscope = isSniper
+      ? (this.#noscope ?? Math.floor(Math.random() * 50) === 0)
+      : false;
+
     const inner = 50;
     const gap = 20;
 
@@ -201,6 +216,15 @@ class KillfeedBuilder {
       gapLeft = 5;
     }
 
+    let noscopeWidth = 0;
+    let noscopeImage: Image | null = null;
+    if (this.#noscope && !suicideImage) {
+      noscopeImage = await loadImage(
+        join('media', 'kill-icons', 'noscope.svg'),
+      );
+      noscopeWidth = 50;
+    }
+
     let headshotWidth = 0;
     let headshotImage: Image | null = null;
     if (this.#headshot && !suicideImage) {
@@ -208,6 +232,13 @@ class KillfeedBuilder {
         join('media', 'kill-icons', 'icon_headshot.svg'),
       );
       headshotWidth = 50;
+    }
+
+    if (suicideImage) {
+      headshotWidth = 0;
+      noscopeWidth = 0;
+      airborneWidth = 0;
+      gapLeft = gap;
     }
 
     const boxWidth =
@@ -220,6 +251,7 @@ class KillfeedBuilder {
       targetWidth +
       inner +
       plusWidth +
+      noscopeWidth +
       assistWidth +
       airborneWidth;
 
@@ -239,6 +271,23 @@ class KillfeedBuilder {
     ctx.fillText(this.#source, 50, 40);
     if (Math.floor(Math.random() * 20) !== 0 && this.#target != this.#source)
       ctx.fillStyle = sourceT ? colorCT : colorT;
+    if (noscopeImage) {
+      ctx.drawImage(
+        noscopeImage,
+        50 +
+          sourceWidth +
+          gapLeft +
+          weaponWidth +
+          20 +
+          plusWidth +
+          assistWidth +
+          airborneWidth -
+          5,
+        8,
+        45,
+        45,
+      );
+    }
     if (headshotImage) {
       ctx.drawImage(
         headshotImage,
@@ -249,6 +298,7 @@ class KillfeedBuilder {
           20 +
           plusWidth +
           assistWidth +
+          noscopeWidth +
           airborneWidth -
           5,
         8,
@@ -266,7 +316,8 @@ class KillfeedBuilder {
         plusWidth +
         assistWidth +
         airborneWidth +
-        headshotWidth,
+        headshotWidth +
+        noscopeWidth,
       40,
     );
     if (Math.floor(Math.random() * 10) !== 0)
@@ -349,7 +400,8 @@ export default new Command(
         ],
       )
       .airborne(interaction.options.getBoolean('airborne', false) ?? undefined)
-      .headshot(interaction.options.getBoolean('headshot', false) ?? undefined);
+      .headshot(interaction.options.getBoolean('headshot', false) ?? undefined)
+      .noscope(interaction.options.getBoolean('noscope', false) ?? undefined);
 
     await interaction.reply({
       files: [await killfeed.render()],
@@ -388,6 +440,12 @@ export default new Command(
     {
       name: 'headshot',
       description: 'ob es ein Headshot Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'noscope',
+      description: 'ob es ein Noscope Kill sein soll',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
