@@ -109,12 +109,14 @@ class KillfeedBuilder {
   #airborne: boolean;
   #headshot: boolean;
   #noscope?: boolean;
+  #smoke: boolean;
 
   constructor(source: string, target: string) {
     this.#source = source.slice(0, 50);
     this.#target = target.slice(0, 50);
     this.#airborne = Math.floor(Math.random() * 20) === 0;
-    this.#headshot = Math.floor(Math.random() * 20) === 0;
+    this.#headshot = Math.floor(Math.random() * 3) === 0;
+    this.#smoke = Math.floor(Math.random() * 20) === 0;
     const weaponList = Object.keys(goodWeapons);
     this.#weapon =
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
@@ -142,6 +144,11 @@ class KillfeedBuilder {
 
   noscope(noscope?: boolean) {
     if (noscope !== undefined) this.#noscope = noscope;
+    return this;
+  }
+
+  smoke(smoke?: boolean) {
+    if (smoke !== undefined) this.#smoke = smoke;
     return this;
   }
 
@@ -225,6 +232,15 @@ class KillfeedBuilder {
       noscopeWidth = 50;
     }
 
+    let smokeWidth = 0;
+    let smokeImage: Image | null = null;
+    if (this.#smoke && !suicideImage) {
+      smokeImage = await loadImage(
+        join('media', 'kill-icons', 'smoke_kill.svg'),
+      );
+      smokeWidth = 50;
+    }
+
     let headshotWidth = 0;
     let headshotImage: Image | null = null;
     if (this.#headshot && !suicideImage) {
@@ -238,6 +254,7 @@ class KillfeedBuilder {
       headshotWidth = 0;
       noscopeWidth = 0;
       airborneWidth = 0;
+      smokeWidth = 0;
       gapLeft = gap;
     }
 
@@ -253,6 +270,7 @@ class KillfeedBuilder {
       plusWidth +
       noscopeWidth +
       assistWidth +
+      smokeWidth +
       airborneWidth;
 
     const canvas = createCanvas(boxWidth > 1000 ? boxWidth : 1000, 60);
@@ -288,6 +306,24 @@ class KillfeedBuilder {
         45,
       );
     }
+    if (smokeImage) {
+      ctx.drawImage(
+        smokeImage,
+        50 +
+          sourceWidth +
+          gapLeft +
+          weaponWidth +
+          20 +
+          plusWidth +
+          assistWidth +
+          noscopeWidth +
+          airborneWidth -
+          5,
+        8,
+        45,
+        45,
+      );
+    }
     if (headshotImage) {
       ctx.drawImage(
         headshotImage,
@@ -299,6 +335,7 @@ class KillfeedBuilder {
           plusWidth +
           assistWidth +
           noscopeWidth +
+          smokeWidth +
           airborneWidth -
           5,
         8,
@@ -317,6 +354,7 @@ class KillfeedBuilder {
         assistWidth +
         airborneWidth +
         headshotWidth +
+        smokeWidth +
         noscopeWidth,
       40,
     );
@@ -401,7 +439,8 @@ export default new Command(
       )
       .airborne(interaction.options.getBoolean('airborne', false) ?? undefined)
       .headshot(interaction.options.getBoolean('headshot', false) ?? undefined)
-      .noscope(interaction.options.getBoolean('noscope', false) ?? undefined);
+      .noscope(interaction.options.getBoolean('noscope', false) ?? undefined)
+      .smoke(interaction.options.getBoolean('smoke', false) ?? undefined);
 
     await interaction.reply({
       files: [await killfeed.render()],
@@ -446,6 +485,12 @@ export default new Command(
     {
       name: 'noscope',
       description: 'ob es ein Noscope Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'smoke',
+      description: 'ob es ein Smoke Kill sein soll',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
