@@ -102,6 +102,16 @@ const goodWeapons: Record<string, string> = {
   XM1014: weapons['XM1014'],
 };
 
+function useFont(name: string, ext: string = 'ttf') {
+  GlobalFonts.registerFromPath(join('media', name + '.' + ext), name);
+}
+
+useFont('stratum2', 'woff2');
+useFont('CS2EquipmentIcons');
+useFont('NotoSansCondensed');
+useFont('DejaVuSansCondensed');
+useFont('STIXTwoMath');
+
 class KillfeedBuilder {
   #source: string;
   #target: string;
@@ -214,28 +224,10 @@ class KillfeedBuilder {
     const inner = 50;
     const gap = 20;
 
-    GlobalFonts.registerFromPath(join('media', 'stratum2.woff2'), 'Stratum2');
-    if (this.#source !== this.#target)
-      GlobalFonts.registerFromPath(
-        join('media', 'CS2EquipmentIcons.ttf'),
-        'CS2',
-      );
-    GlobalFonts.registerFromPath(
-      join('media', 'NotoSansCondensed.ttf'),
-      'NotoSansCondensed',
-    );
-    GlobalFonts.registerFromPath(
-      join('media', 'DejaVuSansCondensed.ttf'),
-      'DejaVuSansCondensed',
-    );
-    GlobalFonts.registerFromPath(
-      join('media', 'STIXTwoMath.ttf'),
-      'STIXTwoMath',
-    );
     const measureCanvas = createCanvas(0, 0);
     const measureContext = measureCanvas.getContext('2d');
     measureContext.font =
-      '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
+      '30px stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     const sourceWidth = Math.ceil(
       measureContext.measureText(this.#source).width,
     );
@@ -257,7 +249,7 @@ class KillfeedBuilder {
       );
       weaponWidth = (45 / 32) * 33;
     } else {
-      measureContext.font = '45px CS2';
+      measureContext.font = '45px CS2EquipmentIcons';
       weaponWidth = Math.ceil(measureContext.measureText(this.#weapon).width);
     }
     let gapLeft = gap;
@@ -368,7 +360,7 @@ class KillfeedBuilder {
       ctx.drawImage(blindedImage, 50 - 5, 8, 45, 45);
     }
     ctx.font =
-      '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
+      '30px stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     const sourceT = Math.floor(Math.random() * 2) === 0;
     ctx.fillStyle = sourceT ? colorT : colorCT;
     ctx.fillText(this.#source, 50 + blindedWidth, 40);
@@ -527,7 +519,7 @@ class KillfeedBuilder {
         ctx.drawImage(airborneImage, -23, -38, 45, 45);
         ctx.restore();
       }
-      ctx.font = '45px CS2';
+      ctx.font = '45px CS2EquipmentIcons';
       ctx.fillText(
         this.#weapon,
         50 +
