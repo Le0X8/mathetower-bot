@@ -251,16 +251,14 @@ class KillfeedBuilder {
       );
     } else {
       if (airborneImage) {
+        ctx.save();
         const rotation = (5 * Math.PI) / 180;
+        const x = 50 + sourceWidth + gapLeft + plusWidth + assistWidth;
+        const y = 10;
+        ctx.translate(x + 45 / 2, y + 45 / 2);
         ctx.rotate(rotation);
-        ctx.drawImage(
-          airborneImage,
-          50 + sourceWidth + gapLeft + plusWidth + assistWidth,
-          -40, // TODO: höhe ist abhängig vom text davor
-          45,
-          45,
-        );
-        ctx.rotate(-rotation);
+        ctx.drawImage(airborneImage, -23, -38, 45, 45);
+        ctx.restore();
       }
       ctx.font = '45px CS2';
       ctx.fillText(
