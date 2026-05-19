@@ -32,22 +32,19 @@ export default {
   ],
 
   async callback(interaction: ChatInputCommandInteraction) {
+    const user = interaction.options.getUser('user') || interaction.user;
     const today = new Date();
     const year = today.getFullYear();
     const quarter = Math.floor(today.getMonth() / 3);
     const era =
       eras[
-        await store.cache(
-          'era+' + interaction.user.id,
-          `${year}:${quarter}`,
-          async () => {
-            return Math.floor(Math.random() * eras.length);
-          },
-        )
+        await store.cache('era+' + user.id, `${year}:${quarter}`, async () => {
+          return Math.floor(Math.random() * eras.length);
+        })
       ];
     const id = era.split(':')[1].toString();
     await interaction.reply({
-      content: `<@${interaction.user.id}> ist gerade in seiner **${era}** era!`,
+      content: `<@${user.id}> ist gerade in seiner **${era}** era!`,
       files: existsSync(`./media/eras/${id}.jpg`)
         ? [
             {
