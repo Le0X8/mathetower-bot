@@ -21,12 +21,14 @@ export default {
 
       const selectOptions = departures.map((d) => {
         const time = new Intl.DateTimeFormat('de-DE', {
+          timeZone: 'Europe/Berlin',
           hour: '2-digit',
           minute: '2-digit',
           hourCycle: 'h23',
         }).format(d.plannedDeparture);
 
         const actualTime = new Intl.DateTimeFormat('de-DE', {
+          timeZone: 'Europe/Berlin',
           hour: '2-digit',
           minute: '2-digit',
           hourCycle: 'h23',
