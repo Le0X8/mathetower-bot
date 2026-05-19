@@ -557,16 +557,21 @@ export default new Command(
   async (interaction) => {
     const source =
       interaction.options.getString('customsource', false) ??
+      (interaction.member as GuildMember)?.guild.members.cache.get(
+        interaction.options.getUser('source', false)?.id ?? '',
+      )?.nickname ??
+      interaction.options.getUser('source', false)?.globalName ??
+      interaction.options.getUser('source', false)?.username ??
       (interaction.member as GuildMember).nickname ??
       interaction.user.globalName ??
       interaction.user.username;
     const target =
       interaction.options.getString('customtarget', false) ??
       (interaction.member as GuildMember)?.guild.members.cache.get(
-        interaction.options.getUser('target', true).id,
+        interaction.options.getUser('target', false)?.id ?? '',
       )?.nickname ??
-      interaction.options.getUser('target', true).globalName ??
-      interaction.options.getUser('target', true).username ??
+      interaction.options.getUser('target', false)?.globalName ??
+      interaction.options.getUser('target', false)?.username ??
       source;
 
     const killfeed = new KillfeedBuilder(source, target);
@@ -607,7 +612,13 @@ export default new Command(
       name: 'target',
       description: 'die Person die du töten willst',
       type: ApplicationCommandOptionType.User,
-      required: true,
+      required: false,
+    },
+    {
+      name: 'source',
+      description: 'die Person die tötet',
+      type: ApplicationCommandOptionType.User,
+      required: false,
     },
     {
       name: 'assist',
