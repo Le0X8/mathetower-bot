@@ -44,7 +44,7 @@ export default {
       ];
     const id = era.split(':')[1].toString();
     await interaction.reply({
-      content: `<@${user.id}> ist gerade in seiner **${era}** era!`,
+      content: `<@${user.id}> ist gerade in seiner **${era.split('\n\n')[0]}** era!\n\n${era.split('\n\n')[1]}`,
       files: existsSync(`./media/eras/${id}.jpg`)
         ? [
             {
