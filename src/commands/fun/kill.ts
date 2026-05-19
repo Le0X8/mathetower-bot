@@ -220,8 +220,8 @@ class KillfeedBuilder {
     const sourceT = Math.floor(Math.random() * 2) === 0;
     ctx.fillStyle = sourceT ? colorT : colorCT;
     ctx.fillText(this.#source, 50, 40);
-    if (Math.floor(Math.random() * 20) === 0 && this.#target != this.#source)
-      ctx.fillStyle = sourceT ? colorT : colorCT;
+    if (Math.floor(Math.random() * 20) !== 0 && this.#target != this.#source)
+      ctx.fillStyle = sourceT ? colorCT : colorT;
     ctx.fillText(
       this.#target,
       50 +
@@ -234,7 +234,7 @@ class KillfeedBuilder {
         airborneWidth,
       40,
     );
-    if (Math.floor(Math.random() * 5) !== 0)
+    if (Math.floor(Math.random() * 10) !== 0)
       ctx.fillStyle = sourceT ? colorT : colorCT;
     if (this.#assist)
       ctx.fillText(this.#assist, 50 + sourceWidth + plusWidth, 40);
