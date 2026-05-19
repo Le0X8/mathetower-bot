@@ -55,7 +55,7 @@ function buildTimeWindow() {
   const now = new Date();
 
   const from = new Date(now.getTime() - 60 * 60 * 1000);
-  const to = new Date(now.getTime() + 60 * 60 * 1000);
+  const to = new Date(now.getTime() + 120 * 60 * 1000);
 
   return { from, to };
 }
