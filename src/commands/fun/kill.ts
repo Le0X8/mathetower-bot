@@ -107,13 +107,11 @@ class KillfeedBuilder {
   #weapon: string;
   #assist?: string;
   #airborne: boolean;
-  #rng: number;
 
   constructor(source: string, target: string) {
-    this.#rng = Math.floor(Math.random() * 16);
     this.#source = source;
     this.#target = target;
-    this.#airborne = this.#rng === 0;
+    this.#airborne = Math.floor(Math.random() * 20) === 0;
     const weaponList = Object.keys(goodWeapons);
     this.#weapon =
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
@@ -219,10 +217,11 @@ class KillfeedBuilder {
 
     ctx.font =
       '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
-    ctx.fillStyle = this.#rng % 2 == 0 ? colorT : colorCT;
+    const sourceT = Math.floor(Math.random() * 2) === 0;
+    ctx.fillStyle = sourceT ? colorT : colorCT;
     ctx.fillText(this.#source, 50, 40);
-    if (this.#rng < 14 && this.#target != this.#source)
-      ctx.fillStyle = this.#rng % 2 == 0 ? colorCT : colorT;
+    if (Math.floor(Math.random() * 20) === 0 && this.#target != this.#source)
+      ctx.fillStyle = sourceT ? colorT : colorCT;
     ctx.fillText(
       this.#target,
       50 +
@@ -235,7 +234,8 @@ class KillfeedBuilder {
         airborneWidth,
       40,
     );
-    if (this.#rng < 8) ctx.fillStyle = this.#rng % 2 == 0 ? colorCT : colorT;
+    if (Math.floor(Math.random() * 5) !== 0)
+      ctx.fillStyle = sourceT ? colorT : colorCT;
     if (this.#assist)
       ctx.fillText(this.#assist, 50 + sourceWidth + plusWidth, 40);
 
