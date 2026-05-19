@@ -111,6 +111,7 @@ class KillfeedBuilder {
   #noscope?: boolean;
   #smoke: boolean;
   #wallbang: boolean;
+  #blinded: boolean;
 
   constructor(source: string, target: string) {
     this.#source = source.slice(0, 50);
@@ -119,6 +120,7 @@ class KillfeedBuilder {
     this.#headshot = Math.floor(Math.random() * 3) === 0;
     this.#smoke = Math.floor(Math.random() * 20) === 0;
     this.#wallbang = Math.floor(Math.random() * 20) === 0;
+    this.#blinded = Math.floor(Math.random() * 40) === 0;
     const weaponList = Object.keys(goodWeapons);
     this.#weapon =
       weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
@@ -156,6 +158,11 @@ class KillfeedBuilder {
 
   wallbang(wallbang?: boolean) {
     if (wallbang !== undefined) this.#wallbang = wallbang;
+    return this;
+  }
+
+  blinded(blinded?: boolean) {
+    if (blinded !== undefined) this.#blinded = blinded;
     return this;
   }
 
@@ -220,6 +227,15 @@ class KillfeedBuilder {
     }
     let gapLeft = gap;
 
+    let blindedWidth = 0;
+    let blindedImage: Image | null = null;
+    if (this.#blinded && !suicideImage) {
+      blindedImage = await loadImage(
+        join('media', 'kill-icons', 'blind_kill.svg'),
+      );
+      blindedWidth = 50;
+    }
+
     let airborneWidth = 0;
     let airborneImage: Image | null = null;
     if (this.#airborne) {
@@ -272,6 +288,7 @@ class KillfeedBuilder {
       airborneWidth = 0;
       smokeWidth = 0;
       wallbangWidth = 0;
+      blindedWidth = 0;
       gapLeft = gap;
     }
 
@@ -279,6 +296,7 @@ class KillfeedBuilder {
       inner +
       sourceWidth +
       gapLeft +
+      blindedWidth +
       weaponWidth +
       gap +
       headshotWidth +
@@ -300,17 +318,21 @@ class KillfeedBuilder {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(33, 3, boxWidth - 66, canvas.height - 6);
 
+    if (blindedImage) {
+      ctx.drawImage(blindedImage, 50 - 5, 8, 45, 45);
+    }
     ctx.font =
       '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
     const sourceT = Math.floor(Math.random() * 2) === 0;
     ctx.fillStyle = sourceT ? colorT : colorCT;
-    ctx.fillText(this.#source, 50, 40);
+    ctx.fillText(this.#source, 50 + blindedWidth, 40);
     if (Math.floor(Math.random() * 20) !== 0 && this.#target != this.#source)
       ctx.fillStyle = sourceT ? colorCT : colorT;
     if (noscopeImage) {
       ctx.drawImage(
         noscopeImage,
         50 +
+          blindedWidth +
           sourceWidth +
           gapLeft +
           weaponWidth +
@@ -328,6 +350,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         smokeImage,
         50 +
+          blindedWidth +
           sourceWidth +
           gapLeft +
           weaponWidth +
@@ -346,6 +369,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         wallbangImage,
         50 +
+          blindedWidth +
           sourceWidth +
           gapLeft +
           weaponWidth +
@@ -365,6 +389,7 @@ class KillfeedBuilder {
       ctx.drawImage(
         headshotImage,
         50 +
+          blindedWidth +
           sourceWidth +
           gapLeft +
           weaponWidth +
@@ -384,6 +409,7 @@ class KillfeedBuilder {
     ctx.fillText(
       this.#target,
       50 +
+        blindedWidth +
         sourceWidth +
         gapLeft +
         weaponWidth +
@@ -400,14 +426,19 @@ class KillfeedBuilder {
     if (Math.floor(Math.random() * 10) !== 0)
       ctx.fillStyle = sourceT ? colorT : colorCT;
     if (this.#assist)
-      ctx.fillText(this.#assist, 50 + sourceWidth + plusWidth, 40);
+      ctx.fillText(
+        this.#assist,
+        50 + blindedWidth + sourceWidth + plusWidth,
+        40,
+      );
 
     ctx.fillStyle = '#f8fafc';
-    if (this.#assist) ctx.fillText('  +  ', 50 + sourceWidth, 40);
+    if (this.#assist)
+      ctx.fillText('  +  ', 50 + blindedWidth + sourceWidth, 40);
     if (suicideImage) {
       ctx.drawImage(
         suicideImage,
-        50 + sourceWidth + 20 + plusWidth + assistWidth,
+        50 + blindedWidth + sourceWidth + 20 + plusWidth + assistWidth,
         8,
         weaponWidth,
         45,
@@ -416,7 +447,8 @@ class KillfeedBuilder {
       if (airborneImage) {
         ctx.save();
         const rotation = (5 * Math.PI) / 180;
-        const x = 50 + sourceWidth + gapLeft + plusWidth + assistWidth;
+        const x =
+          50 + blindedWidth + sourceWidth + gapLeft + plusWidth + assistWidth;
         const y = 10;
         ctx.translate(x + 45 / 2, y + 45 / 2);
         ctx.rotate(rotation);
@@ -426,7 +458,13 @@ class KillfeedBuilder {
       ctx.font = '45px CS2';
       ctx.fillText(
         this.#weapon,
-        50 + sourceWidth + gapLeft + plusWidth + assistWidth + airborneWidth,
+        50 +
+          blindedWidth +
+          sourceWidth +
+          gapLeft +
+          plusWidth +
+          assistWidth +
+          airborneWidth,
         45,
       );
     }
@@ -480,7 +518,8 @@ export default new Command(
       .headshot(interaction.options.getBoolean('headshot', false) ?? undefined)
       .noscope(interaction.options.getBoolean('noscope', false) ?? undefined)
       .smoke(interaction.options.getBoolean('smoke', false) ?? undefined)
-      .wallbang(interaction.options.getBoolean('wallbang', false) ?? undefined);
+      .wallbang(interaction.options.getBoolean('wallbang', false) ?? undefined)
+      .blinded(interaction.options.getBoolean('blinded', false) ?? undefined);
 
     await interaction.reply({
       files: [await killfeed.render()],
@@ -537,6 +576,12 @@ export default new Command(
     {
       name: 'wallbang',
       description: 'ob es ein Wallbang Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'blinded',
+      description: 'ob es ein Blinded Kill sein soll',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
