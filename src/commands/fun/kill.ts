@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import { ApplicationCommandOptionType, GuildMember } from 'discord.js';
-import { createCanvas, GlobalFonts } from '@napi-rs/canvas';
+import { createCanvas, GlobalFonts, Image, loadImage } from '@napi-rs/canvas';
 import { join } from 'node:path';
 
 const colorT = '#fbbf24';
@@ -50,7 +50,7 @@ const weapons: Record<string, string> = {
   'Nomad Knife': '\ue058',
   Nova: '\ue02d',
   P250: '\ue04f',
-  P90: '\ue0e5',
+  P90: '\ue035',
   'Paracord Knife': '\ue05d',
   'PP-Bizon': '\ue00c',
   'R8 Revolver': '\ue003',
@@ -101,42 +101,49 @@ const goodWeapons: Record<string, string> = {
   XM1014: weapons['XM1014'],
 };
 
-export default new Command(
-  'kill',
-  'tötet jemanden',
-  async (interaction) => {
-    const colorRng = Math.floor(Math.random() * 16);
-    const source =
-      interaction.options.getString('customsource', false) ??
-      (interaction.member as GuildMember).nickname ??
-      interaction.user.globalName ??
-      interaction.user.username;
-    const target =
-      interaction.options.getString('customtarget', false) ??
-      (interaction.member as GuildMember)?.guild.members.cache.get(
-        interaction.options.getUser('target', true).id,
-      )?.nickname ??
-      interaction.options.getUser('target', true).globalName ??
-      interaction.options.getUser('target', true).username ??
-      source;
-    const assist =
-      interaction.options.getString('customassist', false) ??
-      (interaction.member as GuildMember)?.guild.members.cache.get(
-        interaction.options.getUser('assist', false)?.id ?? '',
-      )?.nickname ??
-      interaction.options.getUser('assist', false)?.globalName ??
-      interaction.options.getUser('assist', false)?.username;
+class KillfeedBuilder {
+  #source: string;
+  #target: string;
+  #weapon: string;
+  #assist?: string;
+  #airborne: boolean;
+  #rng: number;
 
+  constructor(source: string, target: string) {
+    this.#rng = Math.floor(Math.random() * 16);
+    this.#source = source;
+    this.#target = target;
+    this.#airborne = this.#rng === 0;
     const weaponList = Object.keys(goodWeapons);
-    const weapon =
-      weapons[
-        interaction.options.getString('customweapon', false) ??
-          interaction.options.getString('weapon', false) ??
-          ''
-      ] ?? weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
+    this.#weapon =
+      weapons[weaponList[Math.floor(Math.random() * weaponList.length)]];
+  }
+
+  assist(assist?: string) {
+    if (assist) this.#assist = assist;
+    return this;
+  }
+
+  weapon(weapon?: string) {
+    if (weapon) this.#weapon = weapon;
+    return this;
+  }
+
+  airborne(airborne?: boolean) {
+    if (airborne !== undefined) this.#airborne = airborne;
+    return this;
+  }
+
+  async render() {
+    const inner = 50;
+    const gap = 20;
 
     GlobalFonts.registerFromPath(join('media', 'stratum2.woff2'), 'Stratum2');
-    GlobalFonts.registerFromPath(join('media', 'CS2EquipmentIcons.ttf'), 'CS2');
+    if (this.#source !== this.#target)
+      GlobalFonts.registerFromPath(
+        join('media', 'CS2EquipmentIcons.ttf'),
+        'CS2',
+      );
     GlobalFonts.registerFromPath(
       join('media', 'NotoSansCondensed.ttf'),
       'NotoSansCondensed',
@@ -153,27 +160,54 @@ export default new Command(
     const measureContext = measureCanvas.getContext('2d');
     measureContext.font =
       '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
-    const sourceWidth = Math.ceil(measureContext.measureText(source).width);
-    const plusWidth = assist
+    const sourceWidth = Math.ceil(
+      measureContext.measureText(this.#source).width,
+    );
+    const plusWidth = this.#assist
       ? Math.ceil(measureContext.measureText('  +  ').width)
       : 0;
-    const assistWidth = assist
-      ? Math.ceil(measureContext.measureText(assist).width)
+    const assistWidth = this.#assist
+      ? Math.ceil(measureContext.measureText(this.#assist).width)
       : 0;
-    const targetWidth = Math.ceil(measureContext.measureText(target).width);
-    measureContext.font = '45px CS2';
-    const weaponWidth = Math.ceil(measureContext.measureText(weapon).width);
+    const targetWidth = Math.ceil(
+      measureContext.measureText(this.#target).width,
+    );
+
+    let weaponWidth: number;
+    let suicideImage: Image | null = null;
+    if (this.#source === this.#target) {
+      suicideImage = await loadImage(
+        join('media', 'kill-icons', 'icon_suicide.svg'),
+      );
+      weaponWidth = (45 / 32) * 33;
+    } else {
+      measureContext.font = '45px CS2';
+      weaponWidth = Math.ceil(measureContext.measureText(this.#weapon).width);
+    }
+    let gapLeft = gap;
+
+    let airborneWidth = 0;
+    let airborneImage: Image | null = null;
+    if (this.#airborne) {
+      airborneImage = await loadImage(
+        join('media', 'kill-icons', 'inairkill.svg'),
+      );
+      airborneWidth = 42;
+      gapLeft = 5;
+    }
 
     const boxWidth =
-      50 +
+      inner +
       sourceWidth +
-      20 +
+      gapLeft +
       weaponWidth +
-      20 +
+      gap +
       targetWidth +
-      50 +
+      inner +
       plusWidth +
-      assistWidth;
+      assistWidth +
+      airborneWidth;
+
     const canvas = createCanvas(boxWidth > 1000 ? boxWidth : 1000, 60);
     const ctx = canvas.getContext('2d');
 
@@ -185,32 +219,106 @@ export default new Command(
 
     ctx.font =
       '30px Stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
-    ctx.fillStyle = colorRng % 2 == 0 ? colorT : colorCT;
-    ctx.fillText(source, 50, 40);
-    if (colorRng < 14 && target != source)
-      ctx.fillStyle = colorRng % 2 == 0 ? colorCT : colorT;
+    ctx.fillStyle = this.#rng % 2 == 0 ? colorT : colorCT;
+    ctx.fillText(this.#source, 50, 40);
+    if (this.#rng < 14 && this.#target != this.#source)
+      ctx.fillStyle = this.#rng % 2 == 0 ? colorCT : colorT;
     ctx.fillText(
-      target,
-      50 + sourceWidth + 20 + weaponWidth + 20 + plusWidth + assistWidth,
+      this.#target,
+      50 +
+        sourceWidth +
+        gapLeft +
+        weaponWidth +
+        20 +
+        plusWidth +
+        assistWidth +
+        airborneWidth,
       40,
     );
-    if (colorRng < 8) ctx.fillStyle = colorRng % 2 == 0 ? colorCT : colorT;
-    if (assist) ctx.fillText(assist, 50 + sourceWidth + plusWidth, 40);
+    if (this.#rng < 8) ctx.fillStyle = this.#rng % 2 == 0 ? colorCT : colorT;
+    if (this.#assist)
+      ctx.fillText(this.#assist, 50 + sourceWidth + plusWidth, 40);
 
     ctx.fillStyle = '#f8fafc';
-    if (assist) ctx.fillText('  +  ', 50 + sourceWidth, 40);
-    ctx.font = '45px CS2';
-    ctx.fillText(weapon, 50 + sourceWidth + 20 + plusWidth + assistWidth, 45);
+    if (this.#assist) ctx.fillText('  +  ', 50 + sourceWidth, 40);
+    if (suicideImage) {
+      ctx.drawImage(
+        suicideImage,
+        50 + sourceWidth + 20 + plusWidth + assistWidth,
+        10,
+        weaponWidth,
+        45,
+      );
+    } else {
+      if (airborneImage) {
+        const rotation = (5 * Math.PI) / 180;
+        ctx.rotate(rotation);
+        ctx.drawImage(
+          airborneImage,
+          50 + sourceWidth + gapLeft + plusWidth + assistWidth,
+          -40, // TODO: höhe ist abhängig vom text davor
+          45,
+          45,
+        );
+        ctx.rotate(-rotation);
+      }
+      ctx.font = '45px CS2';
+      ctx.fillText(
+        this.#weapon,
+        50 + sourceWidth + gapLeft + plusWidth + assistWidth + airborneWidth,
+        45,
+      );
+    }
+
+    return {
+      contentType: 'image/png',
+      attachment: canvas.toBuffer('image/png'),
+      width: canvas.width,
+      name: `${this.#source} killed ${this.#target}.png`,
+    };
+  }
+}
+
+export default new Command(
+  'kill',
+  'tötet jemanden',
+  async (interaction) => {
+    const source =
+      interaction.options.getString('customsource', false) ??
+      (interaction.member as GuildMember).nickname ??
+      interaction.user.globalName ??
+      interaction.user.username;
+    const target =
+      interaction.options.getString('customtarget', false) ??
+      (interaction.member as GuildMember)?.guild.members.cache.get(
+        interaction.options.getUser('target', true).id,
+      )?.nickname ??
+      interaction.options.getUser('target', true).globalName ??
+      interaction.options.getUser('target', true).username ??
+      source;
+
+    const killfeed = new KillfeedBuilder(source, target);
+
+    killfeed
+      .assist(
+        interaction.options.getString('customassist', false) ??
+          (interaction.member as GuildMember)?.guild.members.cache.get(
+            interaction.options.getUser('assist', false)?.id ?? '',
+          )?.nickname ??
+          interaction.options.getUser('assist', false)?.globalName ??
+          interaction.options.getUser('assist', false)?.username,
+      )
+      .weapon(
+        weapons[
+          interaction.options.getString('customweapon', false) ??
+            interaction.options.getString('weapon', false) ??
+            ''
+        ],
+      )
+      .airborne(interaction.options.getBoolean('airborne', false) ?? undefined);
 
     await interaction.reply({
-      files: [
-        {
-          contentType: 'image/png',
-          attachment: canvas.toBuffer('image/png'),
-          width: canvas.width,
-          name: 'kill.png',
-        },
-      ],
+      files: [await killfeed.render()],
     });
   },
   false,
@@ -236,6 +344,18 @@ export default new Command(
         name: weapon,
         value: weapon,
       })),
+    },
+    {
+      name: 'airborne',
+      description: 'ob es ein Airborne Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'headshot',
+      description: 'ob es ein Headshot Kill sein soll',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
     },
     {
       name: 'customweapon',
