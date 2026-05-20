@@ -19,7 +19,9 @@ export default new Command(
     );
 
     Object.entries(bananen).forEach(([key]) => {
-      if (typeof bananen[parseInt(key) as Banane] != 'number')
+      const banane = parseInt(key) as Banane;
+      const strings = bananeStrings(banane);
+      if (typeof strings == 'undefined')
         delete bananen[parseInt(key) as Banane];
     });
     store.set(id, 'banane', bananen);
