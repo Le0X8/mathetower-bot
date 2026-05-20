@@ -13,6 +13,7 @@ import {
 
 import { reactions } from '@/reactions.ts';
 import '@/store.ts';
+import '@/config/plantage.ts';
 import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';

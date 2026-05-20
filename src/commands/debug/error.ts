@@ -10,6 +10,7 @@ export enum Banane {
   Grün = 1, // 29%
   Braun = 2, // 10%
   Bewaffnet = 99, // 1%
+  Geerntet = 198, // 0%
   Sbahn = 199, // 0%
   Verkauft = 200, // 0%
 }
@@ -48,6 +49,12 @@ export function bananeStrings(banane: Banane): [string, string, string] {
         '<:sbahnane:1506733319188910210>',
         'Umgewandelt aus deinen gesammelten Verspätungsminuten der S1!',
       ];
+    case Banane.Geerntet:
+      return [
+        'geerntete',
+        '<:geerntet:1506742225613099098>',
+        'gewachsen auf einer Bio-`/plantage`!',
+      ];
   }
 }
 
@@ -58,6 +65,7 @@ const bananeRanges: Record<Banane, number> = {
   [Banane.Bewaffnet]: 100000,
   [Banane.Verkauft]: -1,
   [Banane.Sbahn]: -1,
+  [Banane.Geerntet]: -1,
 };
 
 export const bananeValues: Record<Banane, number> = {
@@ -67,6 +75,7 @@ export const bananeValues: Record<Banane, number> = {
   [Banane.Bewaffnet]: 100,
   [Banane.Verkauft]: -1,
   [Banane.Sbahn]: 10,
+  [Banane.Geerntet]: 1,
 };
 
 function bananeRng(): Banane {
