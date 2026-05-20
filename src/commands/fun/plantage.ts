@@ -3,7 +3,7 @@ import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
-const multiplierPrice = (multiplier: number) => multiplier ** 2 * 10 + 100;
+const multiplierPrice = (multiplier: number) => multiplier ** 3 * 10 + 100;
 const landPrice = (land: number) => (land < 1 ? 100 : land * 2000 - 1000);
 
 export default new Command(
@@ -24,7 +24,7 @@ export default new Command(
     const plantage: { land: number; multiplier: number } = store.get(
       user.id,
       'plantage',
-    ) ?? { land: 0, multiplier: 1 };
+    ) ?? { land: 0, multiplier: 1, streak: 0 };
     switch (action) {
       case 'land':
         if (value < landPrice(plantage.land)) {
@@ -68,14 +68,14 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${plantage.land * 2 ** (plantage.multiplier - 1)}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${plantage.land * Math.round(1.5 ** (plantage.multiplier - 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
                   `Nächster Kauf: \`${landPrice(plantage.land)}nb\``,
                 ],
                 [
-                  `Multiplikator: \`${2 ** (plantage.multiplier - 1)}x\``,
+                  `Multiplikator: \`${Math.round(1.5 ** (plantage.multiplier - 1))}x\``,
                   `Nächster Kauf: \`${multiplierPrice(plantage.multiplier)}nb\``,
                 ],
               ],
