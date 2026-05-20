@@ -27,7 +27,7 @@ export default new Command(
             const banane = parseInt(key) as Banane;
             const strings = bananeStrings(banane);
             return [
-              `${strings[1]} **${strings[0]}** Banane${count == 1 ? '' : 'n'}`,
+              `**${strings[1]} ${strings[0]} Bananen**`,
               `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
             ];
           }),
