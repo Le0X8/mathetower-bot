@@ -27,11 +27,13 @@ export default new Command(
             const banane = parseInt(key) as Banane;
             const strings = bananeStrings(banane);
             return [
-              `${strings[1]} **${strings[0]}**: ${count}`,
-              `\`${count}x\` Bananen @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
+              `${strings[1]} **${strings[0]}** Banane${count == 1 ? '' : 'n'}`,
+              `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
             ];
           }),
-          value == 0 ? null : `Summe: Wert von ${value} normalen Bananen (nb)`,
+          value == 0
+            ? null
+            : `Summe: Wert von ${value} normalen Banane${value == 1 ? '' : 'n'} (nb)`,
         ),
       ],
     });
