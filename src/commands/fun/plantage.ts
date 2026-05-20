@@ -68,7 +68,7 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/Stunde:** \`${plantage.land * plantage.multiplier}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${plantage.land * plantage.multiplier}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
