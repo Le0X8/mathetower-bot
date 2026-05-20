@@ -22,7 +22,7 @@ export default new Command(
       0,
     );
 
-    if (senderTotal < amount) {
+    if (senderTotal < amount || amount < 1) {
       await interaction.reply({
         content: `Du hast nicht genug Bananen, um \`${amount}nb\` zu verschenken! Dein aktueller Kontostand beträgt \`${senderTotal}nb\`.`,
         ephemeral: true,
