@@ -18,6 +18,12 @@ export default new Command(
       0,
     );
 
+    Object.entries(bananen).forEach(([key]) => {
+      if (typeof bananen[parseInt(key) as Banane] != 'number')
+        delete bananen[parseInt(key) as Banane];
+    });
+    store.set(id, 'banane', bananen);
+
     await interaction.reply({
       embeds: [
         await buildEmbed(
