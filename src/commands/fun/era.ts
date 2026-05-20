@@ -10,7 +10,7 @@ const eras = [
   '[<:speaknow:1506313176323592303> Speak Now](https://tserasarchive.taylorswift.com/speaknow)\n\n_Long live all the magic we made_',
   '[<:red:1506313170736648232> Red](https://tserasarchive.taylorswift.com/red)\n\n_Loving him was red_',
   "[<:1989:1506313159265226823> 1989](https://tserasarchive.taylorswift.com/1989)\n\n_Cause, darling, I'm a nightmare dressed like a daydream_",
-  '[<:reputation:15063131733119508989> reputation](https://tserasarchive.taylorswift.com/reputation)\n\n_...Ready for it?_',
+  '[<:reputation:1506313173311950898> reputation](https://tserasarchive.taylorswift.com/reputation)\n\n_...Ready for it?_',
   "[<:lover:1506313168786559088> Lover](https://tserasarchive.taylorswift.com/lover)\n\n_We could leave the Christmas lights up 'til January_",
   '[<:folklore:1506313166626361475> folklore](https://tserasarchive.taylorswift.com/folklore)\n\n_You drew stars around my scars_',
   '[<:evermore:1506313161978937384> evermore](https://tserasarchive.taylorswift.com/evermore)\n\n_Long story short, I survived_',
