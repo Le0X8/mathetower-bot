@@ -4,7 +4,7 @@ import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 const multiplierPrice = (multiplier: number) => multiplier ** 2 * 10 + 100;
-const landPrice = (land: number) => (land + 1) * 2000 - 1000;
+const landPrice = (land: number) => (land < 1 ? 100 : land * 2000 - 1000);
 
 export default new Command(
   'plantage',
