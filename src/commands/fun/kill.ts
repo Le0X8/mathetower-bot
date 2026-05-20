@@ -112,6 +112,67 @@ useFont('NotoSansCondensed');
 useFont('DejaVuSansCondensed');
 useFont('STIXTwoMath');
 
+const textFont =
+  'stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
+const weaponFont = 'CS2EquipmentIcons';
+
+function isSniper(weapon: string): boolean {
+  return (
+    weapon === weapons['AWP'] ||
+    weapon === weapons['SSG 08'] ||
+    weapon === weapons['SCAR-20'] ||
+    weapon === weapons['G3SG1']
+  );
+}
+
+function hasBullets(weapon: string): boolean {
+  return !(
+    weapon === weapons['Incendiary Grenade'] ||
+    weapon === weapons['Zeus x27'] ||
+    weapon === weapons['Decoy Grenade'] ||
+    weapon === weapons['HE Grenade'] ||
+    weapon === weapons['Molotov'] ||
+    weapon === weapons['Flashbang'] ||
+    weapon === weapons['Smoke Grenade'] ||
+    weapon === weapons['Knife (CT)'] ||
+    weapon === weapons['Knife (T)'] ||
+    weapon === weapons['Bajonet'] ||
+    weapon === weapons['Bone Knife'] ||
+    weapon === weapons['Butterfly Knife'] ||
+    weapon === weapons['Classic Knife'] ||
+    weapon === weapons['Flip Knife'] ||
+    weapon === weapons['Gut Knife'] ||
+    weapon === weapons['Huntsman Knife'] ||
+    weapon === weapons['Karambit'] ||
+    weapon === weapons['M9 Bayonet'] ||
+    weapon === weapons['Navaja Knife'] ||
+    weapon === weapons['Nomad Knife'] ||
+    weapon === weapons['Paracord Knife'] ||
+    weapon === weapons['Skeleton Knife'] ||
+    weapon === weapons['Stiletto Knife'] ||
+    weapon === weapons['Survival Knife'] ||
+    weapon === weapons['Talon Knife'] ||
+    weapon === weapons['Ursus Knife']
+  );
+}
+
+const measureCanvas = createCanvas(0, 0);
+const measureContext = measureCanvas.getContext('2d');
+function textWidth(
+  font: string,
+  height: number,
+  ...text: (string | undefined)[]
+): number[] {
+  measureContext.font = height + 'px ' + font;
+  return text.map((t) =>
+    t ? Math.ceil(measureContext.measureText(t).width) : 0,
+  );
+}
+
+function killIcon(icon: string) {
+  return loadImage(join('media', 'kill-icons', icon + '.svg'));
+}
+
 class KillfeedBuilder {
   #source: string;
   #target: string;
@@ -185,353 +246,155 @@ class KillfeedBuilder {
   }
 
   async render() {
-    const isSniper =
-      this.#weapon === weapons['AWP'] ||
-      this.#weapon === weapons['SSG 08'] ||
-      this.#weapon === weapons['SCAR-20'] ||
-      this.#weapon === weapons['G3SG1'];
-    this.#noscope = isSniper
+    this.#noscope = isSniper(this.#weapon)
       ? (this.#noscope ?? Math.floor(Math.random() * 50) === 0)
       : false;
-    const hasNoBullets =
-      this.#weapon === weapons['Zeus x27'] ||
-      this.#weapon === weapons['Incendiary Grenade'] ||
-      this.#weapon === weapons['Decoy Grenade'] ||
-      this.#weapon === weapons['HE Grenade'] ||
-      this.#weapon === weapons['Molotov'] ||
-      this.#weapon === weapons['Flashbang'] ||
-      this.#weapon === weapons['Smoke Grenade'] ||
-      this.#weapon === weapons['Knife (CT)'] ||
-      this.#weapon === weapons['Knife (T)'] ||
-      this.#weapon === weapons['Bajonet'] ||
-      this.#weapon === weapons['Bone Knife'] ||
-      this.#weapon === weapons['Butterfly Knife'] ||
-      this.#weapon === weapons['Classic Knife'] ||
-      this.#weapon === weapons['Flip Knife'] ||
-      this.#weapon === weapons['Gut Knife'] ||
-      this.#weapon === weapons['Huntsman Knife'] ||
-      this.#weapon === weapons['Karambit'] ||
-      this.#weapon === weapons['M9 Bayonet'] ||
-      this.#weapon === weapons['Navaja Knife'] ||
-      this.#weapon === weapons['Nomad Knife'] ||
-      this.#weapon === weapons['Paracord Knife'] ||
-      this.#weapon === weapons['Skeleton Knife'] ||
-      this.#weapon === weapons['Stiletto Knife'] ||
-      this.#weapon === weapons['Survival Knife'] ||
-      this.#weapon === weapons['Talon Knife'] ||
-      this.#weapon === weapons['Ursus Knife'];
+    const hasNoBullets = !hasBullets(this.#weapon);
+    const suicide = this.#source === this.#target;
 
-    const inner = 50;
-    const gap = 20;
+    const suicideImage = suicide
+      ? await loadImage(join('media', 'kill-icons', 'icon_suicide.svg'))
+      : null;
 
-    const measureCanvas = createCanvas(0, 0);
-    const measureContext = measureCanvas.getContext('2d');
-    measureContext.font =
-      '30px stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
-    const sourceWidth = Math.ceil(
-      measureContext.measureText(this.#source).width,
-    );
-    const plusWidth = this.#assist
-      ? Math.ceil(measureContext.measureText('  +  ').width)
-      : 0;
-    const assistWidth = this.#assist
-      ? Math.ceil(measureContext.measureText(this.#assist).width)
-      : 0;
-    const targetWidth = Math.ceil(
-      measureContext.measureText(this.#target).width,
+    const height = 60;
+    const inner = (height * 5) / 6;
+    const gap = height / 3;
+    const smallGap = height / 12;
+    const ringX = height / 2;
+    const ringWidth = ringX / 10;
+    const imgHeight = (height * 3) / 4;
+    const imgY = ringWidth + smallGap;
+    const textHeight = height / 2;
+    const textY = textHeight + ringWidth + height / 10;
+    const weaponWidth = suicide
+      ? (imgHeight * 33) / 32
+      : textWidth(weaponFont, imgHeight, this.#weapon)[0];
+
+    const [sourceWidth, plusWidth, assistWidth, targetWidth] = textWidth(
+      textFont,
+      textHeight,
+      this.#source,
+      this.#assist ? '  +  ' : undefined,
+      this.#assist,
+      this.#target,
     );
 
-    let weaponWidth: number;
-    let suicideImage: Image | null = null;
-    if (this.#source === this.#target) {
-      suicideImage = await loadImage(
-        join('media', 'kill-icons', 'icon_suicide.svg'),
-      );
-      weaponWidth = (45 / 32) * 33;
-    } else {
-      measureContext.font = '45px CS2EquipmentIcons';
-      weaponWidth = Math.ceil(measureContext.measureText(this.#weapon).width);
-    }
-    let gapLeft = gap;
+    const blindedImage =
+      this.#blinded && !suicide ? await killIcon('blind_kill') : null;
+    const flashassistImage =
+      this.#flashassist && !suicide && this.#assist
+        ? await killIcon('flashbang_assist')
+        : null;
+    const airborneImage =
+      this.#airborne && !suicide ? await killIcon('inairkill') : null;
+    const noscopeImage =
+      this.#noscope && !suicide && !hasNoBullets
+        ? await killIcon('noscope')
+        : null;
+    const smokeImage =
+      this.#smoke && !suicide && !hasNoBullets
+        ? await killIcon('smoke_kill')
+        : null;
+    const wallbangImage =
+      this.#wallbang && !suicide && !hasNoBullets
+        ? await killIcon('penetrate')
+        : null;
+    const headshotImage =
+      this.#noscope && !suicide && !hasNoBullets
+        ? await killIcon('icon_headshot')
+        : null;
 
-    let blindedWidth = 0;
-    let blindedImage: Image | null = null;
-    if (this.#blinded && !suicideImage) {
-      blindedImage = await loadImage(
-        join('media', 'kill-icons', 'blind_kill.svg'),
-      );
-      blindedWidth = 50;
-    }
+    const blindedWidth = blindedImage ? imgHeight + smallGap : 0;
+    const flashassistWidth = flashassistImage ? imgHeight + smallGap : 0;
+    const airborneWidth = airborneImage ? imgHeight - ringWidth : 0;
+    const noscopeWidth = noscopeImage ? imgHeight + smallGap : 0;
+    const smokeWidth = smokeImage ? imgHeight + smallGap : 0;
+    const wallbangWidth = wallbangImage ? imgHeight + smallGap : 0;
+    const headshotWidth = headshotImage ? imgHeight + smallGap : 0;
 
-    let flashassistWidth = 0;
-    let flashassistImage: Image | null = null;
-    if (this.#flashassist && !suicideImage && this.#assist) {
-      flashassistImage = await loadImage(
-        join('media', 'kill-icons', 'flashbang_assist.svg'),
-      );
-      flashassistWidth = 50;
-    }
+    const contentX = ringX + ringWidth;
+    const blindedX = inner - smallGap;
+    const sourceX = blindedX + smallGap + blindedWidth;
+    const plusX = sourceX + sourceWidth;
+    const flashassistX = plusX + plusWidth - smallGap;
+    const assistX = flashassistX + flashassistWidth + smallGap;
+    const airborneX = assistX + assistWidth + (airborneImage ? smallGap : gap);
+    const weaponX = airborneX + airborneWidth;
+    const noscopeX = weaponX + weaponWidth + gap - smallGap;
+    const smokeX = noscopeX + noscopeWidth;
+    const wallbangX = smokeX + smokeWidth;
+    const headshotX = wallbangX + wallbangWidth;
+    const targetX = headshotX + headshotWidth + smallGap;
 
-    let airborneWidth = 0;
-    let airborneImage: Image | null = null;
-    if (this.#airborne) {
-      airborneImage = await loadImage(
-        join('media', 'kill-icons', 'inairkill.svg'),
-      );
-      airborneWidth = 42;
-      gapLeft = 5;
-    }
+    const width = targetX + targetWidth + inner;
 
-    let noscopeWidth = 0;
-    let noscopeImage: Image | null = null;
-    if (this.#noscope && !suicideImage && !hasNoBullets) {
-      noscopeImage = await loadImage(
-        join('media', 'kill-icons', 'noscope.svg'),
-      );
-      noscopeWidth = 50;
-    }
-
-    let smokeWidth = 0;
-    let smokeImage: Image | null = null;
-    if (this.#smoke && !suicideImage && !hasNoBullets) {
-      smokeImage = await loadImage(
-        join('media', 'kill-icons', 'smoke_kill.svg'),
-      );
-      smokeWidth = 50;
-    }
-
-    let wallbangWidth = 0;
-    let wallbangImage: Image | null = null;
-    if (this.#wallbang && !suicideImage && !hasNoBullets) {
-      wallbangImage = await loadImage(
-        join('media', 'kill-icons', 'penetrate.svg'),
-      );
-      wallbangWidth = 50;
-    }
-
-    let headshotWidth = 0;
-    let headshotImage: Image | null = null;
-    if (this.#headshot && !suicideImage && !hasNoBullets) {
-      headshotImage = await loadImage(
-        join('media', 'kill-icons', 'icon_headshot.svg'),
-      );
-      headshotWidth = 50;
-    }
-
-    if (suicideImage) {
-      headshotWidth = 0;
-      noscopeWidth = 0;
-      airborneWidth = 0;
-      smokeWidth = 0;
-      wallbangWidth = 0;
-      blindedWidth = 0;
-      flashassistWidth = 0;
-      gapLeft = gap;
-    }
-
-    const boxWidth =
-      inner +
-      sourceWidth +
-      gapLeft +
-      blindedWidth +
-      weaponWidth +
-      gap +
-      headshotWidth +
-      targetWidth +
-      inner +
-      plusWidth +
-      noscopeWidth +
-      assistWidth +
-      smokeWidth +
-      wallbangWidth +
-      flashassistWidth +
-      airborneWidth;
-
-    const canvas = createCanvas(boxWidth > 1000 ? boxWidth : 1000, 60);
+    const canvas = createCanvas(
+      width > 20 * inner ? width : 20 * inner,
+      height,
+    );
     const ctx = canvas.getContext('2d');
 
     ctx.fillStyle = '#dc2626';
-    ctx.fillRect(30, 0, boxWidth - 60, canvas.height);
+    ctx.fillRect(ringX, 0, width - ringX * 2, canvas.height);
 
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(33, 3, boxWidth - 66, canvas.height - 6);
+    ctx.fillRect(
+      contentX,
+      ringWidth,
+      width - contentX * 2,
+      canvas.height - ringWidth * 2,
+    );
 
-    if (blindedImage) {
-      ctx.drawImage(blindedImage, 50 - 5, 8, 45, 45);
-    }
-    ctx.font =
-      '30px stratum2, NotoSansCondensed, DejaVuSansCondensed, STIXTwoMath';
+    if (blindedImage)
+      ctx.drawImage(blindedImage, blindedX, imgY, imgHeight, imgHeight);
+
+    ctx.font = textHeight + 'px ' + textFont;
     const sourceT = Math.floor(Math.random() * 2) === 0;
     ctx.fillStyle = sourceT ? colorT : colorCT;
-    ctx.fillText(this.#source, 50 + blindedWidth, 40);
+    ctx.fillText(this.#source, sourceX, textY);
     if (Math.floor(Math.random() * 20) !== 0 && this.#target != this.#source)
       ctx.fillStyle = sourceT ? colorCT : colorT;
-    if (noscopeImage) {
-      ctx.drawImage(
-        noscopeImage,
-        50 +
-          blindedWidth +
-          flashassistWidth +
-          sourceWidth +
-          gapLeft +
-          weaponWidth +
-          20 +
-          plusWidth +
-          assistWidth +
-          airborneWidth -
-          5,
-        8,
-        45,
-        45,
-      );
-    }
-    if (smokeImage) {
-      ctx.drawImage(
-        smokeImage,
-        50 +
-          flashassistWidth +
-          blindedWidth +
-          sourceWidth +
-          gapLeft +
-          weaponWidth +
-          20 +
-          plusWidth +
-          assistWidth +
-          noscopeWidth +
-          airborneWidth -
-          5,
-        8,
-        45,
-        45,
-      );
-    }
-    if (wallbangImage) {
-      ctx.drawImage(
-        wallbangImage,
-        50 +
-          flashassistWidth +
-          blindedWidth +
-          sourceWidth +
-          gapLeft +
-          weaponWidth +
-          20 +
-          plusWidth +
-          assistWidth +
-          smokeWidth +
-          noscopeWidth +
-          airborneWidth -
-          5,
-        8,
-        45,
-        45,
-      );
-    }
-    if (headshotImage) {
-      ctx.drawImage(
-        headshotImage,
-        50 +
-          flashassistWidth +
-          blindedWidth +
-          sourceWidth +
-          gapLeft +
-          weaponWidth +
-          20 +
-          plusWidth +
-          assistWidth +
-          noscopeWidth +
-          wallbangWidth +
-          smokeWidth +
-          airborneWidth -
-          5,
-        8,
-        45,
-        45,
-      );
-    }
-    ctx.fillText(
-      this.#target,
-      50 +
-        flashassistWidth +
-        blindedWidth +
-        sourceWidth +
-        gapLeft +
-        weaponWidth +
-        20 +
-        plusWidth +
-        assistWidth +
-        airborneWidth +
-        headshotWidth +
-        wallbangWidth +
-        smokeWidth +
-        noscopeWidth,
-      40,
-    );
+
+    if (noscopeImage)
+      ctx.drawImage(noscopeImage, noscopeX, imgY, imgHeight, imgHeight);
+    if (smokeImage)
+      ctx.drawImage(smokeImage, smokeX, imgY, imgHeight, imgHeight);
+    if (wallbangImage)
+      ctx.drawImage(wallbangImage, wallbangX, imgY, imgHeight, imgHeight);
+    if (headshotImage)
+      ctx.drawImage(headshotImage, headshotX, imgY, imgHeight, imgHeight);
+
+    ctx.fillText(this.#target, targetX, textY);
     if (Math.floor(Math.random() * 10) !== 0)
       ctx.fillStyle = sourceT ? colorT : colorCT;
-    if (flashassistImage) {
-      ctx.drawImage(
-        flashassistImage,
-        50 + blindedWidth + sourceWidth + plusWidth - 5,
-        8,
-        45,
-        45,
-      );
-    }
-    if (this.#assist)
-      ctx.fillText(
-        this.#assist,
-        50 + blindedWidth + sourceWidth + plusWidth + flashassistWidth,
-        40,
-      );
+    if (flashassistImage)
+      ctx.drawImage(flashassistImage, flashassistX, imgY, imgHeight, imgHeight);
+
+    if (this.#assist) ctx.fillText(this.#assist, assistX, textY);
 
     ctx.fillStyle = '#f8fafc';
-    if (this.#assist)
-      ctx.fillText('  +  ', 50 + blindedWidth + sourceWidth, 40);
+    if (this.#assist) ctx.fillText('  +  ', plusX, textY);
     if (suicideImage) {
-      ctx.drawImage(
-        suicideImage,
-        50 +
-          blindedWidth +
-          flashassistWidth +
-          sourceWidth +
-          20 +
-          plusWidth +
-          assistWidth,
-        8,
-        weaponWidth,
-        45,
-      );
+      ctx.drawImage(suicideImage, weaponX, imgY, weaponWidth, imgHeight);
     } else {
       if (airborneImage) {
         ctx.save();
         const rotation = (5 * Math.PI) / 180;
-        const x =
-          50 +
-          blindedWidth +
-          flashassistWidth +
-          sourceWidth +
-          gapLeft +
-          plusWidth +
-          assistWidth;
-        const y = 10;
-        ctx.translate(x + 45 / 2, y + 45 / 2);
+        const x = airborneX;
+        const y = smallGap * 2;
+        ctx.translate(x + imgHeight / 2, y + imgHeight / 2);
         ctx.rotate(rotation);
-        ctx.drawImage(airborneImage, -23, -38, 45, 45);
+        ctx.drawImage(
+          airborneImage,
+          -((height * 23) / 60),
+          -((height * 38) / 60),
+          imgHeight,
+          imgHeight,
+        );
         ctx.restore();
       }
-      ctx.font = '45px CS2EquipmentIcons';
-      ctx.fillText(
-        this.#weapon,
-        50 +
-          blindedWidth +
-          sourceWidth +
-          gapLeft +
-          flashassistWidth +
-          plusWidth +
-          assistWidth +
-          airborneWidth,
-        45,
-      );
+      ctx.font = imgHeight + 'px ' + weaponFont;
+      ctx.fillText(this.#weapon, weaponX, imgHeight);
     }
 
     return {
