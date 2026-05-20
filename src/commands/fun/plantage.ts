@@ -3,7 +3,7 @@ import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
-const multiplierPrice = (multiplier: number) => multiplier ** 3 * 10 + 100;
+const multiplierPrice = (multiplier: number) => multiplier ** 2 * 10 + 100;
 const landPrice = (land: number) => (land < 1 ? 100 : land * 2000 - 1000);
 
 export default new Command(
@@ -58,7 +58,7 @@ export default new Command(
         store.set(user.id, 'banane', bananen);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
-          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${Math.round(1.5 ** (plantage.multiplier - 1))}x**.`,
+          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${plantage.multiplier}x**.`,
         );
         break;
       default:
@@ -68,14 +68,14 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${plantage.land * Math.round(1.5 ** (plantage.multiplier - 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${plantage.land * plantage.multiplier}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
                   `Nächster Kauf: \`${landPrice(plantage.land)}nb\``,
                 ],
                 [
-                  `Multiplikator: \`${Math.round(1.5 ** (plantage.multiplier - 1))}x\``,
+                  `Multiplikator: \`${plantage.multiplier}x\``,
                   `Nächster Kauf: \`${multiplierPrice(plantage.multiplier)}nb\``,
                 ],
               ],
