@@ -1,6 +1,5 @@
 import { Command } from '$commands';
-import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
-import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import { Banane, bananeValues } from '@/commands/debug/error.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -9,7 +8,7 @@ export default new Command(
   async (interaction) => {
     const sender = interaction.user;
     const receiver = interaction.options.getUser('user', true);
-    const amount = interaction.options.getInteger('amount', true);
+    let amount = interaction.options.getInteger('amount', true);
 
     const senderBalance: Record<Banane, number> =
       store.get(sender.id, 'banane') ?? {};
@@ -21,6 +20,8 @@ export default new Command(
         acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
       0,
     );
+
+    if (amount == -1) amount = senderTotal; // intentional overflow
 
     if (senderTotal < amount || amount < 1) {
       await interaction.reply({
@@ -51,7 +52,8 @@ export default new Command(
     },
     {
       name: 'amount',
-      description: 'Anzahl der zu verschenkenden normalen Bananen (in nb)',
+      description:
+        'Anzahl der zu verschenkenden normalen Bananen (in nb), -1 für alles',
       type: ApplicationCommandOptionType.Integer,
       required: true,
     },
