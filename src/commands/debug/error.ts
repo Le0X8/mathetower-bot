@@ -5,14 +5,14 @@ export default new Command('error', 'schlägt fehl', async (_interaction) => {
   throw new Error('banane 🍌');
 });
 
-enum Banane {
+export enum Banane {
   Gelb = 0, // 60%
   Grün = 1, // 29%
   Braun = 2, // 10%
   Bewaffnet = 99, // 1%
 }
 
-function bananeStrings(banane: Banane): [string, string, string] {
+export function bananeStrings(banane: Banane): [string, string, string] {
   switch (banane) {
     case Banane.Gelb:
       return [
@@ -45,6 +45,13 @@ const bananeRanges: Record<Banane, number> = {
   [Banane.Gelb]: 60,
   [Banane.Grün]: 89,
   [Banane.Braun]: 99,
+  [Banane.Bewaffnet]: 100,
+};
+
+export const bananeValues: Record<Banane, number> = {
+  [Banane.Gelb]: 1,
+  [Banane.Grün]: 2,
+  [Banane.Braun]: 0,
   [Banane.Bewaffnet]: 100,
 };
 
