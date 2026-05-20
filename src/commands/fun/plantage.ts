@@ -24,7 +24,7 @@ export default new Command(
     const plantage: { land: number; multiplier: number } = store.get(
       user.id,
       'plantage',
-    ) ?? { land: 0, multiplier: 1, streak: 0 };
+    ) ?? { land: 0, multiplier: 1 };
     switch (action) {
       case 'land':
         if (value < landPrice(plantage.land)) {
@@ -58,7 +58,7 @@ export default new Command(
         store.set(user.id, 'banane', bananen);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
-          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${plantage.multiplier}x**.`,
+          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${Math.round(1.5 ** (plantage.multiplier - 1))}x**.`,
         );
         break;
       default:
