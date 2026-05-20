@@ -23,14 +23,16 @@ export default new Command(
         await buildEmbed(
           `Alle Bananen von @${user.username}`,
           value == 0 ? 'Dieser Nutzer hat noch keine Bananen gesammelt.' : null,
-          Object.entries(bananen).map(([key, count]) => {
-            const banane = parseInt(key) as Banane;
-            const strings = bananeStrings(banane);
-            return [
-              `**${strings[1]} ${strings[0]} Bananen**`,
-              `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
-            ];
-          }),
+          Object.entries(bananen)
+            .sort(([a], [b]) => parseInt(a) - parseInt(b))
+            .map(([key, count]) => {
+              const banane = parseInt(key) as Banane;
+              const strings = bananeStrings(banane);
+              return [
+                `**${strings[1]} ${strings[0]} Bananen**`,
+                `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
+              ];
+            }),
           value == 0
             ? null
             : `Summe: Wert von ${value} normalen Banane${value == 1 ? '' : 'n'} (nb)`,

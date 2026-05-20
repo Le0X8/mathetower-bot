@@ -10,6 +10,7 @@ export enum Banane {
   Grün = 1, // 29%
   Braun = 2, // 10%
   Bewaffnet = 99, // 1%
+  Verkauft = 100, // 0%
 }
 
 export function bananeStrings(banane: Banane): [string, string, string] {
@@ -38,14 +39,17 @@ export function bananeStrings(banane: Banane): [string, string, string] {
         '<:bewaffnet:1505976549051207760>',
         '🤚 "Hände hoch" ✋',
       ];
+    case Banane.Verkauft:
+      return ['verkaufte', '💰', 'Diese Banane wurde verkauft!'];
   }
 }
 
 const bananeRanges: Record<Banane, number> = {
-  [Banane.Gelb]: 60,
-  [Banane.Grün]: 89,
-  [Banane.Braun]: 99,
-  [Banane.Bewaffnet]: 100,
+  [Banane.Gelb]: 60000,
+  [Banane.Grün]: 89000,
+  [Banane.Braun]: 99000,
+  [Banane.Bewaffnet]: 100000,
+  [Banane.Verkauft]: -1,
 };
 
 export const bananeValues: Record<Banane, number> = {
@@ -53,10 +57,11 @@ export const bananeValues: Record<Banane, number> = {
   [Banane.Grün]: 2,
   [Banane.Braun]: 0,
   [Banane.Bewaffnet]: 100,
+  [Banane.Verkauft]: -1,
 };
 
 function bananeRng(): Banane {
-  const rng = Math.ceil(Math.random() * 100);
+  const rng = Math.ceil(Math.random() * 100000);
 
   for (const range of Object.entries(bananeRanges))
     if (rng <= range[1]) return parseInt(range[0]) as Banane;
@@ -78,7 +83,7 @@ export async function catchBanane(
 
   await interaction.channel.send(
     (fromError ? `-# <@${interaction.user.id}> used \`/error\`\n\n` : '') +
-      `danke bro, hier hast du eine **${s[0]} Banane**. ${s[1]}\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
+      `danke bro, hier hast du eine **${s[0]} Banane** ${s[1]} (\`+${bananeValues[banane]}nb\`).\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
   );
   store.set(interaction.user.id, 'banane', counter);
 }
