@@ -44,7 +44,7 @@ export function bananeStrings(banane: Banane): [string, string, string] {
       return ['verkaufte', '💰', 'Diese Banane wurde verkauft!'];
     case Banane.Sbahn:
       return [
-        'S-Bahnane',
+        'S-Bahnanen, sehr S1-ige',
         '<:sbahnane:1506733319188910210>',
         'Umgewandelt aus deinen gesammelten Verspätungsminuten der S1!',
       ];
