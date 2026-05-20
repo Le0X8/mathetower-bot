@@ -10,9 +10,11 @@ export default new Command(
     let amount = interaction.options.getInteger('amount', false) ?? 0;
 
     const trains = store.get(user.id, 's1-trains') ?? [];
-    const totalMinutes = trains
-      .map((id: string) => store.get(id, 's1')?.delayMinutes ?? 0)
-      .reduce((sum: number, m: number) => sum + m, 0);
+    const minus = store.get(user.id, 's1-minus') ?? 0;
+    const totalMinutes =
+      trains
+        .map((id: string) => store.get(id, 's1')?.delayMinutes ?? 0)
+        .reduce((sum: number, m: number) => sum + m, 0) - minus;
 
     if (amount == -1) amount = totalMinutes; // intentional overflow
 
@@ -25,11 +27,11 @@ export default new Command(
         'Du hast ' +
           amount +
           ' Minute' +
-          (amount == 1 ? 'n' : '') +
+          (amount == 1 ? '' : 'n') +
           ' in **<:sbahnane:1506733319188910210> S-Bahnanen** umgewandelt!\nDu hast jetzt ' +
           (totalMinutes - amount) +
           ' Minute' +
-          (totalMinutes - amount == 1 ? 'n' : '') +
+          (totalMinutes - amount == 1 ? '' : 'n') +
           ' übrig.',
       );
 
@@ -37,6 +39,7 @@ export default new Command(
         store.get(user.id, 'banane') ?? {};
       balance[Banane.Sbahn] = (balance[Banane.Sbahn] ?? 0) + amount;
       store.set(user.id, 'banane', balance);
+      store.set(user.id, 's1-minus', minus + amount);
     } else
       await interaction.reply(
         `<@${user.id}> hat insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}** gesammelt.`,
