@@ -3,6 +3,7 @@ import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
+import config from '$config' with { type: 'json' };
 
 export default new Command(
   'bananen',
@@ -11,6 +12,28 @@ export default new Command(
     const user = interaction.options.getUser('user', false) || interaction.user;
 
     const id = user.id;
+
+    if (id == config.uid) {
+      const donators: Record<string, number> = store.get('donators') ?? {};
+      const total = Object.values(donators).reduce((a, b) => a + b, 0);
+      const top = Object.entries(donators).sort(([, a], [, b]) => b - a);
+
+      await interaction.reply({
+        embeds: [
+          await buildEmbed(
+            'Investoren',
+            'Insgesamt investiert: ' + nb(total),
+            top.map(([key, count], i) => {
+              const share =
+                total > 0 ? ((count / total) * 50).toFixed(2) : '0.00';
+              return [`**${i + 1}. <@${key}>:** ${share}%`, `${nb(count)}`];
+            }),
+            null,
+          ),
+        ],
+      });
+      return;
+    }
 
     const bananen: Record<Banane, number> = store.get(id, 'banane') ?? {};
     const value = Object.entries(bananen).reduce(
