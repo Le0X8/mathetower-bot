@@ -34,7 +34,7 @@ export default new Command(
           });
           return;
         }
-        store.set(interaction.user.id, 'banane', { [Banane.Gelb]: 0 });
+        store.set(interaction.user.id, 'banane', {});
         store.set(interaction.user.id, 'plantage', { land: 0, multiplier: 1 });
         const donators: Record<string, number> = store.get('donators') ?? {};
         delete donators[interaction.user.id];
@@ -46,7 +46,8 @@ export default new Command(
           }!\n\nAlle Bananen, Plantagen und Investitionen wurden gecleart, dafür hast du jetzt einen permanenten Bonus von ${prestige * 50}% auf alle Erträge deiner Plantage!\nDu kannst dir das nächste Prestige-Level holen, wenn du ${nb(prestigeCost(prestige))} Bananen verdient hast!`,
         });
         store.set(interaction.user.id, 'prestige', prestige);
-        break;
+        return;
+
       default:
         break;
     }

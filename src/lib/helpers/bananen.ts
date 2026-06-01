@@ -1,4 +1,5 @@
 export function amount(a: number): string {
+  a = Math.ceil(a);
   const a2 = Math.abs(a);
   if (a2 < 1e3) return `${a.toFixed(2)}`;
   if (a2 < 1e6) return `${(a / 1e3).toFixed(2)}k`;
