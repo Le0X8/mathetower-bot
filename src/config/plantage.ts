@@ -29,22 +29,24 @@ function plantageRoutine() {
   }
 
   const donators: Record<string, number> = store.get('donators') ?? {};
-  const money =
-    ((store.get(config.uid, 'banane') ?? {})[Banane.Gelb] ?? 0) +
-    ((store.get(config.uid, 'banane') ?? {})[Banane.Geerntet] ?? 0);
+  const bal = store.get(config.uid, 'banane') ?? {};
+  let money = (bal[Banane.Gelb] ?? 0) + (bal[Banane.Geerntet] ?? 0);
   const totalDonations = Object.values(donators).reduce((a, b) => a + b, 0);
-  const spendable = Math.floor(money * 0.5);
+  const spendable = Math.floor(money / 2);
   for (const [donator, amount] of Object.entries(donators)) {
     const share = totalDonations > 0 ? amount / totalDonations : 0;
     const payout = Math.floor(spendable * share);
     const balance: Record<Banane, number> = store.get(donator, 'banane') ?? {};
     balance[Banane.Geerntet] = (balance[Banane.Geerntet] ?? 0) + payout;
     store.set(donator, 'banane', balance);
+    bal[Banane.Verkauft] = (bal[Banane.Verkauft] ?? 0) + payout;
+    money -= payout;
   }
+  store.set(config.uid, 'banane', bal);
   maxUpgrade(
     config.uid,
     store.get(config.uid, 'plantage') ?? { land: 0, multiplier: 1 },
-    store.get(config.uid, 'banane') ?? {},
+    bal,
     'maxbalance',
     money,
   );
