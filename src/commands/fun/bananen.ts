@@ -70,7 +70,7 @@ export default new Command(
               const strings = bananeStrings(banane);
               return [
                 `**${strings[1]} ${strings[0]} Bananen**`,
-                `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${nb(bananeValues[banane])}\` = \`${nb(count * bananeValues[banane])}\``,
+                `\`${amount(count)}\` Banane${count == 1 ? '' : 'n'} @ \`${nb(bananeValues[banane])}\` = \`${nb(count * bananeValues[banane])}\``,
               ];
             }),
           value == 0

@@ -1,10 +1,11 @@
 export function amount(a: number): string {
-  if (a < 1e3) return `${a}`;
-  if (a < 1e6) return `${(a / 1e3).toFixed(2)}k`;
-  if (a < 1e9) return `${(a / 1e6).toFixed(2)}M`;
-  if (a < 1e12) return `${(a / 1e9).toFixed(2)}G`;
-  if (a < 1e15) return `${(a / 1e12).toFixed(2)}T`;
-  if (a < 1e18) return `${(a / 1e15).toFixed(2)}P`;
+  const a2 = Math.abs(a);
+  if (a2 < 1e3) return `${a}`;
+  if (a2 < 1e6) return `${(a / 1e3).toFixed(2)}k`;
+  if (a2 < 1e9) return `${(a / 1e6).toFixed(2)}M`;
+  if (a2 < 1e12) return `${(a / 1e9).toFixed(2)}G`;
+  if (a2 < 1e15) return `${(a / 1e12).toFixed(2)}T`;
+  if (a2 < 1e18) return `${(a / 1e15).toFixed(2)}P`;
   return `${(a / 1e18).toFixed(2)}E`;
 }
 
