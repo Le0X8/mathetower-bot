@@ -61,6 +61,40 @@ export default new Command(
           `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${plantage.multiplier}x**.`,
         );
         break;
+      case 'max':
+        const startMultiplier = plantage.multiplier;
+        const startLand = plantage.land;
+        const startValue = value;
+        let money = value;
+        while (true) {
+          const multiplierCost = multiplierPrice(plantage.multiplier);
+          const landCost = landPrice(plantage.land);
+          if (multiplierCost < landCost && money >= multiplierCost) {
+            money -= multiplierCost;
+            plantage.multiplier += 1;
+          } else if (money >= landCost) {
+            money -= landCost;
+            plantage.land += 1;
+          } else {
+            break;
+          }
+        }
+        bananen[Banane.Verkauft] =
+          (bananen[Banane.Verkauft] ?? 0) + (startValue - money);
+        store.set(user.id, 'banane', bananen);
+        store.set(user.id, 'plantage', plantage);
+        await interaction.reply(
+          `Du hast erfolgreich \`${
+            plantage.multiplier - startMultiplier
+          }x\` Multiplikator und \`${
+            plantage.land - startLand
+          }m²\` Land gekauft!\n\nDeine Plantage hat jetzt einen Multiplikator von **${
+            plantage.multiplier
+          }x**.\nDeine Plantage hat jetzt eine Fläche von **${
+            plantage.land
+          }m²**.`,
+        );
+        break;
       default:
         await interaction.reply({
           embeds: [
@@ -106,6 +140,10 @@ export default new Command(
         {
           name: 'Multiplikator kaufen',
           value: 'multiplier',
+        },
+        {
+          name: 'Maximales Upgrade',
+          value: 'max',
         },
       ],
     },
