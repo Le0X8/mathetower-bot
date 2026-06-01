@@ -9,6 +9,79 @@ const multiplierPrice = (multiplier: number) =>
 const landPrice = (land: number) =>
   priceAdjust(land < 1 ? 100 : land * 2000 - 1000);
 
+export function maxUpgrade(
+  user: string,
+  plantage: { land: number; multiplier: number },
+  bananen: Record<Banane, number>,
+  action: 'max' | 'maxbalance' | 'maxland' | 'maxmultiplier',
+  value: number,
+) {
+  const startMultiplier = plantage.multiplier;
+  const startLand = plantage.land;
+  const startValue = value;
+  let money = value;
+  switch (action) {
+    case 'max':
+      while (true) {
+        const multiplierCost = multiplierPrice(plantage.multiplier);
+        const landCost = landPrice(plantage.land);
+        if (multiplierCost < landCost && money >= multiplierCost) {
+          money -= multiplierCost;
+          plantage.multiplier += 1;
+        } else if (money >= landCost) {
+          money -= landCost;
+          plantage.land += 1;
+        } else {
+          break;
+        }
+      }
+      break;
+    case 'maxbalance':
+      while (true) {
+        const multiplierCost = multiplierPrice(plantage.multiplier);
+        const landCost = landPrice(plantage.land);
+        if (plantage.multiplier <= plantage.land && money >= multiplierCost) {
+          money -= multiplierCost;
+          plantage.multiplier += 1;
+        } else if (plantage.multiplier > plantage.land && money >= landCost) {
+          money -= landCost;
+          plantage.land += 1;
+        } else {
+          break;
+        }
+      }
+      break;
+    case 'maxland':
+      while (true) {
+        const landCost = landPrice(plantage.land);
+        if (money >= landCost) {
+          money -= landCost;
+          plantage.land += 1;
+        } else {
+          break;
+        }
+      }
+      break;
+    case 'maxmultiplier':
+      while (true) {
+        const multiplierCost = multiplierPrice(plantage.multiplier);
+        if (money >= multiplierCost) {
+          money -= multiplierCost;
+          plantage.land += 1;
+        } else {
+          break;
+        }
+      }
+      break;
+  }
+
+  const spent = startValue - money;
+  bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spent;
+  store.set(user, 'banane', bananen);
+  store.set(user, 'plantage', plantage);
+  return [startMultiplier, startLand, spent, money];
+}
+
 export default new Command(
   'plantage',
   'Pflanze deine eigenen Bananen an!',
@@ -72,75 +145,13 @@ export default new Command(
       case 'maxbalance':
       case 'maxland':
       case 'maxmultiplier':
-        const startMultiplier = plantage.multiplier;
-        const startLand = plantage.land;
-        const startValue = value;
-        let money = value;
-        switch (action) {
-          case 'max':
-            while (true) {
-              const multiplierCost = multiplierPrice(plantage.multiplier);
-              const landCost = landPrice(plantage.land);
-              if (multiplierCost < landCost && money >= multiplierCost) {
-                money -= multiplierCost;
-                plantage.multiplier += 1;
-              } else if (money >= landCost) {
-                money -= landCost;
-                plantage.land += 1;
-              } else {
-                break;
-              }
-            }
-            break;
-          case 'maxbalance':
-            while (true) {
-              const multiplierCost = multiplierPrice(plantage.multiplier);
-              const landCost = landPrice(plantage.land);
-              if (
-                plantage.multiplier <= plantage.land &&
-                money >= multiplierCost
-              ) {
-                money -= multiplierCost;
-                plantage.multiplier += 1;
-              } else if (
-                plantage.multiplier > plantage.land &&
-                money >= landCost
-              ) {
-                money -= landCost;
-                plantage.land += 1;
-              } else {
-                break;
-              }
-            }
-            break;
-          case 'maxland':
-            while (true) {
-              const landCost = landPrice(plantage.land);
-              if (money >= landCost) {
-                money -= landCost;
-                plantage.land += 1;
-              } else {
-                break;
-              }
-            }
-            break;
-          case 'maxmultiplier':
-            while (true) {
-              const multiplierCost = multiplierPrice(plantage.multiplier);
-              if (money >= multiplierCost) {
-                money -= multiplierCost;
-                plantage.land += 1;
-              } else {
-                break;
-              }
-            }
-            break;
-        }
-
-        const spent = startValue - money;
-        bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spent;
-        store.set(user.id, 'banane', bananen);
-        store.set(user.id, 'plantage', plantage);
+        const [startMultiplier, startLand, spent, money] = maxUpgrade(
+          user.id,
+          plantage,
+          bananen,
+          action,
+          value,
+        );
         await interaction.reply(
           `Du hast erfolgreich \`${
             plantage.multiplier - startMultiplier
