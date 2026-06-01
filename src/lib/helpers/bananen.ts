@@ -1,6 +1,6 @@
 export function amount(a: number): string {
   const a2 = Math.abs(a);
-  if (a2 < 1e3) return `${a}`;
+  if (a2 < 1e3) return `${a.toFixed(2)}`;
   if (a2 < 1e6) return `${(a / 1e3).toFixed(2)}k`;
   if (a2 < 1e9) return `${(a / 1e6).toFixed(2)}M`;
   if (a2 < 1e12) return `${(a / 1e9).toFixed(2)}G`;
