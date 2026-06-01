@@ -1,15 +1,15 @@
-export function amount(amount: number): string {
-  if (amount < 1e3) return `${amount}`;
-  if (amount < 1e6) return `${(amount / 1e3).toFixed(2)}k`;
-  if (amount < 1e9) return `${(amount / 1e6).toFixed(2)}M`;
-  if (amount < 1e12) return `${(amount / 1e9).toFixed(2)}G`;
-  if (amount < 1e15) return `${(amount / 1e12).toFixed(2)}T`;
-  if (amount < 1e18) return `${(amount / 1e15).toFixed(2)}P`;
-  return `${(amount / 1e18).toFixed(2)}E`;
+export function amount(a: number): string {
+  if (a < 1e3) return `${a}`;
+  if (a < 1e6) return `${(a / 1e3).toFixed(2)}k`;
+  if (a < 1e9) return `${(a / 1e6).toFixed(2)}M`;
+  if (a < 1e12) return `${(a / 1e9).toFixed(2)}G`;
+  if (a < 1e15) return `${(a / 1e12).toFixed(2)}T`;
+  if (a < 1e18) return `${(a / 1e15).toFixed(2)}P`;
+  return `${(a / 1e18).toFixed(2)}E`;
 }
 
-export function nb(amount: number): string {
-  return `${amount}\u0e3f`;
+export function nb(a: number): string {
+  return `${amount(a)}\u0e3f`;
 }
 
 export function priceAdjust(price: number): number {

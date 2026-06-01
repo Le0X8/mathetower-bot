@@ -1,7 +1,7 @@
 import { Command } from '$commands';
 import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
-import { nb, priceAdjust } from '@/lib/helpers/bananen.ts';
+import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 const multiplierPrice = (multiplier: number) =>
@@ -109,7 +109,7 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${plantage.land * plantage.multiplier}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier)}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
