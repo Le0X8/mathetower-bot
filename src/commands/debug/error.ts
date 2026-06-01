@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { nb } from '@/lib/helpers/bananen.ts';
 import { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 
 export default new Command('error', 'schlägt fehl', async (_interaction) => {
@@ -101,7 +102,7 @@ export async function catchBanane(
 
   await interaction.channel.send(
     (fromError ? `-# <@${interaction.user.id}> used \`/error\`\n\n` : '') +
-      `danke bro, hier hast du eine **${s[0]} Banane** ${s[1]} (\`+${bananeValues[banane]}nb\`).\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
+      `danke bro, hier hast du eine **${s[0]} Banane** ${s[1]} (\`+${nb(bananeValues[banane])}\`).\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
   );
   store.set(interaction.user.id, 'banane', counter);
 }

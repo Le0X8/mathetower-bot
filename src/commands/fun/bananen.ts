@@ -1,6 +1,7 @@
 import { Command } from '$commands';
 import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -52,12 +53,12 @@ export default new Command(
               const strings = bananeStrings(banane);
               return [
                 `**${strings[1]} ${strings[0]} Bananen**`,
-                `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${bananeValues[banane]}nb\` = \`${count * bananeValues[banane]}nb\``,
+                `\`${count}x\` Banane${count == 1 ? '' : 'n'} @ \`${nb(bananeValues[banane])}\` = \`${nb(count * bananeValues[banane])}\``,
               ];
             }),
           value == 0
             ? null
-            : `Summe: Wert von ${value} normalen Banane${value == 1 ? '' : 'n'} (nb)`,
+            : `Summe: Wert von ${amount(value)} normalen Banane${value == 1 ? '' : 'n'} (\u0e3f)`,
         ),
       ],
     });

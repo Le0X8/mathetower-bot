@@ -1,5 +1,6 @@
 import { Command } from '$commands';
 import { Banane, bananeValues } from '@/commands/debug/error.ts';
+import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -25,14 +26,14 @@ export default new Command(
 
     if (senderTotal < amount || amount < 1) {
       await interaction.reply({
-        content: `Du hast nicht genug Bananen, um \`${amount}nb\` zu verschenken! Dein aktueller Kontostand beträgt \`${senderTotal}nb\`.`,
+        content: `Du hast nicht genug Bananen, um \`${nb(amount)}\` zu verschenken! Dein aktueller Kontostand beträgt \`${nb(senderTotal)}\`.`,
         ephemeral: true,
       });
       return;
     }
 
     await interaction.reply(
-      `${sender} hat \`${amount}nb\` an ${receiver} gegeben.`,
+      `${sender} hat \`${nb(amount)}\` an ${receiver} gegeben.`,
     );
 
     senderBalance[Banane.Verkauft] =
@@ -53,7 +54,7 @@ export default new Command(
     {
       name: 'amount',
       description:
-        'Anzahl der zu verschenkenden normalen Bananen (in nb), -1 für alles',
+        'Anzahl der zu verschenkenden normalen Bananen (in \u0e3f), -1 für alles',
       type: ApplicationCommandOptionType.Integer,
       required: true,
     },

@@ -1,10 +1,13 @@
 import { Command } from '$commands';
 import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import { nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
-const multiplierPrice = (multiplier: number) => multiplier ** 2 * 10 + 100;
-const landPrice = (land: number) => (land < 1 ? 100 : land * 2000 - 1000);
+const multiplierPrice = (multiplier: number) =>
+  priceAdjust(multiplier ** 2 * 10 + 100);
+const landPrice = (land: number) =>
+  priceAdjust(land < 1 ? 100 : land * 2000 - 1000);
 
 export default new Command(
   'plantage',
@@ -29,7 +32,7 @@ export default new Command(
       case 'land':
         if (value < landPrice(plantage.land)) {
           await interaction.reply({
-            content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${value}nb\`. Der Preis für das nächste Land beträgt \`${landPrice(plantage.land)}nb\`.`,
+            content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
             ephemeral: true,
           });
           return;
@@ -42,13 +45,13 @@ export default new Command(
         await interaction.reply(
           `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
             plantage.land
-          }m²**.\n\n-# Du hast \`${spentLand}nb\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${value - spentLand}nb\`.`,
+          }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
         );
         break;
       case 'multiplier':
         if (value < multiplierPrice(plantage.multiplier)) {
           await interaction.reply({
-            content: `Du hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${value}nb\`. Der Preis für den nächsten Multiplikator beträgt \`${multiplierPrice(plantage.multiplier)}nb\`.`,
+            content: `Du hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.multiplier))}\`.`,
             ephemeral: true,
           });
           return;
@@ -62,7 +65,7 @@ export default new Command(
         await interaction.reply(
           `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
             plantage.multiplier
-          }x**.\n\n-# Du hast \`${spentMultiplier}nb\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${value - spentMultiplier}nb\`.`,
+          }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentMultiplier)}\`.`,
         );
         break;
       case 'max':
@@ -96,7 +99,7 @@ export default new Command(
             plantage.multiplier
           }x**.\nDeine Plantage hat jetzt eine Fläche von **${
             plantage.land
-          }m²**.\n\n-# Du hast \`${spent}nb\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${money}nb\`.`,
+          }m²**.\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${nb(money)}\`.`,
         );
         break;
       default:
@@ -110,11 +113,11 @@ export default new Command(
               [
                 [
                   `Land: \`${plantage.land}m²\``,
-                  `Nächster Kauf: \`${landPrice(plantage.land)}nb\``,
+                  `Nächster Kauf: \`${nb(landPrice(plantage.land))}\``,
                 ],
                 [
                   `Multiplikator: \`${plantage.multiplier}x\``,
-                  `Nächster Kauf: \`${multiplierPrice(plantage.multiplier)}nb\``,
+                  `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
                 ],
               ],
               null,
