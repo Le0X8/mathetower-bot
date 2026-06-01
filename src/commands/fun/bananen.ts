@@ -24,11 +24,15 @@ export default new Command(
             'Investoren',
             'Insgesamt investiert: ' + nb(total),
             top.map(([key, count], i) => {
+              const user = interaction.client.users.cache.get(key);
               const share =
                 total > 0 ? ((count / total) * 50).toFixed(2) : '0.00';
-              return [`**${i + 1}. <@${key}>:** ${share}%`, `${nb(count)}`];
+              return [
+                `**${i + 1}. @${user?.username ?? '#' + key}:** ${share}%`,
+                `${nb(count)}`,
+              ];
             }),
-            null,
+            '50% Rest wird für Upgrades verwendet.',
           ),
         ],
       });
