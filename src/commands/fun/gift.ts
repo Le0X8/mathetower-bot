@@ -2,6 +2,7 @@ import { Command } from '$commands';
 import { Banane, bananeValues } from '@/commands/debug/error.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
+import config from '$config' with { type: 'json' };
 
 export default new Command(
   'gift',
@@ -32,9 +33,20 @@ export default new Command(
       return;
     }
 
-    await interaction.reply(
-      `${sender} hat \`${nb(amount)}\` an ${receiver} gegeben.`,
-    );
+    if (receiver.id == config.uid) {
+      const donators: Record<string, number> = store.get('donators') ?? {};
+      donators[sender.id] = (donators[sender.id] ?? 0) + amount;
+      store.set('donators', null, donators);
+      const total = Object.values(donators).reduce((a, b) => a + b, 0);
+      const part = ((donators[sender.id] / total) * 50).toFixed(2);
+
+      await interaction.reply(
+        `${sender} hat \`${nb(amount)}\` an ${receiver} gegeben.\nDanke!\n\nDu bekommst jetzt ${part}% Anteil an meinem Ertrag.`,
+      );
+    } else
+      await interaction.reply(
+        `${sender} hat \`${nb(amount)}\` an ${receiver} gegeben.`,
+      );
 
     senderBalance[Banane.Verkauft] =
       (senderBalance[Banane.Verkauft] ?? 0) + amount;
