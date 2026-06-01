@@ -22,7 +22,12 @@ function plantageRoutine() {
   const plantages: [string, Plantage][] = store.entries('plantage');
   for (const [id, plantage] of plantages) {
     const user = id.split('+')[1];
-    const earnings = minutesPassed * plantage.multiplier * plantage.land;
+    const prestige = store.get(user, 'prestige') ?? 0;
+    const earnings =
+      minutesPassed *
+      plantage.multiplier *
+      plantage.land *
+      (prestige * 0.5 + 1);
     const balance: Record<Banane, number> = store.get(user, 'banane') ?? {};
     balance[Banane.Geerntet] = (balance[Banane.Geerntet] ?? 0) + earnings;
     store.set(user, 'banane', balance);

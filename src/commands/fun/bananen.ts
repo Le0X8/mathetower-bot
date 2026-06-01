@@ -5,13 +5,50 @@ import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 import config from '$config' with { type: 'json' };
 
+const prestigeCost = (prestige: number) => 1e9 * prestige ** 2;
+
 export default new Command(
   'bananen',
   'Zeigt dir deine Bananen an',
   async (interaction) => {
-    const user = interaction.options.getUser('user', false) || interaction.user;
+    const action = interaction.options.getString('action', false);
 
+    const user = interaction.options.getUser('user', false) || interaction.user;
     const id = user.id;
+    const bananen: Record<Banane, number> = store.get(id, 'banane') ?? {};
+    const value = Object.entries(bananen).reduce(
+      (acc, [key, count]) =>
+        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
+      0,
+    );
+    switch (action) {
+      case 'prestige':
+        if (
+          value < prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0)
+        ) {
+          await interaction.reply({
+            content: `Du brauchst ${nb(
+              prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0),
+            )} Bananen, um das nächste Prestige-Level zu erreichen!`,
+            ephemeral: true,
+          });
+          return;
+        }
+        store.set(interaction.user.id, 'banane', {});
+        store.set(interaction.user.id, 'plantage', { land: 0, multiplier: 1 });
+        const donators: Record<string, number> = store.get('donators') ?? {};
+        delete donators[interaction.user.id];
+        store.set('donators', null, donators);
+        const prestige = (store.get(interaction.user.id, 'prestige') ?? 0) + 1;
+        await interaction.reply({
+          content: `<@${interaction.user.id}> ist jetzt Prestige Level ${
+            prestige
+          }!\n\nAlle Bananen, Plantagen und Investitionen wurden gecleart, dafür hast du jetzt einen permanenten Bonus von ${prestige * 50}% auf alle Erträge deiner Plantage!\nDu kannst dir das nächste Prestige-Level holen, wenn du ${nb(prestigeCost(prestige))} Bananen verdient hast!`,
+        });
+        break;
+      default:
+        break;
+    }
 
     if (id == config.uid) {
       const donators: Record<string, number> = store.get('donators') ?? {};
@@ -42,13 +79,6 @@ export default new Command(
       });
       return;
     }
-
-    const bananen: Record<Banane, number> = store.get(id, 'banane') ?? {};
-    const value = Object.entries(bananen).reduce(
-      (acc, [key, count]) =>
-        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
-      0,
-    );
 
     Object.entries(bananen).forEach(([key, val]) => {
       const banane = parseInt(key) as Banane;
@@ -87,6 +117,18 @@ export default new Command(
       description: 'Wessen Bananen möchtest du sehen?',
       type: ApplicationCommandOptionType.User,
       required: false,
+    },
+    {
+      name: 'action',
+      description: 'Was möchtest du tun?',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+      choices: [
+        {
+          name: 'Prestige (CLEART ALLES)',
+          value: 'prestige',
+        },
+      ],
     },
   ],
 );
