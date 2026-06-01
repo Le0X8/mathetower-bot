@@ -1,5 +1,6 @@
 import { Command } from '$commands';
 import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
+import { prestigeCost } from '@/commands/fun/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
@@ -166,13 +167,14 @@ export default new Command(
         break;
 
       default:
+        const prestige = store.get(user.id, 'prestige') ?? 0;
         await interaction.reply({
           embeds: [
             await buildEmbed(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier)}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 0.5 + 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
@@ -182,7 +184,11 @@ export default new Command(
                   `Multiplikator: \`${plantage.multiplier}x\``,
                   `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
                 ],
-              ],
+                prestige > 0 && [
+                  `Prestige-Bonus: \`${prestige * 50}%\``,
+                  `Nächstes Prestige-Level: \`${nb(prestigeCost(prestige))}\``,
+                ],
+              ].filter(Boolean) as [string, string][],
               null,
             ),
           ],

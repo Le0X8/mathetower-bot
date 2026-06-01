@@ -5,7 +5,7 @@ import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 import config from '$config' with { type: 'json' };
 
-const prestigeCost = (prestige: number) => 1e9 * prestige ** 2;
+export const prestigeCost = (prestige: number) => 1e9 * prestige ** 2;
 
 export default new Command(
   'bananen',
@@ -45,6 +45,7 @@ export default new Command(
             prestige
           }!\n\nAlle Bananen, Plantagen und Investitionen wurden gecleart, dafür hast du jetzt einen permanenten Bonus von ${prestige * 50}% auf alle Erträge deiner Plantage!\nDu kannst dir das nächste Prestige-Level holen, wenn du ${nb(prestigeCost(prestige))} Bananen verdient hast!`,
         });
+        store.set(interaction.user.id, 'prestige', prestige);
         break;
       default:
         break;
