@@ -18,12 +18,26 @@ export default new Command(
       0,
     );
 
-    Object.entries(bananen).forEach(([key]) => {
+    Object.entries(bananen).forEach(([key, val]) => {
       const banane = parseInt(key) as Banane;
       const strings = bananeStrings(banane);
-      if (typeof strings == 'undefined')
+      if (typeof strings == 'undefined' || val == 0)
         delete bananen[parseInt(key) as Banane];
     });
+    if (bananen[Banane.Verkauft]) {
+      let left = bananen[Banane.Verkauft];
+      if (bananen[Banane.Geerntet]) {
+        const toRemove = Math.min(left, bananen[Banane.Geerntet]);
+        bananen[Banane.Geerntet] -= toRemove;
+        left -= toRemove;
+      }
+      if (bananen[Banane.Gelb]) {
+        const toRemove = Math.min(left, bananen[Banane.Gelb]);
+        bananen[Banane.Gelb] -= toRemove;
+        left -= toRemove;
+      }
+      bananen[Banane.Verkauft] = left;
+    }
     store.set(id, 'banane', bananen);
 
     await interaction.reply({
