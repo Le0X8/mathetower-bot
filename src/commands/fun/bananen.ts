@@ -24,7 +24,8 @@ export default new Command(
     switch (action) {
       case 'prestige':
         if (
-          value < prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0)
+          value <
+          prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0 + 1)
         ) {
           await interaction.reply({
             content: `Du brauchst ${nb(
