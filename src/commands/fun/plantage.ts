@@ -97,12 +97,15 @@ export default new Command(
               const multiplierCost = multiplierPrice(plantage.multiplier);
               const landCost = landPrice(plantage.land);
               if (
-                plantage.multiplier < plantage.land &&
+                plantage.multiplier <= plantage.land &&
                 money >= multiplierCost
               ) {
                 money -= multiplierCost;
                 plantage.multiplier += 1;
-              } else if (money >= landCost) {
+              } else if (
+                plantage.multiplier > plantage.land &&
+                money >= landCost
+              ) {
                 money -= landCost;
                 plantage.land += 1;
               } else {
