@@ -35,12 +35,14 @@ export default new Command(
           return;
         }
         plantage.land += 1;
-        bananen[Banane.Verkauft] =
-          (bananen[Banane.Verkauft] ?? 0) + landPrice(plantage.land - 1);
+        const spentLand = landPrice(plantage.land - 1);
+        bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spentLand;
         store.set(user.id, 'banane', bananen);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
-          `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${plantage.land}m²**.`,
+          `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
+            plantage.land
+          }m²**.\n\n-# Du hast \`${spentLand}nb\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${value - spentLand}nb\`.`,
         );
         break;
       case 'multiplier':
@@ -52,13 +54,15 @@ export default new Command(
           return;
         }
         plantage.multiplier += 1;
+        const spentMultiplier = multiplierPrice(plantage.multiplier - 1);
         bananen[Banane.Verkauft] =
-          (bananen[Banane.Verkauft] ?? 0) +
-          multiplierPrice(plantage.multiplier - 1);
+          (bananen[Banane.Verkauft] ?? 0) + spentMultiplier;
         store.set(user.id, 'banane', bananen);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
-          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${plantage.multiplier}x**.`,
+          `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
+            plantage.multiplier
+          }x**.\n\n-# Du hast \`${spentMultiplier}nb\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${value - spentMultiplier}nb\`.`,
         );
         break;
       case 'max':
@@ -79,8 +83,8 @@ export default new Command(
             break;
           }
         }
-        bananen[Banane.Verkauft] =
-          (bananen[Banane.Verkauft] ?? 0) + (startValue - money);
+        const spent = startValue - money;
+        bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spent;
         store.set(user.id, 'banane', bananen);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
@@ -92,7 +96,7 @@ export default new Command(
             plantage.multiplier
           }x**.\nDeine Plantage hat jetzt eine Fläche von **${
             plantage.land
-          }m²**.`,
+          }m²**.\n\n-# Du hast \`${spent}nb\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${money}nb\`.`,
         );
         break;
       default:
