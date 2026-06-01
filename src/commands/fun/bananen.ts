@@ -5,7 +5,7 @@ import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 import config from '$config' with { type: 'json' };
 
-export const prestigeCost = (prestige: number) => 1e9 * prestige ** 2;
+export const prestigeCost = (prestige: number) => 1e9 * (prestige + 1) ** 2;
 
 export default new Command(
   'bananen',
@@ -24,8 +24,7 @@ export default new Command(
     switch (action) {
       case 'prestige':
         if (
-          value <
-          prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0 + 1)
+          value < prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0)
         ) {
           await interaction.reply({
             content: `Du brauchst ${nb(
