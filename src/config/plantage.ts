@@ -29,7 +29,9 @@ function plantageRoutine() {
   }
 
   const donators: Record<string, number> = store.get('donators') ?? {};
-  const money = (store.get(config.uid, 'banane') ?? {})[Banane.Geerntet] ?? 0;
+  const money =
+    ((store.get(config.uid, 'banane') ?? {})[Banane.Gelb] ?? 0) +
+    ((store.get(config.uid, 'banane') ?? {})[Banane.Geerntet] ?? 0);
   const totalDonations = Object.values(donators).reduce((a, b) => a + b, 0);
   const spendable = Math.floor(money * 0.5);
   for (const [donator, amount] of Object.entries(donators)) {
