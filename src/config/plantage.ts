@@ -47,7 +47,7 @@ function plantageRoutine() {
     config.uid,
     store.get(config.uid, 'plantage') ?? { land: 0, multiplier: 1 },
     bal,
-    'maxbalance',
+    'max',
     money,
   );
 }
