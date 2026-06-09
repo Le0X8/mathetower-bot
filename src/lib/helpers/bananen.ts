@@ -15,7 +15,7 @@ export function nb(a: number): string {
 }
 
 export function priceAdjust(price: number): number {
-  if (price < 1e3) return price;
+  if (price < 1e3) return Math.ceil(price);
   if (price < 1e6) return Math.ceil(price / 1e1) * 1e1;
   if (price < 1e9) return Math.ceil(price / 1e4) * 1e4;
   if (price < 1e12) return Math.ceil(price / 1e7) * 1e7;

@@ -6,9 +6,23 @@ import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 const multiplierPrice = (multiplier: number) =>
-  priceAdjust(multiplier ** 2 * 10 + 100);
+  priceAdjust(
+    multiplier < 50
+      ? multiplier ** 1.5 * 5 + 100
+      : multiplier < 100
+        ? multiplier ** 1.5 * 10 + 100
+        : multiplier ** 2 * 10 + 100,
+  );
 const landPrice = (land: number) =>
-  priceAdjust(land < 1 ? 100 : land * 2000 - 1000);
+  priceAdjust(
+    land < 1
+      ? 0
+      : land < 50
+        ? land * 20 - 10
+        : land < 100
+          ? land * 200 - 100
+          : land * 2000 - 1000,
+  );
 
 export function maxUpgrade(
   user: string,
@@ -174,7 +188,7 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 0.5 + 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,
@@ -185,7 +199,7 @@ export default new Command(
                   `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
                 ],
                 prestige > 0 && [
-                  `Prestige-Bonus: \`${prestige * 50}%\``,
+                  `Prestige-Bonus: \`${prestige * 200}%\``,
                   `Nächstes Prestige-Level: \`${nb(prestigeCost(prestige))}\``,
                 ],
               ].filter(Boolean) as [string, string][],
