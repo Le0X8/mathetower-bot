@@ -1,12 +1,7 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import { createHash } from 'node:crypto';
 
-const execFileAsync = promisify(execFile);
-
-const BASE = 'https://int.bahn.de/web/api/reiseloesung/abfahrten';
-
-const DORTMUND_UNI_ID = '8004419';
+const BASE = 'https://efa.vrr.de/standard/XSLT_DM_REQUEST';
+const DORTMUND_UNI_ID = '20000472';
 
 export interface S1Departure {
   trainId: string;
@@ -17,23 +12,83 @@ export interface S1Departure {
   cancelled: boolean;
 }
 
-interface RawEntry {
-  bahnhofsId: string;
-  zeit: string;
-  ezZeit?: string;
-  journeyId: string;
-  verkehrmittel: { name: string };
-  terminus: string;
-  ausfall?: boolean;
-  meldungen?: { prioritaet: string; text: string }[];
+interface RawDateTime {
+  year: string;
+  month: string;
+  day: string;
+  hour: string;
+  minute: string;
 }
 
-async function fetchDepartures(url: string): Promise<RawEntry[]> {
-  const response = await fetch(url, {
+interface RawDeparture {
+  dateTime: RawDateTime;
+  realDateTime?: RawDateTime;
+  realtimeStatus?: string;
+  servingLine: {
+    symbol: string;
+    direction: string;
+    stateless: string;
+    trainNum: string;
+    delay: string;
+  };
+  attrs?: { name: string; value: string }[];
+}
+
+interface RawResponse {
+  departureList?: RawDeparture[];
+}
+
+function parseDateTime(dt: RawDateTime): Date {
+  return new Date(
+    Number(dt.year),
+    Number(dt.month) - 1,
+    Number(dt.day),
+    Number(dt.hour),
+    Number(dt.minute),
+    0,
+  );
+}
+
+function buildParams(from: Date): URLSearchParams {
+  return new URLSearchParams({
+    outputFormat: 'JSON',
+    language: 'de',
+    stateless: '1',
+    coordOutputFormat: 'WGS84[DD.ddddd]',
+    coordOutputFormatTail: '7',
+    type_dm: 'stop',
+    name_dm: DORTMUND_UNI_ID,
+    itOptionsActive: '1',
+    ptOptionsActive: '1',
+    useProxFootSearch: '1',
+    useProxFootSearchOrigin: '1',
+    useProxFootSearchDestination: '1',
+    mergeDep: '1',
+    useAllStops: '1',
+    mode: 'direct',
+    useRealtime: '1',
+    deleteAssignedStops_dm: '0',
+    limit: '12',
+    includedMeans: 'checkbox',
+    inclMOT_1: 'on',
+    itdDateDay: String(from.getDate()),
+    itdDateMonth: String(from.getMonth() + 1),
+    itdDateYear: String(from.getFullYear()),
+    itdTimeHour: String(from.getHours()),
+    itdTimeMinute: String(from.getMinutes()),
+  });
+}
+
+export async function getCurrentS1Departures(): Promise<S1Departure[]> {
+  const now = new Date();
+  const from = new Date(now.getTime() - 60 * 60 * 1000);
+  const to = new Date(now.getTime() + 120 * 60 * 1000);
+
+  const response = await fetch(`${BASE}?${buildParams(from)}`, {
     headers: {
-      Accept: 'application/json',
-      'Accept-Language': 'de',
-      'User-Agent': 'mathetower-bot',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'User-Agent': 'Mozilla/5.0 (compatible; Java/public-transport-enabler)',
+      Connection: 'close',
     },
   });
 
@@ -41,75 +96,33 @@ async function fetchDepartures(url: string): Promise<RawEntry[]> {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
 
-  const data = (await response.json()) as { entries?: RawEntry[] };
-  return data.entries ?? [];
-}
+  const data = (await response.json()) as RawResponse;
+  const departures = data.departureList ?? [];
 
-function hasStopCancelled(messages?: { text: string }[]): boolean {
-  if (!messages) return false;
+  return departures
+    .filter((d) => d.servingLine.symbol === 'S1')
+    .map((d): S1Departure => {
+      const planned = parseDateTime(d.dateTime);
+      const actual = d.realDateTime ? parseDateTime(d.realDateTime) : planned;
+      const delay = Number(d.servingLine.delay ?? 0);
+      const cancelled =
+        d.realtimeStatus === 'DEPARTURE_CANCELLED' || delay === -9999;
+      const delayMinutes = cancelled ? 0 : delay;
 
-  return messages.some((m) => /halt entfällt/i.test(m.text));
-}
-
-function buildTimeWindow() {
-  const now = new Date();
-
-  const from = new Date(now.getTime() - 60 * 60 * 1000);
-  const to = new Date(now.getTime() + 120 * 60 * 1000);
-
-  return { from, to };
-}
-
-export async function getCurrentS1Departures(): Promise<S1Departure[]> {
-  const { from, to } = buildTimeWindow();
-
-  const date = nowDateString(from);
-
-  const time = nowTimeString(from);
-
-  const url =
-    `${BASE}?ortExtId=${DORTMUND_UNI_ID}` +
-    `&zeit=${time}` +
-    `&datum=${date}` +
-    `&verkehrsmittel[]=SBAHN`;
-
-  const entries = await fetchDepartures(url);
-
-  return entries
-    .filter((d) => d.verkehrmittel.name === 'S1')
-    .filter((d) => {
-      const t = new Date(d.ezZeit ?? d.zeit).getTime();
-      return t >= from.getTime() && t <= to.getTime();
-    })
-    .map((d) => {
-      const planned = new Date(d.zeit);
-      const actual = d.ezZeit ? new Date(d.ezZeit) : planned;
-
-      const delayMinutes = Math.round(
-        (actual.getTime() - planned.getTime()) / 60000,
-      );
-
-      const cancelled = d.ausfall === true || hasStopCancelled(d.meldungen);
+      const rawId = `${d.servingLine.stateless}:${d.servingLine.trainNum}`;
+      const trainId = createHash('md5').update(rawId).digest('hex');
 
       return {
-        trainId: createHash('md5').update(d.journeyId).digest('hex'),
-        direction: d.terminus ?? null,
+        trainId,
+        direction: d.servingLine.direction ?? null,
         plannedDeparture: planned,
         actualDeparture: actual,
         delayMinutes,
         cancelled,
       };
+    })
+    .filter((d) => {
+      const t = d.actualDeparture.getTime();
+      return t >= from.getTime() && t <= now.getTime();
     });
-}
-
-function pad(n: number) {
-  return String(n).padStart(2, '0');
-}
-
-function nowDateString(d: Date) {
-  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-}
-
-function nowTimeString(d: Date) {
-  return pad(d.getHours()) + ':' + pad(d.getMinutes());
 }

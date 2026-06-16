@@ -1,7 +1,7 @@
 import { Mensa } from '@/config/mensa.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { EmbedBuilder } from 'discord.js';
-import { buildErrorEmbed } from './error-embed.ts';
+import { buildActionFailedEmbed } from './action-failed-embed.ts';
 
 const typeEmojis: Record<string, string> = {
   F: '🐟', // mit Fisch
@@ -90,7 +90,7 @@ export async function menuToday(location: number, filter?: number) {
       );
     } catch (error) {
       embeds.push(
-        await buildErrorEmbed(
+        await buildActionFailedEmbed(
           `Keine Daten für die Mensa **${getTitle(id as number)}** verfügbar.`,
         ),
       );
