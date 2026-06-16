@@ -23,9 +23,16 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent,
   ],
 });
+
+function refreshMembers() {
+  client.guilds.fetch(config.gid).then((guild) => {
+    guild.members.fetch().catch(console.error);
+  });
+}
 
 client.once(Events.ClientReady, (readyClient) => {
   registerCommands(readyClient);
@@ -40,6 +47,9 @@ client.once(Events.ClientReady, (readyClient) => {
     ],
     status: 'online',
   });
+
+  refreshMembers();
+  setInterval(refreshMembers, 60 * 60 * 1000);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

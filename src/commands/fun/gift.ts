@@ -1,7 +1,7 @@
 import { Command } from '$commands';
 import { Banane, bananeValues } from '@/commands/debug/error.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
-import { ApplicationCommandOptionType, Role, User } from 'discord.js';
+import { ApplicationCommandOptionType, GuildMember, Role } from 'discord.js';
 import config from '$config' with { type: 'json' };
 
 export default new Command(
@@ -14,14 +14,11 @@ export default new Command(
 
     const receivers = [];
 
-    if (receiver instanceof Role) {
-      const members = await interaction.guild?.members.fetch();
-      if (members)
-        members.forEach((member) => {
-          if (member.roles.cache.has(receiver.id)) receivers.push(member.id);
-        });
-    }
-    if (receiver instanceof User) receivers.push(receiver.id);
+    if (receiver instanceof Role)
+      receiver.members.forEach((m) => receivers.push(m.id));
+
+    if (receiver instanceof GuildMember)
+      receivers.push(receiver.id ?? receiver.user.id);
 
     const senderBalance: Record<Banane, number> =
       store.get(sender.id, 'banane') ?? {};
@@ -63,8 +60,10 @@ export default new Command(
       } else
         msgs.push(`${sender} hat \`${nb(singleAmount)}\` an <@${r}> gegeben.`);
 
+      if (!receiverBalances[i])
+        receiverBalances[i] = {} as unknown as Record<Banane, number>;
       receiverBalances[i][Banane.Gelb] =
-        (receiverBalances[i][Banane.Gelb] ?? 0) + singleAmount;
+        (receiverBalances?.[i]?.[Banane.Gelb] ?? 0) + singleAmount;
 
       store.set(r, 'banane', receiverBalances[i]);
     });
@@ -72,7 +71,14 @@ export default new Command(
     senderBalance[Banane.Verkauft] =
       (senderBalance[Banane.Verkauft] ?? 0) + amount;
     store.set(sender.id, 'banane', senderBalance);
-    await interaction.reply(msgs.join('\n'));
+
+    await interaction.reply(msgs.slice(0, 20).join('\n'));
+
+    if (msgs.length > 20) {
+      for (let i = 20; i < msgs.length; i += 20) {
+        await interaction.followUp(msgs.slice(i, i + 20).join('\n'));
+      }
+    }
   },
   false,
   [

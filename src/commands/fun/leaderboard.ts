@@ -1,7 +1,7 @@
 import { Command } from '$commands';
 import { Banane, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
-import { nb } from '@/lib/helpers/bananen.ts';
+import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -11,26 +11,30 @@ export default new Command(
     const variant =
       interaction.options.getString('leaderboard', false) ?? 'bananen';
 
+    let place: number | null = null;
     switch (variant) {
       case 'prestige':
         const prestige: [string, number][] = store
           .entries('prestige')
           .sort((a, b) => b[1] - a[1]);
+
+        place = prestige.findIndex(([key]) => key == interaction.user.id) + 1;
+
         await interaction.reply({
           embeds: [
             await buildEmbed(
               'Prestige-Leaderboard',
               'jedes Prestige-Level gibt +200% Bonus',
-              prestige.map(([key, level], i) => {
+              prestige.slice(0, 25).map(([key, level], i) => {
                 key = key.split('+')[1];
                 const user = interaction.guild?.members.cache.get(key);
 
                 return [
                   `**${i + 1}. @${user?.user.username ?? '#' + key}:** Lvl. ${level}`,
-                  `\`+${200 * level}\`%`,
+                  `\`+${200 * level}%\``,
                 ];
               }),
-              '',
+              'Du bist an Platz ' + (place < 0 ? prestige.length + 1 : place),
             ),
           ],
         });
@@ -46,20 +50,23 @@ export default new Command(
               ],
           )
           .sort((a, b) => b[1] - a[1]);
+
+        place = plantage.findIndex(([key]) => key == interaction.user.id) + 1;
+
         await interaction.reply({
           embeds: [
             await buildEmbed(
               'Plantage-Leaderboard',
               'Land + Multiplier',
-              plantage.map(([key, score], i) => {
+              plantage.slice(0, 25).map(([key, score], i) => {
                 const user = interaction.guild?.members.cache.get(key);
 
                 return [
                   `**${i + 1}. @${user?.user.username ?? '#' + key}:**`,
-                  `\`${score}\` Upgrades`,
+                  `\`${amount(score)}\` Upgrades`,
                 ];
               }),
-              '',
+              'Du bist an Platz ' + (place < 0 ? plantage.length + 1 : place),
             ),
           ],
         });
@@ -82,20 +89,23 @@ export default new Command(
               ] as [string, number],
           )
           .sort((a, b) => b[1] - a[1]);
+
+        place = bananen.findIndex(([key]) => key == interaction.user.id) + 1;
+
         await interaction.reply({
           embeds: [
             await buildEmbed(
               'Bananen-Leaderboard',
               null,
-              bananen.map(([key, score], i) => {
+              bananen.slice(0, 25).map(([key, score], i) => {
                 const user = interaction.guild?.members.cache.get(key);
 
                 return [
                   `**${i + 1}. @${user?.user.username ?? '#' + key}:**`,
-                  `\`${nb(score)}\` Bananen`,
+                  `\`${nb(score)}\``,
                 ];
               }),
-              '',
+              'Du bist an Platz ' + (place < 0 ? bananen.length + 1 : place),
             ),
           ],
         });
