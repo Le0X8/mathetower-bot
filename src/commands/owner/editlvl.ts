@@ -3,7 +3,7 @@ import config from '$config' with { type: 'json' };
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
-  'zzz owner editlvl',
+  'zzz-owner-editlvl',
   '[Owner-exclusive] Bearbeitet Bananen-Levels',
   async (interaction) => {
     if (interaction.user.id !== config.owner) {
