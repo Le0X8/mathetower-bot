@@ -7,7 +7,11 @@ export function amount(a: number): string {
   if (a2 < 1e12) return `${(a / 1e9).toFixed(2)}G`;
   if (a2 < 1e15) return `${(a / 1e12).toFixed(2)}T`;
   if (a2 < 1e18) return `${(a / 1e15).toFixed(2)}P`;
-  return `${(a / 1e18).toFixed(2)}E`;
+  if (a2 < 1e21) return `${(a / 1e18).toFixed(2)}E`;
+  if (a2 < 1e24) return `${(a / 1e21).toFixed(2)}Z`;
+  if (a2 < 1e27) return `${(a / 1e24).toFixed(2)}Y`;
+  if (a2 < 1e30) return `${(a / 1e27).toFixed(2)}R`;
+  return `${(a / 1e30).toFixed(2)}Q`;
 }
 
 export function nb(a: number): string {
@@ -21,5 +25,9 @@ export function priceAdjust(price: number): number {
   if (price < 1e12) return Math.ceil(price / 1e7) * 1e7;
   if (price < 1e15) return Math.ceil(price / 1e10) * 1e10;
   if (price < 1e18) return Math.ceil(price / 1e13) * 1e13;
-  return Math.ceil(price / 1e16) * 1e16;
+  if (price < 1e21) return Math.ceil(price / 1e16) * 1e16;
+  if (price < 1e24) return Math.ceil(price / 1e19) * 1e19;
+  if (price < 1e27) return Math.ceil(price / 1e22) * 1e22;
+  if (price < 1e30) return Math.ceil(price / 1e25) * 1e25;
+  return Math.ceil(price / 1e28) * 1e28;
 }

@@ -82,7 +82,7 @@ export function maxUpgrade(
         const multiplierCost = multiplierPrice(plantage.multiplier);
         if (money >= multiplierCost) {
           money -= multiplierCost;
-          plantage.land += 1;
+          plantage.multiplier += 1;
         } else {
           break;
         }
