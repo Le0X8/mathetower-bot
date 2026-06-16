@@ -26,7 +26,7 @@ export default new Command(
 
     switch (property) {
       case 'land':
-        if (value === undefined) {
+        if (typeof value != 'number') {
           await interaction.reply({
             content:
               'Dieser Nutzer hat aktuell folgendes Land-Level: ' +
@@ -42,7 +42,7 @@ export default new Command(
         );
         break;
       case 'multiplier':
-        if (value === undefined) {
+        if (typeof value != 'number') {
           await interaction.reply({
             content:
               'Dieser Nutzer hat aktuell folgenden Multiplier: ' +
@@ -58,7 +58,7 @@ export default new Command(
         );
         break;
       case 'prestige':
-        if (value === undefined) {
+        if (typeof value != 'number') {
           await interaction.reply({
             content:
               'Dieser Nutzer hat aktuell folgendes Prestige-Level: ' + prestige,
