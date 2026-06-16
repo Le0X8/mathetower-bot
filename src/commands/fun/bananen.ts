@@ -16,6 +16,21 @@ export default new Command(
     const user = interaction.options.getUser('user', false) || interaction.user;
     const id = user.id;
     const bananen: Record<Banane, number> = store.get(id, 'banane') ?? {};
+
+    if (bananen[Banane.Verkauft] > 0 && bananen[Banane.Geerntet] > 0) {
+      const diff = Math.min(bananen[Banane.Verkauft], bananen[Banane.Geerntet]);
+      bananen[Banane.Verkauft] -= diff;
+      bananen[Banane.Geerntet] -= diff;
+      store.set(id, 'banane', bananen);
+    }
+
+    if (bananen[Banane.Verkauft] > 0 && bananen[Banane.Gelb] > 0) {
+      const diff = Math.min(bananen[Banane.Verkauft], bananen[Banane.Gelb]);
+      bananen[Banane.Verkauft] -= diff;
+      bananen[Banane.Gelb] -= diff;
+      store.set(id, 'banane', bananen);
+    }
+
     const value = Object.entries(bananen).reduce(
       (acc, [key, count]) =>
         acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
