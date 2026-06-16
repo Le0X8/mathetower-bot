@@ -1,5 +1,5 @@
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
-import { buildErrorEmbed } from '@/lib/embeds/error-embed.ts';
+import { buildActionFailedEmbed } from '@/lib/embeds/action-failed-embed.ts';
 import { getCurrentS1Departures } from '@/lib/helpers/current-s1.ts';
 import {
   ChatInputCommandInteraction,
@@ -7,7 +7,16 @@ import {
   ActionRowBuilder,
   MessageFlags,
   StringSelectMenuInteraction,
+  DiscordjsError,
+  DiscordjsErrorCodes,
 } from 'discord.js';
+
+const CANCELLED_BONUS = 42;
+const S_EMOJI = '<:sbahn:1450544266026680463>';
+
+function calculateS(delayMinutes: number): number {
+  return Math.round(Math.pow(delayMinutes, 1.4));
+}
 
 export default {
   name: 'schnellbahn1',
@@ -36,21 +45,25 @@ export default {
 
         const label = `S1 → ${d.direction ?? ''}`.trim();
 
-        const description =
-          d.delayMinutes > 0
+        const description = d.cancelled
+          ? `${time
+              .split('')
+              .map((char) => '\u0336' + char)
+              .join('')} Fällt aus`
+          : d.delayMinutes > 0
             ? `${time
                 .split('')
                 .map((char) => '\u0336' + char)
                 .join(
                   '',
-                )}\u0336\u2007 →\u2007${actualTime}\u2007(+${d.delayMinutes} Min)`
+                )}\u0336\u2007${actualTime}\u2007(+${d.delayMinutes} Min)`
             : time;
 
         return {
           label,
           description,
           value: d.trainId,
-          emoji: '<:sbahn:1450544266026680463>',
+          emoji: S_EMOJI,
         };
       });
 
@@ -88,8 +101,8 @@ export default {
       if (previous.includes(trainId)) {
         await interaction.editReply({
           embeds: [
-            await buildErrorEmbed(
-              new Error('Du hast diese Fahrt bereits eingetragen!'),
+            await buildActionFailedEmbed(
+              'Du hast diese Fahrt bereits eingetragen!',
             ),
           ],
           components: [],
@@ -106,11 +119,28 @@ export default {
         .map((id) => store.get(id, 's1')?.delayMinutes ?? 0)
         .reduce((sum, m) => sum + m, 0);
 
+      const earnedS = departure.cancelled
+        ? CANCELLED_BONUS
+        : calculateS(departure.delayMinutes);
+
+      const totalS = updatedTrains
+        .map((id) => {
+          const d = store.get(id, 's1');
+          return d?.cancelled
+            ? CANCELLED_BONUS
+            : calculateS(d?.delayMinutes ?? 0);
+        })
+        .reduce((sum, s) => sum + s, 0);
+
+      const earnedDescription = departure.cancelled
+        ? `Eine ausgefallene Bahn und bekommt dafür **+${CANCELLED_BONUS} ${S_EMOJI}**`
+        : `**+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** und **+${earnedS} ${S_EMOJI}** gutgeschrieben bekommen`;
+
       await collected.reply({
         embeds: [
           await buildEmbed(
-            '<:sbahn:1450544266026680463> Verspätung eingetragen!',
-            `<@${interaction.user.id}> hat **+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** gutgeschrieben bekommen und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}**`,
+            `${S_EMOJI} Verspätung eingetragen!`,
+            `<@${interaction.user.id}> hat ${earnedDescription} und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}** und **${totalS} ${S_EMOJI}**`,
             [
               [
                 selectedOption.label.replace('→', 'nach'),
@@ -124,14 +154,25 @@ export default {
       });
       await interaction.deleteReply();
     } catch (error) {
-      await interaction.editReply({
-        embeds: [
-          await buildErrorEmbed(
-            error instanceof Error ? error : new Error(String(error)),
-          ),
-        ],
-        components: [],
-      });
+      if (
+        (error as DiscordjsError).code ==
+        DiscordjsErrorCodes.InteractionCollectorError
+      ) {
+        await interaction.editReply({
+          embeds: [await buildActionFailedEmbed('Dein Arsch war zu langsam!')],
+          components: [],
+        });
+      } else {
+        console.error(error);
+        await interaction.editReply({
+          embeds: [
+            await buildActionFailedEmbed(
+              'Es ist ein unbekannter Fehler aufgetreten.',
+            ),
+          ],
+          components: [],
+        });
+      }
     }
   },
 };
