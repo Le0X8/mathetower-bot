@@ -38,8 +38,26 @@ interface RawResponse {
   departureList?: RawDeparture[];
 }
 
-function parseDateTime(dt: RawDateTime): Date {
-  return new Date(
+function getBerlinOffsetMinutes(date: Date): number {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Berlin',
+    timeZoneName: 'shortOffset',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const parts = dtf.formatToParts(date);
+  const tzPart = parts.find((p) => p.type === 'timeZoneName')?.value;
+  if (!tzPart) return 0;
+  const match = tzPart.match(/GMT([+-]\d+)/);
+  if (!match) return 0;
+  return Number(match[1]) * 60;
+}
+
+function parseBerlinDateTime(dt: RawDateTime): Date {
+  const localMillis = Date.UTC(
     Number(dt.year),
     Number(dt.month) - 1,
     Number(dt.day),
@@ -47,6 +65,9 @@ function parseDateTime(dt: RawDateTime): Date {
     Number(dt.minute),
     0,
   );
+  const fakeUTCDate = new Date(localMillis);
+  const offset = getBerlinOffsetMinutes(fakeUTCDate);
+  return new Date(fakeUTCDate.getTime() - offset * 60 * 1000);
 }
 
 function buildParams(from: Date): URLSearchParams {
@@ -68,7 +89,7 @@ function buildParams(from: Date): URLSearchParams {
     mode: 'direct',
     useRealtime: '1',
     deleteAssignedStops_dm: '0',
-    limit: '12',
+    limit: '20',
     includedMeans: 'checkbox',
     inclMOT_1: 'on',
     itdDateDay: String(from.getDate()),
@@ -81,12 +102,11 @@ function buildParams(from: Date): URLSearchParams {
 
 export async function getCurrentS1Departures(): Promise<S1Departure[]> {
   const now = new Date();
-  const from = new Date(now.getTime() - 60 * 60 * 1000);
-  const to = new Date(now.getTime() + 120 * 60 * 1000);
+  const from = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
   const response = await fetch(`${BASE}?${buildParams(from)}`, {
     headers: {
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Accept: 'application/json',
       'User-Agent': 'Mozilla/5.0 (compatible; Java/public-transport-enabler)',
       Connection: 'close',
     },
@@ -102,8 +122,11 @@ export async function getCurrentS1Departures(): Promise<S1Departure[]> {
   return departures
     .filter((d) => d.servingLine.symbol === 'S1')
     .map((d): S1Departure => {
-      const planned = parseDateTime(d.dateTime);
-      const actual = d.realDateTime ? parseDateTime(d.realDateTime) : planned;
+      const planned = parseBerlinDateTime(d.dateTime);
+      const actual = d.realDateTime
+        ? parseBerlinDateTime(d.realDateTime)
+        : planned;
+
       const delay = Number(d.servingLine.delay ?? 0);
       const cancelled =
         d.realtimeStatus === 'DEPARTURE_CANCELLED' || delay === -9999;
