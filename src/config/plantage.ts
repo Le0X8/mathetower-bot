@@ -1,6 +1,6 @@
-import { Banane } from '@/commands/debug/error.ts';
 import config from '$config' with { type: 'json' };
 import { maxUpgrade } from '@/commands/fun/plantage.ts';
+import { Bananen, BananeType } from '@/util/bananen.ts';
 
 const minute = 60 * 1000;
 
@@ -26,29 +26,22 @@ function plantageRoutine() {
     const earnings = Math.ceil(
       minutesPassed * plantage.multiplier * plantage.land * (prestige * 2 + 1),
     );
-    const balance: Record<Banane, number> = store.get(user, 'banane') ?? {};
-    balance[Banane.Geerntet] = (balance[Banane.Geerntet] ?? 0) + earnings;
-    store.set(user, 'banane', balance);
+    const balance = new Bananen(user);
+    balance.add(BananeType.Geerntet, earnings);
   }
 
   const donators: Record<string, number> = store.get('donators') ?? {};
-  const bal = store.get(config.uid, 'banane') ?? {};
-  let money =
-    (bal[Banane.Gelb] ?? 0) +
-    (bal[Banane.Geerntet] ?? 0) -
-    (bal[Banane.Verkauft] ?? 0);
+  const bal = new Bananen(config.uid);
+  let money = bal.getValue();
   const totalDonations = Object.values(donators).reduce((a, b) => a + b, 0);
   const spendable = Math.floor(money / 2);
   for (const [donator, amount] of Object.entries(donators)) {
     const share = totalDonations > 0 ? amount / totalDonations : 0;
     const payout = Math.floor(spendable * share);
-    const balance: Record<Banane, number> = store.get(donator, 'banane') ?? {};
-    balance[Banane.Geerntet] = (balance[Banane.Geerntet] ?? 0) + payout;
-    store.set(donator, 'banane', balance);
-    bal[Banane.Verkauft] = (bal[Banane.Verkauft] ?? 0) + payout;
+    const balance = new Bananen(donator);
+    bal.transfer(balance, payout, true);
     money -= payout;
   }
-  store.set(config.uid, 'banane', bal);
   maxUpgrade(
     config.uid,
     store.get(config.uid, 'plantage') ?? { land: 0, multiplier: 1 },

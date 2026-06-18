@@ -1,8 +1,8 @@
 import { Command } from '$commands';
-import { Banane, bananeValues } from '@/commands/debug/error.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType, GuildMember, Role } from 'discord.js';
 import config from '$config' with { type: 'json' };
+import { Bananen, BananeType } from '@/util/bananen.ts';
 
 export default new Command(
   'gift',
@@ -20,17 +20,10 @@ export default new Command(
     if (receiver instanceof GuildMember)
       receivers.push(receiver.id ?? receiver.user.id);
 
-    const senderBalance: Record<Banane, number> =
-      store.get(sender.id, 'banane') ?? {};
-    const receiverBalances: Record<Banane, number>[] = receivers.map((r) =>
-      store.get(r, 'banane'),
-    ) ?? [{}];
+    const senderBalance = new Bananen(sender.id);
+    const receiverBalances: Bananen[] = receivers.map((r) => new Bananen(r));
 
-    let senderTotal = Object.entries(senderBalance).reduce(
-      (acc, [key, count]) =>
-        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
-      0,
-    );
+    let senderTotal = senderBalance.getValue();
 
     if (amount == -1) amount = senderTotal; // intentional overflow
 
@@ -60,17 +53,8 @@ export default new Command(
       } else
         msgs.push(`${sender} hat \`${nb(singleAmount)}\` an <@${r}> gegeben.`);
 
-      if (!receiverBalances[i])
-        receiverBalances[i] = {} as unknown as Record<Banane, number>;
-      receiverBalances[i][Banane.Gelb] =
-        (receiverBalances?.[i]?.[Banane.Gelb] ?? 0) + singleAmount;
-
-      store.set(r, 'banane', receiverBalances[i]);
+      senderBalance.transfer(receiverBalances[i], singleAmount);
     });
-
-    senderBalance[Banane.Verkauft] =
-      (senderBalance[Banane.Verkauft] ?? 0) + amount;
-    store.set(sender.id, 'banane', senderBalance);
 
     await interaction.reply(msgs.slice(0, 20).join('\n'));
 

@@ -1,5 +1,5 @@
 import { Command } from '$commands';
-import { Banane } from '@/commands/debug/error.ts';
+import { Bananen, BananeType } from '@/util/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -35,10 +35,8 @@ export default new Command(
           ' übrig.',
       );
 
-      const balance: Record<Banane, number> =
-        store.get(user.id, 'banane') ?? {};
-      balance[Banane.Sbahn] = (balance[Banane.Sbahn] ?? 0) + amount;
-      store.set(user.id, 'banane', balance);
+      const balance = new Bananen(user.id);
+      balance.add(BananeType.Sbahn, amount);
       store.set(user.id, 's1-minus', minus + amount);
     } else
       await interaction.reply(

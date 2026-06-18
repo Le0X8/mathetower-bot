@@ -300,7 +300,7 @@ class KillfeedBuilder {
         ? await killIcon('penetrate')
         : null;
     const headshotImage =
-      this.#noscope && !suicide && !hasNoBullets
+      this.#headshot && !suicide && !hasNoBullets
         ? await killIcon('icon_headshot')
         : null;
 

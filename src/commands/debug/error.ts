@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { Bananen } from '@/util/bananen.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
 import { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 
@@ -6,103 +7,16 @@ export default new Command('error', 'schlägt fehl', async (_interaction) => {
   throw new Error('banane 🍌');
 });
 
-export enum Banane {
-  Gelb = 0, // 60%
-  Grün = 1, // 29%
-  Braun = 2, // 10%
-  Bewaffnet = 99, // 1%
-  Geerntet = 198, // 0%
-  Sbahn = 199, // 0%
-  Verkauft = 200, // 0%
-}
-
-export function bananeStrings(banane: Banane): [string, string, string] {
-  switch (banane) {
-    case Banane.Gelb:
-      return [
-        'normale gelbe',
-        '<:normal:1505971920858779800>',
-        'da ist wirklich nix besonderes dran 🫩✌️🥀',
-      ];
-    case Banane.Grün:
-      return [
-        'unreife grüne',
-        '<:gruen:1505973348876943493>',
-        "vielleicht bisschen hart aber wer's mag :(",
-      ];
-    case Banane.Braun:
-      return [
-        'vergammelte braune',
-        '<:braun:1505973784249761923>',
-        'würd ich jetzt nicht mehr essen 🤮',
-      ];
-    case Banane.Bewaffnet:
-      return [
-        'schwer bewaffnete 😳',
-        '<:bewaffnet:1505976549051207760>',
-        '🤚 "Hände hoch" ✋',
-      ];
-    case Banane.Verkauft:
-      return ['verkaufte', '💰', 'Diese Banane wurde verkauft!'];
-    case Banane.Sbahn:
-      return [
-        'S-Bahnanen, sehr S1-ige',
-        '<:sbahnane:1506733319188910210>',
-        'Umgewandelt aus deinen gesammelten Verspätungsminuten der S1!',
-      ];
-    case Banane.Geerntet:
-      return [
-        'geerntete',
-        '<:geerntet:1506742225613099098>',
-        'gewachsen auf einer Bio-`/plantage`!',
-      ];
-  }
-}
-
-const bananeRanges: Record<Banane, number> = {
-  [Banane.Gelb]: 60000,
-  [Banane.Grün]: 89000,
-  [Banane.Braun]: 99000,
-  [Banane.Bewaffnet]: 100000,
-  [Banane.Verkauft]: -1,
-  [Banane.Sbahn]: -1,
-  [Banane.Geerntet]: -1,
-};
-
-export const bananeValues: Record<Banane, number> = {
-  [Banane.Gelb]: 1,
-  [Banane.Grün]: 2,
-  [Banane.Braun]: 0,
-  [Banane.Bewaffnet]: 100,
-  [Banane.Verkauft]: -1,
-  [Banane.Sbahn]: 10,
-  [Banane.Geerntet]: 1,
-};
-
-function bananeRng(): Banane {
-  const rng = Math.ceil(Math.random() * 100000);
-
-  for (const range of Object.entries(bananeRanges))
-    if (rng <= range[1]) return parseInt(range[0]) as Banane;
-  return Banane.Gelb;
-}
-
 export async function catchBanane(
   interaction: ChatInputCommandInteraction,
   fromError: boolean = true,
 ) {
   if (!(interaction.channel instanceof TextChannel)) return;
-  const banane = bananeRng();
-  const s = bananeStrings(banane);
-
-  const counter =
-    (store.get(interaction.user.id, 'banane') as Record<Banane, number>) ?? {};
-  if (typeof counter[banane] != 'number') counter[banane] = 0;
-  counter[banane]++;
+  const bal = new Bananen(interaction.user.id);
+  const { strs, count, value } = bal.addRandom();
 
   await interaction.channel.send(
     (fromError ? `-# <@${interaction.user.id}> used \`/error\`\n\n` : '') +
-      `danke bro, hier hast du eine **${s[0]} Banane** ${s[1]} (\`+${nb(bananeValues[banane])}\`).\nDu hast jetzt \`${counter[banane]}\` davon.\n\n_${s[2]}_`,
+      `danke bro, hier hast du eine **${strs[0]} Banane** ${strs[1]} (\`+${nb(value)}\`).\nDu hast jetzt \`${count}\` davon.\n\n_${strs[2]}_`,
   );
-  store.set(interaction.user.id, 'banane', counter);
 }

@@ -1,5 +1,5 @@
 import { Command } from '$commands';
-import { Banane, bananeValues } from '@/commands/debug/error.ts';
+import { Bananen } from '@/util/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
@@ -76,16 +76,10 @@ export default new Command(
         const bananen = store
           .entries('banane')
           .map(
-            ([key, banane]) =>
+            ([key]) =>
               [
                 key.split('+')[1],
-                Object.entries(banane).reduce(
-                  (acc, [key, count]) =>
-                    acc +
-                    (bananeValues[parseInt(key) as Banane] ?? 0) *
-                      (count as number),
-                  0,
-                ),
+                new Bananen(key.split('+')[1]).getValue(),
               ] as [string, number],
           )
           .sort((a, b) => b[1] - a[1]);

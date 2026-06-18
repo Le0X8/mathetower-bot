@@ -1,6 +1,6 @@
 import { Command } from '$commands';
-import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { prestigeCost } from '@/commands/fun/bananen.ts';
+import { Bananen, bananeStrings, BananeType } from '@/util/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
@@ -27,7 +27,7 @@ const landPrice = (land: number) =>
 export function maxUpgrade(
   user: string,
   plantage: { land: number; multiplier: number },
-  bananen: Record<Banane, number>,
+  bananen: Bananen,
   action: 'max' | 'maxbalance' | 'maxland' | 'maxmultiplier',
   value: number,
 ) {
@@ -91,8 +91,7 @@ export function maxUpgrade(
   }
 
   const spent = startValue - money;
-  bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spent;
-  store.set(user, 'banane', bananen);
+  bananen.remove(spent);
   store.set(user, 'plantage', plantage);
   return [startMultiplier, startLand, spent, money];
 }
@@ -105,12 +104,8 @@ export default new Command(
     let action = interaction.options.getString('action', false) || 'view';
     if (user.id !== interaction.user.id) action = 'view';
 
-    const bananen: Record<Banane, number> = store.get(user.id, 'banane') ?? {};
-    const value = Object.entries(bananen).reduce(
-      (acc, [key, count]) =>
-        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
-      0,
-    );
+    const bananen = new Bananen(user.id);
+    const value = bananen.getValue();
 
     const plantage: { land: number; multiplier: number } = store.get(
       user.id,
@@ -127,8 +122,7 @@ export default new Command(
         }
         plantage.land += 1;
         const spentLand = landPrice(plantage.land - 1);
-        bananen[Banane.Verkauft] = (bananen[Banane.Verkauft] ?? 0) + spentLand;
-        store.set(user.id, 'banane', bananen);
+        bananen.remove(spentLand);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
           `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
@@ -146,9 +140,7 @@ export default new Command(
         }
         plantage.multiplier += 1;
         const spentMultiplier = multiplierPrice(plantage.multiplier - 1);
-        bananen[Banane.Verkauft] =
-          (bananen[Banane.Verkauft] ?? 0) + spentMultiplier;
-        store.set(user.id, 'banane', bananen);
+        bananen.remove(spentMultiplier);
         store.set(user.id, 'plantage', plantage);
         await interaction.reply(
           `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
@@ -188,7 +180,7 @@ export default new Command(
               'Plantage von @' + user.username,
               plantage.land < 1
                 ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze `/plantage action:Land kaufen` um für 100nb 1m² Land zu kaufen.'
-                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(Banane.Geerntet)[1]}`,
+                : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
               [
                 [
                   `Land: \`${plantage.land}m²\``,

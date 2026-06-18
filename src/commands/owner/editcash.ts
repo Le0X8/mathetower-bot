@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import config from '$config' with { type: 'json' };
-import { Banane, bananeValues } from '@/commands/debug/error.ts';
+import { Bananen, BananeType } from '@/util/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -19,14 +19,10 @@ export default new Command(
     const property = interaction.options.getString('property', true);
     const value = interaction.options.getInteger('value', false);
 
-    let balance: Record<Banane, number> = store.get(user.id, 'banane') ?? {};
+    let balance = new Bananen(user.id);
     const donators: Record<string, number> = store.get('donators') ?? {};
     const invested = donators[user.id] ?? 0;
-    const cash = Object.entries(balance).reduce(
-      (acc, [key, count]) =>
-        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
-      0,
-    );
+    const cash = balance.getValue();
 
     switch (property) {
       case 'invested':
@@ -51,10 +47,7 @@ export default new Command(
           });
           return;
         }
-        balance = {
-          [Banane.Gelb]: value,
-        } as unknown as Record<Banane, number>;
-        store.set(user.id, 'banane', balance);
+        balance.setValue(value);
         await interaction.reply(
           `Bananen von ${user.username} wurden auf ${value} gesetzt.`,
         );

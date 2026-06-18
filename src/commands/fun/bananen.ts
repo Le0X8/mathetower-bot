@@ -1,9 +1,14 @@
 import { Command } from '$commands';
-import { Banane, bananeStrings, bananeValues } from '@/commands/debug/error.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 import config from '$config' with { type: 'json' };
+import {
+  Bananen,
+  bananeStrings,
+  BananeType,
+  bananeValues,
+} from '@/util/bananen.ts';
 
 export const prestigeCost = (prestige: number) => 1e9 * (prestige + 1) ** 2;
 
@@ -15,27 +20,9 @@ export default new Command(
 
     const user = interaction.options.getUser('user', false) || interaction.user;
     const id = user.id;
-    const bananen: Record<Banane, number> = store.get(id, 'banane') ?? {};
+    const b = new Bananen(id).normalize();
 
-    if (bananen[Banane.Verkauft] > 0 && bananen[Banane.Geerntet] > 0) {
-      const diff = Math.min(bananen[Banane.Verkauft], bananen[Banane.Geerntet]);
-      bananen[Banane.Verkauft] -= diff;
-      bananen[Banane.Geerntet] -= diff;
-      store.set(id, 'banane', bananen);
-    }
-
-    if (bananen[Banane.Verkauft] > 0 && bananen[Banane.Gelb] > 0) {
-      const diff = Math.min(bananen[Banane.Verkauft], bananen[Banane.Gelb]);
-      bananen[Banane.Verkauft] -= diff;
-      bananen[Banane.Gelb] -= diff;
-      store.set(id, 'banane', bananen);
-    }
-
-    const value = Object.entries(bananen).reduce(
-      (acc, [key, count]) =>
-        acc + (bananeValues[parseInt(key) as Banane] ?? 0) * count,
-      0,
-    );
+    const value = b.getValue();
     switch (action) {
       case 'prestige':
         if (
@@ -49,7 +36,7 @@ export default new Command(
           });
           return;
         }
-        store.set(interaction.user.id, 'banane', {});
+        new Bananen(interaction.user.id).reset();
         store.set(interaction.user.id, 'plantage', { land: 0, multiplier: 1 });
         const donators: Record<string, number> = store.get('donators') ?? {};
         delete donators[interaction.user.id];
@@ -97,23 +84,15 @@ export default new Command(
       return;
     }
 
-    Object.entries(bananen).forEach(([key, val]) => {
-      const banane = parseInt(key) as Banane;
-      const strings = bananeStrings(banane);
-      if (typeof strings == 'undefined' || val == 0)
-        delete bananen[parseInt(key) as Banane];
-    });
-    store.set(id, 'banane', bananen);
-
     await interaction.reply({
       embeds: [
         await buildEmbed(
           `Alle Bananen von @${user.username}`,
           value == 0 ? 'Dieser Nutzer hat noch keine Bananen gesammelt.' : null,
-          Object.entries(bananen)
+          Object.entries(b.bananen)
             .sort(([a], [b]) => parseInt(a) - parseInt(b))
             .map(([key, count]) => {
-              const banane = parseInt(key) as Banane;
+              const banane = parseInt(key) as BananeType;
               const strings = bananeStrings(banane);
               return [
                 `**${strings[1]} ${strings[0]} Bananen**`,
