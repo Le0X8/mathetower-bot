@@ -38,39 +38,91 @@ interface RawResponse {
   departureList?: RawDeparture[];
 }
 
-function getBerlinOffsetMinutes(date: Date): number {
-  const dtf = new Intl.DateTimeFormat('en-US', {
+function getBerlinParts(date: Date): {
+  day: number;
+  month: number;
+  year: number;
+  hours: number;
+  minutes: number;
+} {
+  const parts = new Intl.DateTimeFormat('de-DE', {
     timeZone: 'Europe/Berlin',
-    timeZoneName: 'shortOffset',
     year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const parts = dtf.formatToParts(date);
-  const tzPart = parts.find((p) => p.type === 'timeZoneName')?.value;
-  if (!tzPart) return 0;
-  const match = tzPart.match(/GMT([+-]\d+)/);
-  if (!match) return 0;
-  return Number(match[1]) * 60;
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  const get = (type: string) =>
+    Number(parts.find((p) => p.type === type)?.value ?? 0);
+
+  return {
+    day: get('day'),
+    month: get('month'),
+    year: get('year'),
+    hours: get('hour'),
+    minutes: get('minute'),
+  };
 }
 
-function parseBerlinDateTime(dt: RawDateTime): Date {
-  const localMillis = Date.UTC(
-    Number(dt.year),
-    Number(dt.month) - 1,
-    Number(dt.day),
-    Number(dt.hour),
-    Number(dt.minute),
-    0,
-  );
-  const fakeUTCDate = new Date(localMillis);
-  const offset = getBerlinOffsetMinutes(fakeUTCDate);
-  return new Date(fakeUTCDate.getTime() - offset * 60 * 1000);
+function parseDateTime(dt: RawDateTime): Date {
+  const year = Number(dt.year);
+  const month = Number(dt.month);
+  const day = Number(dt.day);
+  const hour = Number(dt.hour);
+  const minute = Number(dt.minute);
+
+  let date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+
+  const tz = 'Europe/Berlin';
+
+  for (let i = 0; i < 2; i++) {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+
+    const parts = fmt.formatToParts(date);
+    const get = (type: string) =>
+      Number(parts.find((p) => p.type === type)?.value);
+
+    const berlinYear = get('year');
+    const berlinMonth = get('month');
+    const berlinDay = get('day');
+    const berlinHour = get('hour');
+    const berlinMinute = get('minute');
+
+    const target = Date.UTC(year, month - 1, day, hour, minute, 0);
+
+    const actual = Date.UTC(
+      berlinYear,
+      berlinMonth - 1,
+      berlinDay,
+      berlinHour,
+      berlinMinute,
+      0,
+    );
+
+    const diffMinutes = (target - actual) / 60000;
+
+    if (diffMinutes === 0) break;
+
+    date = new Date(date.getTime() + diffMinutes * 60000);
+  }
+
+  return date;
 }
 
 function buildParams(from: Date): URLSearchParams {
+  const b = getBerlinParts(from);
   return new URLSearchParams({
     outputFormat: 'JSON',
     language: 'de',
@@ -89,24 +141,24 @@ function buildParams(from: Date): URLSearchParams {
     mode: 'direct',
     useRealtime: '1',
     deleteAssignedStops_dm: '0',
-    limit: '20',
+    limit: '12',
     includedMeans: 'checkbox',
     inclMOT_1: 'on',
-    itdDateDay: String(from.getDate()),
-    itdDateMonth: String(from.getMonth() + 1),
-    itdDateYear: String(from.getFullYear()),
-    itdTimeHour: String(from.getHours()),
-    itdTimeMinute: String(from.getMinutes()),
+    itdDateDay: String(b.day),
+    itdDateMonth: String(b.month),
+    itdDateYear: String(b.year),
+    itdTimeHour: String(b.hours),
+    itdTimeMinute: String(b.minutes),
   });
 }
 
 export async function getCurrentS1Departures(): Promise<S1Departure[]> {
   const now = new Date();
-  const from = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+  const from = new Date(now.getTime() - 60 * 60 * 1000);
 
   const response = await fetch(`${BASE}?${buildParams(from)}`, {
     headers: {
-      Accept: 'application/json',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'User-Agent': 'Mozilla/5.0 (compatible; Java/public-transport-enabler)',
       Connection: 'close',
     },
@@ -122,11 +174,8 @@ export async function getCurrentS1Departures(): Promise<S1Departure[]> {
   return departures
     .filter((d) => d.servingLine.symbol === 'S1')
     .map((d): S1Departure => {
-      const planned = parseBerlinDateTime(d.dateTime);
-      const actual = d.realDateTime
-        ? parseBerlinDateTime(d.realDateTime)
-        : planned;
-
+      const planned = parseDateTime(d.dateTime);
+      const actual = d.realDateTime ? parseDateTime(d.realDateTime) : planned;
       const delay = Number(d.servingLine.delay ?? 0);
       const cancelled =
         d.realtimeStatus === 'DEPARTURE_CANCELLED' || delay === -9999;
