@@ -199,7 +199,7 @@ export default new Command(
           case 'land':
             if (value < landPrice(plantage.land)) {
               await action?.reply({
-                content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
                 ephemeral: true,
               });
               return;
@@ -209,7 +209,7 @@ export default new Command(
             bananen.remove(spentLand);
             store.set(user.id, 'plantage', plantage);
             await action?.reply(
-              `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
+              `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
                 plantage.land
               }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
             );
@@ -217,7 +217,7 @@ export default new Command(
           case 'multiplier':
             if (value < multiplierPrice(plantage.multiplier)) {
               await action?.reply({
-                content: `Du hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.multiplier))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.multiplier))}\`.`,
                 ephemeral: true,
               });
               return;
@@ -227,7 +227,7 @@ export default new Command(
             bananen.remove(spentMultiplier);
             store.set(user.id, 'plantage', plantage);
             await action?.reply(
-              `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
+              `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
                 plantage.multiplier
               }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentMultiplier)}\`.`,
             );
@@ -243,16 +243,25 @@ export default new Command(
               action?.customId,
               value,
             );
+            const multiplier = plantage.multiplier - startMultiplier;
+            const land = plantage.land - startLand;
             await action?.reply(
-              `Du hast erfolgreich \`${
-                plantage.multiplier - startMultiplier
-              }x\` Multiplikator und \`${
-                plantage.land - startLand
-              }m²\` Land gekauft!\n\nDeine Plantage hat jetzt einen Multiplikator von **${
-                plantage.multiplier
-              }x**.\nDeine Plantage hat jetzt eine Fläche von **${
-                plantage.land
-              }m²**.\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${nb(money)}\`.`,
+              `-# <@${user.id}>\nDu hast erfolgreich ` +
+                (multiplier > 0 ? `\`${multiplier}x\` Multiplikator` : '') +
+                (multiplier > 0 && land > 0 ? ` und ` : '') +
+                (land > 0 ? `\`${land}m²\` Land` : '') +
+                ` gekauft!\n` +
+                (multiplier > 0
+                  ? `\nDeine Plantage hat jetzt einen Multiplikator von **${
+                      plantage.multiplier
+                    }x**.`
+                  : '') +
+                (land > 0
+                  ? `\nDeine Plantage hat jetzt eine Fläche von **${
+                      plantage.land
+                    }m²**.`
+                  : 0) +
+                `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${nb(money)}\`.`,
             );
             break;
           case 'switchtomax':
