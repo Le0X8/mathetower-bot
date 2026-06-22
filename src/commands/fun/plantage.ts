@@ -271,7 +271,8 @@ export default new Command(
             break;
         }
         await action?.deferUpdate();
-      } catch {
+      } catch (e) {
+        throw e;
         await interaction.editReply({
           components: [],
         });
