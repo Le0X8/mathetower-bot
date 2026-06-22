@@ -158,30 +158,32 @@ export default new Command(
         .setStyle(ButtonStyle.Secondary)
         .setCustomId('switchtosingle'),
     );
-    const msg = await interaction.reply({
-      embeds: [
-        await buildEmbed(
-          'Plantage von @' + user.username,
-          plantage.land < 1
-            ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze den Knopf unten, um 1m² Land zu kaufen.'
-            : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
+
+    const embed = () =>
+      buildEmbed(
+        'Plantage von @' + user.username,
+        plantage.land < 1
+          ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze den Knopf unten, um 1m² Land zu kaufen.'
+          : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
+        [
           [
-            [
-              `Land: \`${plantage.land}m²\``,
-              `Nächster Kauf: \`${nb(landPrice(plantage.land))}\``,
-            ],
-            [
-              `Multiplikator: \`${plantage.multiplier}x\``,
-              `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
-            ],
-            prestige > 0 && [
-              `Prestige-Bonus: \`${prestige * 200}%\``,
-              `Nächstes Prestige-Level: \`${nb(prestigeCost(prestige))}\``,
-            ],
-          ].filter(Boolean) as [string, string][],
-          null,
-        ),
-      ],
+            `Land: \`${plantage.land}m²\``,
+            `Nächster Kauf: \`${nb(landPrice(plantage.land))}\``,
+          ],
+          [
+            `Multiplikator: \`${plantage.multiplier}x\``,
+            `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
+          ],
+          prestige > 0 && [
+            `Prestige-Bonus: \`${prestige * 200}%\``,
+            `Nächstes Prestige-Level: \`${nb(prestigeCost(prestige))}\``,
+          ],
+        ].filter(Boolean) as [string, string][],
+        null,
+      );
+
+    const msg = await interaction.reply({
+      embeds: [await embed()],
       components: [singleItem],
       withResponse: true,
     });
@@ -208,6 +210,9 @@ export default new Command(
             const spentLand = landPrice(plantage.land - 1);
             bananen.remove(spentLand);
             store.set(user.id, 'plantage', plantage);
+            await interaction.editReply({
+              embeds: [await embed()],
+            });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
                 plantage.land
@@ -226,6 +231,9 @@ export default new Command(
             const spentMultiplier = multiplierPrice(plantage.multiplier - 1);
             bananen.remove(spentMultiplier);
             store.set(user.id, 'plantage', plantage);
+            await interaction.editReply({
+              embeds: [await embed()],
+            });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
                 plantage.multiplier
@@ -245,6 +253,9 @@ export default new Command(
             );
             const multiplier = plantage.multiplier - startMultiplier;
             const land = plantage.land - startLand;
+            await interaction.editReply({
+              embeds: [await embed()],
+            });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich ` +
                 (multiplier > 0 ? `\`${multiplier}x\` Multiplikator` : '') +
