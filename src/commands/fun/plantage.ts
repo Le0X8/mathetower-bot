@@ -3,7 +3,13 @@ import { prestigeCost } from '@/commands/fun/bananen.ts';
 import { Bananen, bananeStrings, BananeType } from '@/util/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
-import { ApplicationCommandOptionType } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ApplicationCommandOptionType,
+  ButtonBuilder,
+  ButtonStyle,
+  Interaction,
+} from 'discord.js';
 
 const multiplierPrice = (multiplier: number) =>
   priceAdjust(
@@ -174,7 +180,15 @@ export default new Command(
 
       default:
         const prestige = store.get(user.id, 'prestige') ?? 0;
-        await interaction.reply({
+        const buyLand = new ButtonBuilder()
+          .setCustomId('buyLand')
+          .setLabel('Land kaufen')
+          .setStyle(ButtonStyle.Primary)
+          .setCustomId('land');
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          buyLand,
+        );
+        const msg = await interaction.reply({
           embeds: [
             await buildEmbed(
               'Plantage von @' + user.username,
@@ -198,7 +212,24 @@ export default new Command(
               null,
             ),
           ],
+          components: [row],
+          withResponse: true,
         });
+
+        const collectorFilter = (i: Interaction) =>
+          i.user.id === interaction.user.id;
+
+        try {
+          const action = await msg.resource?.message?.awaitMessageComponent({
+            filter: collectorFilter,
+            time: 20_000,
+          });
+          msg.resource?.message?.reply(action?.customId as string);
+        } catch {
+          await interaction.editReply({
+            components: [],
+          });
+        }
     }
   },
   false,
