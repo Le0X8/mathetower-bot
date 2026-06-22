@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { nb, amount as am } from '@/lib/helpers/bananen.ts';
 import { Bananen, BananeType } from '@/util/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
@@ -16,16 +17,16 @@ export default new Command(
     const chance = 1 / multiplier;
     const roll = Math.random();
 
-    if (roll < chance) {
+    if (roll <= chance) {
       const winnings = Math.floor(amount * (multiplier - 1));
       balance.add(BananeType.Gold, winnings).save();
       await interaction.reply(
-        `Glückwunsch! Du hast ${winnings} goldene Bananen <:gold:1518542283488755712> gewonnen! 🎉`,
+        `Glückwunsch! Du hast ${am(winnings)} goldene Bananen <:gold:1518542283488755712> gewonnen! 🎉`,
       );
     } else {
       balance.remove(amount).save();
       await interaction.reply(
-        `Oh nein! Du hast ${amount} Bananen verloren. 😢 Versuch es nochmal!`,
+        `Oh nein! Du hast ${nb(amount)} Bananen verloren. 😢 Versuch es nochmal!`,
       );
     }
   },
