@@ -17,7 +17,7 @@ export default new Command(
     const roll = Math.random();
 
     if (roll < chance) {
-      const winnings = Math.floor(amount * multiplier);
+      const winnings = Math.floor(amount * (multiplier - 1));
       balance.add(BananeType.Gold, winnings).save();
       await interaction.reply(
         `Glückwunsch! Du hast ${winnings} goldene Bananen <:gold:1518542283488755712> gewonnen! 🎉`,
