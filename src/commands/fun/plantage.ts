@@ -213,6 +213,7 @@ export default new Command(
                 plantage.land
               }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
             );
+            break;
           case 'multiplier':
             if (value < multiplierPrice(plantage.multiplier)) {
               await action?.reply({
