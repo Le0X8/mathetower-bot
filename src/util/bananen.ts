@@ -33,6 +33,18 @@ export class Bananen {
       this.bananen[BananeType.Gelb] -= diff;
     }
 
+    if (
+      this.bananen[BananeType.Verkauft] > 0 &&
+      this.bananen[BananeType.Gold] > 0
+    ) {
+      const diff = Math.min(
+        this.bananen[BananeType.Verkauft],
+        this.bananen[BananeType.Gold],
+      );
+      this.bananen[BananeType.Verkauft] -= diff;
+      this.bananen[BananeType.Gold] -= diff;
+    }
+
     Object.entries(this.bananen).forEach(([key, val]) => {
       const banane = parseInt(key) as BananeType;
       const strings = bananeStrings(banane);
