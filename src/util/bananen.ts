@@ -1,6 +1,7 @@
 export class Bananen {
   uid: string;
   bananen: Record<BananeType, number>;
+  diff: number = 0;
 
   constructor(uid: string) {
     this.uid = uid;
@@ -68,6 +69,7 @@ export class Bananen {
 
     if (typeof this.bananen[banane] != 'number') this.bananen[banane] = 0;
     this.bananen[banane]++;
+    this.diff += bananeValues[banane] ?? 0;
     this.save();
 
     return {
@@ -78,6 +80,7 @@ export class Bananen {
   }
 
   reset(): Bananen {
+    this.diff -= this.getValue();
     this.bananen = {} as unknown as Record<BananeType, number>;
     return this.save();
   }
@@ -85,10 +88,12 @@ export class Bananen {
   add(banane: BananeType, count: number): Bananen {
     if (typeof this.bananen[banane] != 'number') this.bananen[banane] = 0;
     this.bananen[banane] += count;
+    this.diff += (bananeValues[banane] ?? 0) * count;
     return this.normalize();
   }
 
   setValue(value: number): Bananen {
+    this.diff = value - this.getValue();
     this.bananen = {
       [BananeType.Gelb]: value,
     } as unknown as Record<BananeType, number>;
@@ -105,6 +110,23 @@ export class Bananen {
     target.add(farmed ? BananeType.Geerntet : BananeType.Gelb, amount);
     return true;
   }
+
+  resetDiff(): void {
+    this.diff = 0;
+  }
+
+  loss(): number {
+    return this.diff < 0 ? -this.diff : 0;
+  }
+
+  gain(): number {
+    return this.diff > 0 ? this.diff : 0;
+  }
+
+  getAmount(amount: number): number {
+    if (amount < 0) return Math.ceil(this.getValue() / -amount);
+    return amount;
+  }
 }
 
 export enum BananeType {
@@ -112,6 +134,7 @@ export enum BananeType {
   Grün = 1, // 29%
   Braun = 2, // 10%
   Bewaffnet = 99, // 1%
+  Gold = 197, // 0.001%
   Geerntet = 198, // 0%
   Sbahn = 199, // 0%
   Verkauft = 200, // 0%
@@ -157,6 +180,12 @@ export function bananeStrings(banane: BananeType): [string, string, string] {
         '<:geerntet:1506742225613099098>',
         'gewachsen auf einer Bio-`/plantage`!',
       ];
+    case BananeType.Gold:
+      return [
+        'goldene',
+        '<:gold:1518542283488755712>',
+        'einfach gambling addicted',
+      ];
   }
 }
 
@@ -165,6 +194,7 @@ const bananeRanges: Record<BananeType, number> = {
   [BananeType.Grün]: 89000,
   [BananeType.Braun]: 99000,
   [BananeType.Bewaffnet]: 100000,
+  [BananeType.Gold]: -1,
   [BananeType.Verkauft]: -1,
   [BananeType.Sbahn]: -1,
   [BananeType.Geerntet]: -1,
@@ -175,6 +205,7 @@ export const bananeValues: Record<BananeType, number> = {
   [BananeType.Grün]: 2,
   [BananeType.Braun]: 0,
   [BananeType.Bewaffnet]: 100,
+  [BananeType.Gold]: 1,
   [BananeType.Verkauft]: -1,
   [BananeType.Sbahn]: 10,
   [BananeType.Geerntet]: 1,

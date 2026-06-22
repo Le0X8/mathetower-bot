@@ -16,7 +16,7 @@ export default new Command(
         .map((id: string) => store.get(id, 's1')?.delayMinutes ?? 0)
         .reduce((sum: number, m: number) => sum + m, 0) - minus;
 
-    if (amount == -1) amount = totalMinutes; // intentional overflow
+    if (amount < 0) amount = totalMinutes / -amount;
 
     if (
       amount > 0 &&

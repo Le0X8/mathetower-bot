@@ -25,7 +25,7 @@ export default new Command(
 
     let senderTotal = senderBalance.getValue();
 
-    if (amount == -1) amount = senderTotal; // intentional overflow
+    amount = senderBalance.getAmount(amount);
 
     const singleAmount = amount;
     amount = amount * receivers.length;
