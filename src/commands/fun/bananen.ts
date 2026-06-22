@@ -26,6 +26,8 @@ export default new Command(
     switch (action) {
       case 'prestige':
         const cost = prestigeCost(store.get(user.id, 'prestige') ?? 0);
+        const me = new Bananen(interaction.user.id);
+        const value = me.getValue();
         if (value < cost) {
           await interaction.reply({
             content: `Du brauchst ${nb(
@@ -36,7 +38,7 @@ export default new Command(
           return;
         }
         if (user.id !== interaction.user.id) {
-          new Bananen(interaction.user.id).transfer(b, value);
+          me.transfer(b, value);
           await interaction.reply({
             content: `# <@${user.id}>\nDu hast \`${nb(value)}\` Bananen von <@${interaction.user.id}> geschenkt bekommen, damit du prestigen kannst!`,
           });
