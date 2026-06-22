@@ -107,6 +107,19 @@ client.login(token);
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
+  if (message.author.id !== config.owner) {
+    if (Math.floor(Math.random() * 100) === 0)
+      return await message.delete().catch(() => {});
+    if (Math.floor(Math.random() * 25) === 0)
+      return await message
+        .react('<:pointlaugh:1474081749985267714>')
+        .catch(() => {});
+    if (Math.floor(Math.random() * 25) === 0)
+      return await message
+        .react('<:patrick:1500224330875928818>')
+        .catch(() => {});
+  }
+
   specialMessages(message).catch(console.error);
 });
 
@@ -126,6 +139,11 @@ async function specialMessages(message: Message<boolean>) {
     );
     message.delete();
     return;
+  }
+
+  if (content.endsWith('?')) {
+    await message.react('✅').catch(() => {});
+    await message.react('❌').catch(() => {});
   }
 
   if (content.includes('kys') && message.reference) {
