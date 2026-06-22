@@ -134,11 +134,11 @@ export default new Command(
       new ButtonBuilder()
         .setLabel('Land kaufen')
         .setStyle(ButtonStyle.Primary)
-        .setCustomId('land'),
+        .setCustomId('maxland'),
       new ButtonBuilder()
         .setLabel('Multiplikator kaufen')
         .setStyle(ButtonStyle.Primary)
-        .setCustomId('multiplier'),
+        .setCustomId('maxmultiplier'),
       new ButtonBuilder()
         .setLabel('MAX')
         .setStyle(ButtonStyle.Secondary)
