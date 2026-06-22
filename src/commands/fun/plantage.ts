@@ -258,21 +258,22 @@ export default new Command(
             await interaction.editReply({
               components: [maxItem],
             });
+            await action?.deferUpdate().catch(() => {});
             break;
           case 'switchtoall':
             await interaction.editReply({
               components: [allItem],
             });
+            await action?.deferUpdate().catch(() => {});
             break;
           case 'switchtosingle':
             await interaction.editReply({
               components: [singleItem],
             });
+            await action?.deferUpdate().catch(() => {});
             break;
         }
-        await action?.deferUpdate();
-      } catch (e) {
-        throw e;
+      } catch {
         await interaction.editReply({
           components: [],
         });
