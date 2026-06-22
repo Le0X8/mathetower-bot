@@ -25,14 +25,20 @@ export default new Command(
     const value = b.getValue();
     switch (action) {
       case 'prestige':
-        if (
-          value < prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0)
-        ) {
+        const cost = prestigeCost(store.get(user.id, 'prestige') ?? 0);
+        if (value < cost) {
           await interaction.reply({
             content: `Du brauchst ${nb(
-              prestigeCost(store.get(interaction.user.id, 'prestige') ?? 0),
+              cost,
             )} Bananen, um das nächste Prestige-Level zu erreichen!`,
             ephemeral: true,
+          });
+          return;
+        }
+        if (user.id !== interaction.user.id) {
+          new Bananen(interaction.user.id).transfer(b, value);
+          await interaction.reply({
+            content: `# <@${user.id}>\nDu hast \`${nb(value)}\` Bananen von <@${interaction.user.id}> geschenkt bekommen, damit du prestigen kannst!`,
           });
           return;
         }
