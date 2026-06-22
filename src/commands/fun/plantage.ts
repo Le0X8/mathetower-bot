@@ -198,7 +198,7 @@ export default new Command(
         switch (action?.customId) {
           case 'land':
             if (value < landPrice(plantage.land)) {
-              await interaction.reply({
+              await action?.reply({
                 content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
                 ephemeral: true,
               });
@@ -215,7 +215,7 @@ export default new Command(
             );
           case 'multiplier':
             if (value < multiplierPrice(plantage.multiplier)) {
-              await interaction.reply({
+              await action?.reply({
                 content: `Du hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.multiplier))}\`.`,
                 ephemeral: true,
               });
@@ -225,7 +225,7 @@ export default new Command(
             const spentMultiplier = multiplierPrice(plantage.multiplier - 1);
             bananen.remove(spentMultiplier);
             store.set(user.id, 'plantage', plantage);
-            await interaction.reply(
+            await action?.reply(
               `Du hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
                 plantage.multiplier
               }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentMultiplier)}\`.`,
@@ -242,7 +242,7 @@ export default new Command(
               action?.customId,
               value,
             );
-            await interaction.reply(
+            await action?.reply(
               `Du hast erfolgreich \`${
                 plantage.multiplier - startMultiplier
               }x\` Multiplikator und \`${
@@ -270,6 +270,7 @@ export default new Command(
             });
             break;
         }
+        await action?.deferUpdate();
       } catch {
         await interaction.editReply({
           components: [],
