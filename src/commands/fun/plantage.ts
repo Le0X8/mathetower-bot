@@ -118,24 +118,6 @@ export default new Command(
       'plantage',
     ) ?? { land: 0, multiplier: 1 };
     switch (action) {
-      case 'land':
-        if (value < landPrice(plantage.land)) {
-          await interaction.reply({
-            content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
-            ephemeral: true,
-          });
-          return;
-        }
-        plantage.land += 1;
-        const spentLand = landPrice(plantage.land - 1);
-        bananen.remove(spentLand);
-        store.set(user.id, 'plantage', plantage);
-        await interaction.reply(
-          `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
-            plantage.land
-          }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
-        );
-        break;
       case 'multiplier':
         if (value < multiplierPrice(plantage.multiplier)) {
           await interaction.reply({
@@ -216,19 +198,40 @@ export default new Command(
           withResponse: true,
         });
 
-        const collectorFilter = (i: Interaction) =>
-          i.user.id === interaction.user.id;
+        const collectorFilter = (i: Interaction) => i.user.id === user.id;
 
-        try {
-          const action = await msg.resource?.message?.awaitMessageComponent({
-            filter: collectorFilter,
-            time: 20_000,
-          });
-          msg.resource?.message?.reply(action?.customId as string);
-        } catch {
-          await interaction.editReply({
-            components: [],
-          });
+        while (true) {
+          try {
+            const action = await msg.resource?.message?.awaitMessageComponent({
+              filter: collectorFilter,
+              time: 20_000, // 20 secs
+            });
+
+            switch (action?.customId) {
+              case 'land':
+                if (value < landPrice(plantage.land)) {
+                  await interaction.reply({
+                    content: `Du hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
+                    ephemeral: true,
+                  });
+                  return;
+                }
+                plantage.land += 1;
+                const spentLand = landPrice(plantage.land - 1);
+                bananen.remove(spentLand);
+                store.set(user.id, 'plantage', plantage);
+                await action?.reply(
+                  `Du hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
+                    plantage.land
+                  }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
+                );
+            }
+          } catch {
+            await interaction.editReply({
+              components: [],
+            });
+            break;
+          }
         }
     }
   },
@@ -246,10 +249,6 @@ export default new Command(
       type: ApplicationCommandOptionType.String,
       required: false,
       choices: [
-        {
-          name: 'Land kaufen',
-          value: 'land',
-        },
         {
           name: 'Multiplikator kaufen',
           value: 'multiplier',
