@@ -109,7 +109,7 @@ export default new Command(
     const user = interaction.options.getUser('user', false) || interaction.user;
 
     const bananen = new Bananen(user.id);
-    const value = bananen.getValue();
+    let value = bananen.getValue();
 
     const plantage: { land: number; multiplier: number } = store.get(
       user.id,
@@ -303,6 +303,7 @@ export default new Command(
             await action?.deferUpdate().catch(() => {});
             break;
         }
+        value = bananen.getValue();
       } catch {
         await interaction.editReply({
           components: [],
