@@ -118,11 +118,14 @@ export default new Command(
     const prestige = store.get(user.id, 'prestige') ?? 0;
     const singleItem = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setLabel('Land kaufen')
+        .setLabel('\u2922 Land kaufen')
         .setStyle(ButtonStyle.Primary)
         .setCustomId('land'),
       new ButtonBuilder()
-        .setLabel('Multiplikator kaufen')
+        .setLabel(
+          String.fromCharCode(0x2776 + Math.floor(Math.random() * 10)) +
+            ' Multiplikator kaufen',
+        )
         .setStyle(ButtonStyle.Primary)
         .setCustomId('multiplier'),
       new ButtonBuilder()
@@ -132,11 +135,14 @@ export default new Command(
     );
     const maxItem = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setLabel('Land kaufen')
+        .setLabel('\u2922 Land kaufen')
         .setStyle(ButtonStyle.Primary)
         .setCustomId('maxland'),
       new ButtonBuilder()
-        .setLabel('Multiplikator kaufen')
+        .setLabel(
+          String.fromCharCode(0x2776 + Math.floor(Math.random() * 10)) +
+            ' Multiplikator kaufen',
+        )
         .setStyle(ButtonStyle.Primary)
         .setCustomId('maxmultiplier'),
       new ButtonBuilder()
@@ -146,11 +152,14 @@ export default new Command(
     );
     const allItem = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setLabel('nach Preis')
+        .setLabel(
+          String.fromCodePoint(0x1f4b4 + Math.floor(Math.random() * 4)) +
+            ' nach Preis',
+        )
         .setStyle(ButtonStyle.Primary)
         .setCustomId('max'),
       new ButtonBuilder()
-        .setLabel('mit Balancing')
+        .setLabel('\u2696\ufe0f mit Balancing')
         .setStyle(ButtonStyle.Primary)
         .setCustomId('maxbalance'),
       new ButtonBuilder()
