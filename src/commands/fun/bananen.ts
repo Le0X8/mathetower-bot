@@ -38,13 +38,13 @@ export default new Command(
           return;
         }
         if (user.id !== interaction.user.id) {
-          me.transfer(b, value);
+          me.transfer(b, cost);
           await interaction.reply({
             content: `# <@${user.id}>\nDu hast \`${nb(value)}\` Bananen von <@${interaction.user.id}> geschenkt bekommen, damit du prestigen kannst!`,
           });
           return;
         }
-        new Bananen(interaction.user.id).reset();
+        me.reset();
         store.set(interaction.user.id, 'plantage', { land: 0, multiplier: 1 });
         const donators: Record<string, number> = store.get('donators') ?? {};
         delete donators[interaction.user.id];
