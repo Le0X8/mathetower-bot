@@ -131,6 +131,10 @@ async function specialMessages(message: Message<boolean>) {
     .split(/[^a-zäöüß]/g)
     .filter((w) => w.length > 2 && w.length < 20 && content.length < 150);
   words.forEach((word) => {
+    if (/[bcdfghjklmnpqrstvwxyz]{3}/.test(word)) {
+      return;
+    }
+
     if (wordList[word]) {
       wordList[word]++;
     } else {
