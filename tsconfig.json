@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
+      "$emojis": ["./src/lib/emojis.ts"],
       "$config": ["./config.json"],
       "$commands": ["./src/commands/commands.ts"],
-      "$commands/*": ["./src/commands/*"]
+      "$commands/*": ["./src/commands/*"],
+      "@/*": ["./src/*"]
     },
 
     "ignoreDeprecations": "6.0",

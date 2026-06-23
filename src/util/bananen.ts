@@ -1,3 +1,5 @@
+import { emojis } from '$emojis';
+
 export class Bananen {
   uid: string;
   bananen: Record<BananeType, number>;
@@ -157,25 +159,25 @@ export function bananeStrings(banane: BananeType): [string, string, string] {
     case BananeType.Gelb:
       return [
         'normale gelbe',
-        '<:normal:1505971920858779800>',
+        emojis.banane.normal,
         'da ist wirklich nix besonderes dran 🫩✌️🥀',
       ];
     case BananeType.Grün:
       return [
         'unreife grüne',
-        '<:gruen:1505973348876943493>',
+        emojis.banane.grün,
         "vielleicht bisschen hart aber wer's mag :(",
       ];
     case BananeType.Braun:
       return [
         'vergammelte braune',
-        '<:braun:1505973784249761923>',
+        emojis.banane.braun,
         'würd ich jetzt nicht mehr essen 🤮',
       ];
     case BananeType.Bewaffnet:
       return [
         'schwer bewaffnete 😳',
-        '<:bewaffnet:1505976549051207760>',
+        emojis.banane.bewaffnet,
         '🤚 "Hände hoch" ✋',
       ];
     case BananeType.Verkauft:
@@ -183,21 +185,17 @@ export function bananeStrings(banane: BananeType): [string, string, string] {
     case BananeType.Sbahn:
       return [
         'S-Bahnanen, sehr S1-ige',
-        '<:sbahnane:1506733319188910210>',
+        emojis.banane.sbahn,
         'Umgewandelt aus deinen gesammelten Verspätungsminuten der S1!',
       ];
     case BananeType.Geerntet:
       return [
         'geerntete',
-        '<:geerntet:1506742225613099098>',
+        emojis.banane.geerntet,
         'gewachsen auf einer Bio-`/plantage`!',
       ];
     case BananeType.Gold:
-      return [
-        'goldene',
-        '<:gold:1518542283488755712>',
-        'einfach gambling addicted',
-      ];
+      return ['goldene', emojis.banane.gold, 'einfach gambling addicted'];
   }
 }
 

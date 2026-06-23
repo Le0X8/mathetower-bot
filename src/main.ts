@@ -18,6 +18,7 @@ import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
 import { catchBanane } from '@/commands/debug/error.ts';
+import { emojis } from '$emojis';
 
 const client = new Client({
   intents: [
@@ -107,17 +108,11 @@ client.login(token);
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
-  if (message.author.id !== config.owner) {
-    if (Math.floor(Math.random() * 100) === 0)
-      return await message.delete().catch(() => {});
-    if (Math.floor(Math.random() * 25) === 0)
-      return await message
-        .react('<:pointlaugh:1474081749985267714>')
-        .catch(() => {});
-    if (Math.floor(Math.random() * 25) === 0)
-      return await message
-        .react('<:patrick:1500224330875928818>')
-        .catch(() => {});
+  if (Math.floor(Math.random() * 50) === 0) {
+    const reactions = Object.values(emojis.reaction);
+    await message
+      .react(reactions[Math.floor(Math.random() * reactions.length)])
+      .catch(() => {});
   }
 
   specialMessages(message).catch(console.error);
@@ -129,19 +124,40 @@ async function specialMessages(message: Message<boolean>) {
   if (
     content.includes('//x.com') ||
     content.includes('//twitter.com') ||
-    content.includes('//www.instagram.com')
+    content.includes('//www.instagram.com') ||
+    content.includes('//vm.seetiktok.com') ||
+    content.includes('//vm.tiktok.com') ||
+    content.includes('//www.reddit.com')
   ) {
     await message.reply(
-      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${message.content //i may be blind but where is the tracker being removed
-        .replace('//x.com', '//vxtwitter.com')
-        .replace('//twitter.com', '//vxtwitter.com')
-        .replace('//www.instagram.com', '//www.vxinstagram.com')}`,
+      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${
+        message.content //i may be blind but where is the tracker being removed
+          .replace('//x.com', '//vxtwitter.com')
+          .replace('//twitter.com', '//vxtwitter.com')
+          .replace('//www.instagram.com', '//www.vxinstagram.com')
+          .replace('//vm.seetiktok.com', '//kktiktok.com')
+          .replace('//vm.tiktok.com', '//kktiktok.com')
+          .replace('//www.reddit.com', '//vxreddit.com')
+          // tracking parameters
+          .replace(/(\?|&)igsh=/g, '#')
+          .split('#')[0]
+      }`,
     );
     message.delete();
     return;
   }
 
-  if (content.endsWith('?')) {
+  if (
+    content.endsWith('?') &&
+    !content.includes('welche') &&
+    !content.includes('was') &&
+    !content.includes('wer') &&
+    !content.includes('wie') &&
+    !content.includes('wo') &&
+    !content.includes('wann') &&
+    !content.includes('warum') &&
+    !content.includes('weshalb')
+  ) {
     await message.react('✅').catch(() => {});
     await message.react('❌').catch(() => {});
   }
@@ -151,7 +167,6 @@ async function specialMessages(message: Message<boolean>) {
     await ref.react('🇰');
     await ref.react('🇾');
     await ref.react('🇸');
-    return;
   }
 
   reactions.forEach(async ([trigger, ...reaction]) => {

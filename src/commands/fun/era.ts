@@ -1,3 +1,4 @@
+import { emojis } from '$emojis';
 import {
   ApplicationCommandOptionType,
   ChatInputCommandInteraction,
@@ -5,18 +6,42 @@ import {
 import { existsSync } from 'node:fs';
 
 const eras = [
-  "[<:debut:1506311826495770624> Taylor Swift](https://tserasarchive.taylorswift.com/selftitled)\n\n_Our song is a slammin' screen door_",
-  '[<:fearless:1506313164176752833> Fearless](https://tserasarchive.taylorswift.com/fearless)\n\n_You belong with me_',
-  '[<:speaknow:1506313176323592303> Speak Now](https://tserasarchive.taylorswift.com/speaknow)\n\n_Long live all the magic we made_',
-  '[<:red:1506313170736648232> Red](https://tserasarchive.taylorswift.com/red)\n\n_Loving him was red_',
-  "[<:1989:1506313159265226823> 1989](https://tserasarchive.taylorswift.com/1989)\n\n_Cause, darling, I'm a nightmare dressed like a daydream_",
-  '[<:reputation:1506313173311950898> reputation](https://tserasarchive.taylorswift.com/reputation)\n\n_...Ready for it?_',
-  "[<:lover:1506313168786559088> Lover](https://tserasarchive.taylorswift.com/lover)\n\n_We could leave the Christmas lights up 'til January_",
-  '[<:folklore:1506313166626361475> folklore](https://tserasarchive.taylorswift.com/folklore)\n\n_You drew stars around my scars_',
-  '[<:evermore:1506313161978937384> evermore](https://tserasarchive.taylorswift.com/evermore)\n\n_Long story short, I survived_',
-  '[<:midnights:1506311848151224574> Midnights](https://tserasarchive.taylorswift.com/midnights)\n\n_So, make the friendship bracelets, take the moment and taste it_',
-  "[<:torturedpoetsdept:1506313179687292928> The Tortured Poets Department](https://tserasarchive.taylorswift.com/ttpd)\n\n_You know you're good when you can even do it with a broken heart_",
-  '[<:thelifeofashowgirl:1506313178093715547> The Life of a Showgirl](https://tserasarchive.taylorswift.com/thelifeofashowgirl)\n\n_Keep it one hundred on the land, the sea, the sky_',
+  '[' +
+    emojis.era.debut +
+    " Taylor Swift](https://tserasarchive.taylorswift.com/selftitled)\n\n_Our song is a slammin' screen door_",
+  '[' +
+    emojis.era.fearless +
+    ' Fearless](https://tserasarchive.taylorswift.com/fearless)\n\n_You belong with me_',
+  '[' +
+    emojis.era.speaknow +
+    ' Speak Now](https://tserasarchive.taylorswift.com/speaknow)\n\n_Long live all the magic we made_',
+  '[' +
+    emojis.era.red +
+    ' Red](https://tserasarchive.taylorswift.com/red)\n\n_Loving him was red_',
+  '[' +
+    emojis.era.ts1989 +
+    " 1989](https://tserasarchive.taylorswift.com/1989)\n\n_Cause, darling, I'm a nightmare dressed like a daydream_",
+  '[' +
+    emojis.era.reputation +
+    ' reputation](https://tserasarchive.taylorswift.com/reputation)\n\n_...Ready for it?_',
+  '[' +
+    emojis.era.lover +
+    " Lover](https://tserasarchive.taylorswift.com/lover)\n\n_We could leave the Christmas lights up 'til January_",
+  '[' +
+    emojis.era.folklore +
+    ' folklore](https://tserasarchive.taylorswift.com/folklore)\n\n_You drew stars around my scars_',
+  '[' +
+    emojis.era.evermore +
+    ' evermore](https://tserasarchive.taylorswift.com/evermore)\n\n_Long story short, I survived_',
+  '[' +
+    emojis.era.midnights +
+    ' Midnights](https://tserasarchive.taylorswift.com/midnights)\n\n_So, make the friendship bracelets, take the moment and taste it_',
+  '[' +
+    emojis.era.ttpd +
+    " The Tortured Poets Department](https://tserasarchive.taylorswift.com/ttpd)\n\n_You know you're good when you can even do it with a broken heart_",
+  '[' +
+    emojis.era.tloas +
+    ' The Life of a Showgirl](https://tserasarchive.taylorswift.com/thelifeofashowgirl)\n\n_Keep it one hundred on the land, the sea, the sky_',
 ];
 
 export default {

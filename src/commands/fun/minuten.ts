@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { emojis } from '$emojis';
 import { Bananen, BananeType } from '@/util/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
@@ -28,7 +29,9 @@ export default new Command(
           amount +
           ' Minute' +
           (amount == 1 ? '' : 'n') +
-          ' in **<:sbahnane:1506733319188910210> S-Bahnanen** umgewandelt!\nDu hast jetzt ' +
+          ' in **' +
+          emojis.banane.sbahn +
+          ' S-Bahnanen** umgewandelt!\nDu hast jetzt ' +
           (totalMinutes - amount) +
           ' Minute' +
           (totalMinutes - amount == 1 ? '' : 'n') +

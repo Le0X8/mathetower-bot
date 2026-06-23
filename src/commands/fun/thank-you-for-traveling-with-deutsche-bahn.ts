@@ -10,9 +10,9 @@ import {
   DiscordjsError,
   DiscordjsErrorCodes,
 } from 'discord.js';
+import { emojis } from '$emojis';
 
 const CANCELLED_BONUS = 42;
-const S_EMOJI = '<:sbahn:1450544266026680463>';
 
 function calculateS(delayMinutes: number): number {
   return Math.round(Math.pow(delayMinutes, 1.4));
@@ -63,7 +63,7 @@ export default {
           label,
           description,
           value: d.trainId,
-          emoji: S_EMOJI,
+          emoji: emojis.bahn.sbahn,
         };
       });
 
@@ -133,19 +133,21 @@ export default {
         .reduce((sum, s) => sum + s, 0);
 
       const earnedDescription = departure.cancelled
-        ? `Eine ausgefallene Bahn und bekommt dafür **+${CANCELLED_BONUS} ${S_EMOJI}**`
-        : `**+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** und **+${earnedS} ${S_EMOJI}** gutgeschrieben bekommen`;
+        ? `Eine ausgefallene Bahn und bekommt dafür **+${CANCELLED_BONUS} ${emojis.bahn.sbahn}**`
+        : `**+${departure.delayMinutes} Minute${departure.delayMinutes == 1 ? '' : 'n'}** und **+${earnedS} ${emojis.bahn.sbahn}** gutgeschrieben bekommen`;
 
       await collected.reply({
         embeds: [
           await buildEmbed(
-            `${S_EMOJI} Verspätung eingetragen!`,
-            `<@${interaction.user.id}> hat ${earnedDescription} und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}** und **${totalS} ${S_EMOJI}**`,
+            `${emojis.bahn.sbahn} Verspätung eingetragen!`,
+            `<@${interaction.user.id}> hat ${earnedDescription} und hat jetzt insgesamt **${totalMinutes} Minute${totalMinutes == 1 ? '' : 'n'}** und **${totalS} ${emojis.bahn.sbahn}**`,
             [
               [
                 selectedOption.label.replace('→', 'nach'),
                 selectedOption.description +
-                  '\n\n-# Thank you for traveling with <:db:1451139399478939660>!',
+                  '\n\n-# Thank you for traveling with ' +
+                  emojis.bahn.db +
+                  '!',
               ],
             ],
             null,
