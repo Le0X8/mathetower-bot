@@ -127,7 +127,9 @@ const wordList: Record<string, number> = JSON.parse(
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
-  const words = content.split(/[^a-zäöüß]/g).filter((w) => w.length > 2);
+  const words = content
+    .split(/[^a-zäöüß]/g)
+    .filter((w) => w.length > 2 && w.length < 20);
   words.forEach((word) => {
     if (wordList[word]) {
       wordList[word]++;
