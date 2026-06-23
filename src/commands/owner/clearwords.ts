@@ -1,5 +1,6 @@
 import { Command } from '$commands';
 import config from '$config' with { type: 'json' };
+import { pack } from 'msgpackr';
 import { writeFileSync } from 'node:fs';
 
 export default new Command(
@@ -14,8 +15,12 @@ export default new Command(
       return;
     }
 
-    globalThis.wordlist = {};
-    writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
+    globalThis.wordlist = {
+      graph: {},
+      tokens: { '\0': '0' },
+      words: { '0': '\0' },
+    };
+    writeFileSync('./words.msgpack', pack(globalThis.wordlist));
     await interaction.reply({
       content: `Alle Wörter wurden aus der Wordlist entfernt.`,
     });

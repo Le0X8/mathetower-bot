@@ -17,17 +17,7 @@ export default new Command(
 
     const word = interaction.options.getString('word', true);
 
-    if (globalThis.wordlist[word]) {
-      delete globalThis.wordlist[word];
-      writeFileSync(
-        './words.json',
-        JSON.stringify(globalThis.wordlist),
-        'utf8',
-      );
-      await interaction.reply({
-        content: `Das Wort \`${word}\` wurde aus der Wordlist entfernt.`,
-      });
-    }
+    throw new Error('unimplemented');
   },
   false,
   [

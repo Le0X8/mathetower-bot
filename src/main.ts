@@ -1,4 +1,5 @@
 import config from '$config' with { type: 'json' };
+import { unpack, pack } from 'msgpackr';
 const token = config.token;
 
 import {
@@ -119,9 +120,13 @@ client.on(Events.MessageCreate, async (message) => {
   specialMessages(message).catch(console.error);
 });
 
-if (!existsSync('./words.json')) writeFileSync('./words.json', '{}', 'utf8');
+if (!existsSync('./words.msgpack'))
+  writeFileSync(
+    './words.msgpack',
+    pack({ graph: {}, tokens: { '\0': '0' }, words: { '0': '\0' } }),
+  );
 
-globalThis.wordlist = JSON.parse(readFileSync('./words.json', 'utf8'));
+globalThis.wordlist = unpack(readFileSync('./words.msgpack'));
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
@@ -129,8 +134,8 @@ async function specialMessages(message: Message<boolean>) {
   const words = content
     .split(/[^a-zäöüß]/g)
     .filter((w) => w.length > 1 && w.length < 20);
-  let after: string | null = null;
-  words.reverse().forEach((word) => {
+  let before: [string, string] = ['0', '0'];
+  words.forEach((word) => {
     if (
       /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{5}/.test(
         word
@@ -144,33 +149,46 @@ async function specialMessages(message: Message<boolean>) {
       return;
     }
 
-    if (after !== null || content.length > 29) {
-      if (globalThis.wordlist[word]) {
-        const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
-        if (pos !== -1) {
-          globalThis.wordlist[word][pos][1]++;
-        } else {
-          globalThis.wordlist[word].push([after, 1]);
-        }
-      } else {
-        globalThis.wordlist[word] = [[after, 1]];
-      }
-    }
-    after = word;
-  });
-  after = words[words.length - 1];
-  const word = '>';
-  if (globalThis.wordlist[word]) {
-    const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
-    if (pos !== -1) {
-      globalThis.wordlist[word][pos][1]++;
+    if (wordlist.tokens[word]) {
+      word = wordlist.tokens[word];
     } else {
-      globalThis.wordlist[word].push([after, 1]);
+      const id = Object.keys(wordlist.tokens).length.toString(36);
+      wordlist.tokens[word] = id;
+      wordlist.words[id] = word;
+      word = id;
+    }
+
+    let key = before.join('+');
+    if (globalThis.wordlist.graph[key]) {
+      const pos = globalThis.wordlist.graph[key].findIndex(
+        (v) => v[0] === word,
+      );
+      if (pos !== -1) {
+        globalThis.wordlist.graph[key][pos][1]++;
+      } else {
+        globalThis.wordlist.graph[key].push([word, 1]);
+      }
+    } else {
+      globalThis.wordlist.graph[key] = [[word, 1]];
+    }
+    before[0] = before[1];
+    before[1] = word;
+  });
+
+  let key = before.join('+');
+  let word = null;
+  if (globalThis.wordlist.graph[key]) {
+    const pos = globalThis.wordlist.graph[key].findIndex((v) => v[0] === word);
+    if (pos !== -1) {
+      globalThis.wordlist.graph[key][pos][1]++;
+    } else {
+      globalThis.wordlist.graph[key].push([word, 1]);
     }
   } else {
-    globalThis.wordlist[word] = [[after, 1]];
+    globalThis.wordlist.graph[key] = [[word, 1]];
   }
-  writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
+
+  writeFileSync('./words.msgpack', pack(globalThis.wordlist));
 
   if (
     content.includes('//x.com') ||

@@ -2,5 +2,5 @@ node_modules
 config.json
 data.json
 commands.json
-words.json
+words.msgpack
 dist

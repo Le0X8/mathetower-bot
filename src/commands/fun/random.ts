@@ -16,7 +16,7 @@ export default new Command(
     if (amount < 1) amount = Math.floor(Math.random() * 7) + 1;
     amount = Math.min(amount, 100);
 
-    const words = Object.keys(globalThis.wordlist);
+    const words = Object.keys(globalThis.wordlist.tokens);
     let str = Array.from({ length: amount }, () =>
       replace(words[Math.floor(Math.random() * words.length)]),
     )
