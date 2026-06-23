@@ -128,9 +128,9 @@ async function specialMessages(message: Message<boolean>) {
 
   const words = content
     .split(/[^a-zäöüß\.\,\!\?\=]/g)
-    .filter((w) => w.length > 2 && w.length < 20 && content.length < 150);
+    .filter((w) => w.length > 1 && w.length < 20 && content.length < 150);
   let after: string | null = null;
-  words.forEach((word) => {
+  words.reverse().forEach((word) => {
     if (
       /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{3}/.test(
         word
@@ -154,6 +154,7 @@ async function specialMessages(message: Message<boolean>) {
     } else {
       globalThis.wordlist[word] = [[after, 1]];
     }
+    after = word;
   });
   writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
 

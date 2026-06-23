@@ -33,6 +33,7 @@ export default new Command(
     let arr = [replace(word)];
 
     for (let i = 0; i < 100; i++) {
+      console.log({ next, word });
       word = weightedRandom(next ?? []);
       if (word == null) break;
       arr.push(replace(word));
