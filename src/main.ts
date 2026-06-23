@@ -129,6 +129,7 @@ async function specialMessages(message: Message<boolean>) {
   const words = content
     .split(/[^a-zäöüß\.\,\!\?\=]/g)
     .filter((w) => w.length > 2 && w.length < 20 && content.length < 150);
+  let after: string | null = null;
   words.forEach((word) => {
     if (
       /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{3}/.test(
@@ -144,9 +145,14 @@ async function specialMessages(message: Message<boolean>) {
     }
 
     if (globalThis.wordlist[word]) {
-      globalThis.wordlist[word]++;
+      const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
+      if (pos !== -1) {
+        globalThis.wordlist[word][pos][1]++;
+      } else {
+        globalThis.wordlist[word].push([after, 1]);
+      }
     } else {
-      globalThis.wordlist[word] = 1;
+      globalThis.wordlist[word] = [[after, 1]];
     }
   });
   writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');

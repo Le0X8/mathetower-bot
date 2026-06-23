@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 declare global {
   var store: Store;
-  var wordlist: Record<string, number>;
+  var wordlist: Record<string, [string | null, number][]>;
 }
 
 class Store {
