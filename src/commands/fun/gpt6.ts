@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 function replace(word: string): string {
@@ -15,7 +16,7 @@ function weightedRandom(items: [string | null, number][]): string | null {
   let cumulative = 0;
   for (const item of items) {
     cumulative += item[1];
-    if (rand < cumulative) return item[0];
+    if (rand < cumulative) return item[0] == '>' ? null : item[0];
   }
   return null;
 }
@@ -24,18 +25,34 @@ export default new Command(
   'gpt6',
   'wie /random nur noch besser',
   async (interaction) => {
-    const words = Object.keys(globalThis.wordlist);
-
     let word: string | null =
       interaction.options.getString('start', false) ?? '>';
     let next = globalThis.wordlist[word];
+    if (interaction.options.getBoolean('weights', false)) {
+      if (word === '>') word = '<START>';
+      next = next ?? [];
+      next.push(['<RANDOM>', 2], ['<TERMINATE>', 1]);
+      next.sort((a, b) => b[1] - a[1]);
+      await interaction.reply({
+        embeds: [
+          await buildEmbed(
+            'Weights',
+            `Weights for the word \`${word}\``,
+            next.map(([name, value]) => [name ?? 'null', value.toString()]),
+            null,
+          ),
+        ],
+      });
+      return;
+    }
+    const words = Object.keys(globalThis.wordlist);
+
     let arr = [replace(word)];
 
     for (let i = 0; i < 100; i++) {
-      console.log({ next, word });
       next = next ?? [];
       next.push(
-        [words[Math.floor(Math.random() * words.length)], 1],
+        [words[Math.floor(Math.random() * words.length)], 2],
         [null, 1],
       );
       word = weightedRandom(next);
@@ -45,6 +62,7 @@ export default new Command(
     }
 
     let str = arr.join(' ').slice(0, 2000);
+    if (str.startsWith('>')) str = str.slice(1);
 
     const replacements: Record<string, string> =
       store.get('replacements2') ?? {};
