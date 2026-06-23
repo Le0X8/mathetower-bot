@@ -54,7 +54,7 @@ export default new Command(
     let arr = [replace(word)];
     const words = Object.keys(globalThis.wordlist ?? {});
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 250; i++) {
       next = [...(next ?? [])];
       next.push([words[Math.random() * words.length], 1]);
       word = weightedRandom(next);

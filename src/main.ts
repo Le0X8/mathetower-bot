@@ -128,7 +128,7 @@ async function specialMessages(message: Message<boolean>) {
 
   const words = content
     .split(/[^a-zäöüß]/g)
-    .filter((w) => w.length > 1 && w.length < 20 && content.length < 150);
+    .filter((w) => w.length > 1 && w.length < 20);
   let after: string | null = null;
   words.reverse().forEach((word) => {
     if (
@@ -144,15 +144,17 @@ async function specialMessages(message: Message<boolean>) {
       return;
     }
 
-    if (globalThis.wordlist[word]) {
-      const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
-      if (pos !== -1) {
-        globalThis.wordlist[word][pos][1]++;
+    if (after !== null || content.length > 29) {
+      if (globalThis.wordlist[word]) {
+        const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
+        if (pos !== -1) {
+          globalThis.wordlist[word][pos][1]++;
+        } else {
+          globalThis.wordlist[word].push([after, 1]);
+        }
       } else {
-        globalThis.wordlist[word].push([after, 1]);
+        globalThis.wordlist[word] = [[after, 1]];
       }
-    } else {
-      globalThis.wordlist[word] = [[after, 1]];
     }
     after = word;
   });
