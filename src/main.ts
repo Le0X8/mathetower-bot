@@ -129,7 +129,7 @@ async function specialMessages(message: Message<boolean>) {
 
   const words = content
     .split(/[^a-zäöüß]/g)
-    .filter((w) => w.length > 2 && w.length < 20);
+    .filter((w) => w.length > 2 && w.length < 20 && content.length < 150);
   words.forEach((word) => {
     if (wordList[word]) {
       wordList[word]++;
