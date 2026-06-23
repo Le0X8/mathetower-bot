@@ -127,7 +127,7 @@ async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
   const words = content
-    .split(/[^a-zäöüß\.\,\!\?\=]/g)
+    .split(/[^a-zäöüß]/g)
     .filter((w) => w.length > 1 && w.length < 20 && content.length < 150);
   let after: string | null = null;
   words.reverse().forEach((word) => {
