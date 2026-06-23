@@ -27,7 +27,7 @@ export default new Command(
   async (interaction) => {
     let word: string | null =
       interaction.options.getString('start', false) ?? '>';
-    word = word === '>' ? 'word' : word.toLowerCase().split(/[^a-zäöüß]/g)[0];
+    word = word === '>' ? '>' : word.toLowerCase().split(/[^a-zäöüß]/g)[0];
     let next = globalThis.wordlist[word];
     if (interaction.options.getBoolean('weights', false)) {
       if (word === '>') word = '<START>';
