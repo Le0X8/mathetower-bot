@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs';
 
 export default new Command(
   'zzz-owner-forgetword',
-  '[Owner-exclusive] Löst ein Wort aus der Wordlist',
+  '[Owner-exclusive] Löscht ein Wort aus der Wordlist',
   async (interaction) => {
     if (interaction.user.id !== config.owner) {
       await interaction.reply({
