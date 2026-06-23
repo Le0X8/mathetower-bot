@@ -120,9 +120,8 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 if (!existsSync('./words.json')) writeFileSync('./words.json', '{}', 'utf8');
-const wordList: Record<string, number> = JSON.parse(
-  readFileSync('./words.json', 'utf8'),
-);
+
+globalThis.wordlist = JSON.parse(readFileSync('./words.json', 'utf8'));
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
@@ -135,13 +134,13 @@ async function specialMessages(message: Message<boolean>) {
       return;
     }
 
-    if (wordList[word]) {
-      wordList[word]++;
+    if (globalThis.wordlist[word]) {
+      globalThis.wordlist[word]++;
     } else {
-      wordList[word] = 1;
+      globalThis.wordlist[word] = 1;
     }
   });
-  writeFileSync('./words.json', JSON.stringify(wordList), 'utf8');
+  writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
 
   if (
     content.includes('//x.com') ||
