@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+import { ApplicationCommandOptionType } from 'discord.js';
 
 function replace(word: string): string {
   if (store.get('replacements')?.[word]) {
@@ -25,12 +26,14 @@ export default new Command(
   async (interaction) => {
     const words = Object.keys(globalThis.wordlist);
 
-    let word: string | null = words[Math.floor(Math.random() * words.length)];
+    let word: string | null =
+      interaction.options.getString('start', false) ??
+      words[Math.floor(Math.random() * words.length)];
     let next = globalThis.wordlist[word];
     let arr = [replace(word)];
 
     for (let i = 0; i < 100; i++) {
-      word = weightedRandom(next);
+      word = weightedRandom(next ?? []);
       if (word == null) break;
       arr.push(replace(word));
       next = globalThis.wordlist[word];
@@ -46,4 +49,13 @@ export default new Command(
 
     await interaction.reply(str.slice(0, 2000));
   },
+  false,
+  [
+    {
+      name: 'start',
+      description: 'Startwort',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    },
+  ],
 );
