@@ -131,34 +131,53 @@ globalThis.wordlist = unpack(readFileSync('./words.msgpack'));
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
-  const words = content
-    .split(/[^a-zäöüß]/g)
-    .filter((w) => w.length > 1 && w.length < 20);
-  let before: [string, string] = ['0', '0'];
-  words.forEach((word) => {
-    if (
-      /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{5}/.test(
-        word
-          .replaceAll('sch', '.')
-          .replaceAll('ch', ',')
-          .replaceAll('ck', '!')
-          .replaceAll('ph', '?')
-          .replaceAll('qu', '='),
-      )
-    ) {
-      return;
-    }
+  if (content.length > 3) {
+    const words = content
+      .split(/[^a-zäöüß]/g)
+      .filter((w) => w.length > 1 && w.length < 20);
+    let before: [string, string] = ['0', '0'];
+    words.forEach((word) => {
+      if (
+        /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{5}/.test(
+          word
+            .replaceAll('sch', '.')
+            .replaceAll('ch', ',')
+            .replaceAll('ck', '!')
+            .replaceAll('ph', '?')
+            .replaceAll('qu', '='),
+        )
+      ) {
+        return;
+      }
 
-    if (wordlist.tokens[word]) {
-      word = wordlist.tokens[word];
-    } else {
-      const id = Object.keys(wordlist.tokens).length.toString(36);
-      wordlist.tokens[word] = id;
-      wordlist.words[id] = word;
-      word = id;
-    }
+      if (wordlist.tokens[word]) {
+        word = wordlist.tokens[word];
+      } else {
+        const id = Object.keys(wordlist.tokens).length.toString(36);
+        wordlist.tokens[word] = id;
+        wordlist.words[id] = word;
+        word = id;
+      }
+
+      let key = before.join('+');
+      if (globalThis.wordlist.graph[key]) {
+        const pos = globalThis.wordlist.graph[key].findIndex(
+          (v) => v[0] === word,
+        );
+        if (pos !== -1) {
+          globalThis.wordlist.graph[key][pos][1]++;
+        } else {
+          globalThis.wordlist.graph[key].push([word, 1]);
+        }
+      } else {
+        globalThis.wordlist.graph[key] = [[word, 1]];
+      }
+      before[0] = before[1];
+      before[1] = word;
+    });
 
     let key = before.join('+');
+    let word = null;
     if (globalThis.wordlist.graph[key]) {
       const pos = globalThis.wordlist.graph[key].findIndex(
         (v) => v[0] === word,
@@ -171,24 +190,9 @@ async function specialMessages(message: Message<boolean>) {
     } else {
       globalThis.wordlist.graph[key] = [[word, 1]];
     }
-    before[0] = before[1];
-    before[1] = word;
-  });
 
-  let key = before.join('+');
-  let word = null;
-  if (globalThis.wordlist.graph[key]) {
-    const pos = globalThis.wordlist.graph[key].findIndex((v) => v[0] === word);
-    if (pos !== -1) {
-      globalThis.wordlist.graph[key][pos][1]++;
-    } else {
-      globalThis.wordlist.graph[key].push([word, 1]);
-    }
-  } else {
-    globalThis.wordlist.graph[key] = [[word, 1]];
+    writeFileSync('./words.msgpack', pack(globalThis.wordlist));
   }
-
-  writeFileSync('./words.msgpack', pack(globalThis.wordlist));
 
   if (
     content.includes('//x.com') ||
