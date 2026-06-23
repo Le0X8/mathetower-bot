@@ -170,7 +170,11 @@ async function specialMessages(message: Message<boolean>) {
   }
 
   reactions.forEach(async ([trigger, ...reaction]) => {
-    if (content.includes(trigger)) {
+    if (
+      trigger instanceof Array
+        ? trigger.some((trg) => content.includes(trg))
+        : content.includes(trigger)
+    ) {
       for (const r of reaction) {
         await message.react(r);
       }

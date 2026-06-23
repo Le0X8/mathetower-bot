@@ -1,8 +1,7 @@
 import { emojis } from '$emojis';
 
-export const reactions = [
-  ['big yahu', '🇮🇱'],
-  ['000 jahr', '🇮🇱'],
+export const reactions: [string | string[], ...string[]][] = [
+  [['big yahu', '000 jahr', 'isra'], '🇮🇱'],
   ['aura', '🅰️', '🇺', '🇷', '🇦'],
 
   ['fearless', emojis.era.fearless],
