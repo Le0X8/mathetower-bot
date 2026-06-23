@@ -17,14 +17,19 @@ export default new Command(
     amount = Math.min(amount, 100);
 
     const words = Object.keys(globalThis.wordlist);
+    let str = Array.from({ length: amount }, () =>
+      replace(words[Math.floor(Math.random() * words.length)]),
+    )
+      .join(' ')
+      .slice(0, 2000);
 
-    await interaction.reply(
-      Array.from({ length: amount }, () =>
-        replace(words[Math.floor(Math.random() * words.length)]),
-      )
-        .join(' ')
-        .slice(0, 2000),
-    );
+    const replacements: Record<string, string> =
+      store.get('replacements2') ?? {};
+    Object.entries(replacements).forEach(([key, value]) => {
+      str = str.replaceAll(key, value);
+    });
+
+    await interaction.reply(str);
   },
   false,
   [

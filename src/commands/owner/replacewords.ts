@@ -3,8 +3,8 @@ import config from '$config' with { type: 'json' };
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
-  'zzz-owner-replaceword',
-  '[Owner-exclusive] Tauscht im /random-Command ein Wort gegen was anderes aus',
+  'zzz-owner-replacewords',
+  '[Owner-exclusive] Tauscht im /random-Command einen Substring gegen was anderes aus',
   async (interaction) => {
     if (interaction.user.id !== config.owner) {
       await interaction.reply({
@@ -17,7 +17,7 @@ export default new Command(
     const word = interaction.options.getString('word', true);
     const replacement = interaction.options.getString('replacement', true);
 
-    const replacements = store.get('replacements') ?? {};
+    const replacements = store.get('replacements2') ?? {};
     if (replacements[word]) {
       delete replacements[word];
       await interaction.reply({
@@ -25,9 +25,9 @@ export default new Command(
       });
     } else {
       replacements[word] = replacement;
-      store.set('replacements', null, replacements);
+      store.set('replacements2', null, replacements);
       await interaction.reply({
-        content: `Das Wort \`${word}\` wird nun durch \`${replacement}\` ersetzt.`,
+        content: `Der Substring \`${word}\` wird nun durch \`${replacement}\` ersetzt.`,
       });
     }
   },
