@@ -151,7 +151,7 @@ async function specialMessages(message: Message<boolean>) {
     content.endsWith('?') &&
     !content.includes('welche') &&
     !content.includes('was') &&
-    !content.includes('wer') &&
+    !content.startsWith('wer') &&
     !content.includes('wie') &&
     !content.includes('wo') &&
     !content.includes('wann') &&
