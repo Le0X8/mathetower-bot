@@ -127,12 +127,24 @@ async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
   const words = content
-    .split(/[^a-zäöüß]/g)
+    .replaceAll('sch', '.')
+    .replaceAll('ch', ',')
+    .replaceAll('ck', '!')
+    .replaceAll('ph', '?')
+    .replaceAll('qu', '=')
+    .split(/[^a-zäöüß\.\,\!\?\=]/g)
     .filter((w) => w.length > 2 && w.length < 20 && content.length < 150);
   words.forEach((word) => {
-    if (/[bcdfghjklmnpqrstvwxyz]{3}/.test(word)) {
+    if (/[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{3}/.test(word)) {
       return;
     }
+
+    word = word
+      .replaceAll('.', 'sch')
+      .replaceAll(',', 'ch')
+      .replaceAll('!', 'ck')
+      .replaceAll('?', 'ph')
+      .replaceAll('=', 'qu');
 
     if (globalThis.wordlist[word]) {
       globalThis.wordlist[word]++;
