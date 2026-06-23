@@ -31,30 +31,32 @@ export default new Command(
     if (interaction.options.getBoolean('weights', false)) {
       if (word === '>') word = '<START>';
       next = next ?? [];
-      next.push(['<RANDOM>', 2], ['<TERMINATE>', 1]);
+      next.push(['<RANDOM>', 1]);
       next.sort((a, b) => b[1] - a[1]);
       await interaction.reply({
         embeds: [
           await buildEmbed(
             'Weights',
             `Weights for the word \`${word}\``,
-            next.map(([name, value]) => [name ?? 'null', value.toString()]),
+            next
+              .slice(0, 25)
+              .map(([name, value]) => [
+                name ?? '<TERMINATE>',
+                value.toString(),
+              ]),
             null,
           ),
         ],
       });
       return;
     }
-    const words = Object.keys(globalThis.wordlist);
 
     let arr = [replace(word)];
+    const words = Object.keys(globalThis.wordlist ?? {});
 
     for (let i = 0; i < 100; i++) {
       next = next ?? [];
-      next.push(
-        [words[Math.floor(Math.random() * words.length)], 2],
-        [null, 1],
-      );
+      next.push([words[Math.random() * words.length], 1]);
       word = weightedRandom(next);
       if (word == null) break;
       arr.push(replace(word));

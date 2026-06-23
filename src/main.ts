@@ -149,24 +149,24 @@ async function specialMessages(message: Message<boolean>) {
       if (pos !== -1) {
         globalThis.wordlist[word][pos][1]++;
       } else {
-        globalThis.wordlist[word].push([after, 3]);
+        globalThis.wordlist[word].push([after, 10]);
       }
     } else {
-      globalThis.wordlist[word] = [[after, 3]];
+      globalThis.wordlist[word] = [[after, 10]];
     }
     after = word;
   });
-  after = '>';
-  const word = words[0];
+  after = words[words.length - 1];
+  const word = '>';
   if (globalThis.wordlist[word]) {
     const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
     if (pos !== -1) {
       globalThis.wordlist[word][pos][1]++;
     } else {
-      globalThis.wordlist[word].push([after, 3]);
+      globalThis.wordlist[word].push([after, 10]);
     }
   } else {
-    globalThis.wordlist[word] = [[after, 3]];
+    globalThis.wordlist[word] = [[after, 10]];
   }
   writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
 
