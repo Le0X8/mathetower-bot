@@ -27,14 +27,18 @@ export default new Command(
     const words = Object.keys(globalThis.wordlist);
 
     let word: string | null =
-      interaction.options.getString('start', false) ??
-      words[Math.floor(Math.random() * words.length)];
+      interaction.options.getString('start', false) ?? '>';
     let next = globalThis.wordlist[word];
     let arr = [replace(word)];
 
     for (let i = 0; i < 100; i++) {
       console.log({ next, word });
-      word = weightedRandom(next ?? []);
+      next = next ?? [];
+      next.push(
+        [words[Math.floor(Math.random() * words.length)], 1],
+        [null, 1],
+      );
+      word = weightedRandom(next);
       if (word == null) break;
       arr.push(replace(word));
       next = globalThis.wordlist[word];
@@ -56,6 +60,12 @@ export default new Command(
       name: 'start',
       description: 'Startwort',
       type: ApplicationCommandOptionType.String,
+      required: false,
+    },
+    {
+      name: 'weights',
+      description: 'Zeige Gewichtungen',
+      type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
   ],

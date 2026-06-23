@@ -132,7 +132,7 @@ async function specialMessages(message: Message<boolean>) {
   let after: string | null = null;
   words.reverse().forEach((word) => {
     if (
-      /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{3}/.test(
+      /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{5}/.test(
         word
           .replaceAll('sch', '.')
           .replaceAll('ch', ',')
@@ -156,6 +156,18 @@ async function specialMessages(message: Message<boolean>) {
     }
     after = word;
   });
+  after = '>';
+  const word = words[0];
+  if (globalThis.wordlist[word]) {
+    const pos = globalThis.wordlist[word].findIndex((v) => v[0] === after);
+    if (pos !== -1) {
+      globalThis.wordlist[word][pos][1]++;
+    } else {
+      globalThis.wordlist[word].push([after, 1]);
+    }
+  } else {
+    globalThis.wordlist[word] = [[after, 1]];
+  }
   writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
 
   if (
