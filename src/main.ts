@@ -157,7 +157,7 @@ async function specialMessages(message: Message<boolean>) {
     !content.includes('wann') &&
     !content.includes('warum') &&
     !content.includes('weshalb') &&
-    !content.includes('oder ')
+    (!content.includes('oder ') || content.includes('oder so'))
   ) {
     await message.react('✅').catch(() => {});
     await message.react('❌').catch(() => {});
