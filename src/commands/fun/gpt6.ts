@@ -58,6 +58,8 @@ export default new Command(
       next = [...(next ?? [])];
       next.push([words[Math.random() * words.length], 1]);
       word = weightedRandom(next);
+      if (i == 0 && word == null)
+        word = words[Math.floor(Math.random() * words.length)];
       if (word == null) break;
       arr.push(replace(word));
       next = globalThis.wordlist[word];

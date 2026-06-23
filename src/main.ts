@@ -149,10 +149,10 @@ async function specialMessages(message: Message<boolean>) {
       if (pos !== -1) {
         globalThis.wordlist[word][pos][1]++;
       } else {
-        globalThis.wordlist[word].push([after, 10]);
+        globalThis.wordlist[word].push([after, 1]);
       }
     } else {
-      globalThis.wordlist[word] = [[after, 10]];
+      globalThis.wordlist[word] = [[after, 1]];
     }
     after = word;
   });
@@ -163,10 +163,10 @@ async function specialMessages(message: Message<boolean>) {
     if (pos !== -1) {
       globalThis.wordlist[word][pos][1]++;
     } else {
-      globalThis.wordlist[word].push([after, 10]);
+      globalThis.wordlist[word].push([after, 1]);
     }
   } else {
-    globalThis.wordlist[word] = [[after, 10]];
+    globalThis.wordlist[word] = [[after, 1]];
   }
   writeFileSync('./words.json', JSON.stringify(globalThis.wordlist), 'utf8');
 
