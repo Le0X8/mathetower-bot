@@ -19,6 +19,7 @@ import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
 import { catchBanane } from '@/commands/debug/error.ts';
 import { emojis } from '$emojis';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const client = new Client({
   intents: [
@@ -118,8 +119,23 @@ client.on(Events.MessageCreate, async (message) => {
   specialMessages(message).catch(console.error);
 });
 
+if (!existsSync('./words.json')) writeFileSync('./words.json', '{}', 'utf8');
+const wordList: Record<string, number> = JSON.parse(
+  readFileSync('./words.json', 'utf8'),
+);
+
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
+
+  const words = content.split(/[^a-zäöüß]/g).filter((w) => w.length > 2);
+  words.forEach((word) => {
+    if (wordList[word]) {
+      wordList[word]++;
+    } else {
+      wordList[word] = 1;
+    }
+  });
+  writeFileSync('./words.json', JSON.stringify(wordList), 'utf8');
 
   if (
     content.includes('//x.com') ||
