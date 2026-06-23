@@ -30,7 +30,7 @@ export default new Command(
     let next = globalThis.wordlist[word];
     if (interaction.options.getBoolean('weights', false)) {
       if (word === '>') word = '<START>';
-      next = next ?? [];
+      next = [...(next ?? [])];
       next.push(['<RANDOM>', 1]);
       next.sort((a, b) => b[1] - a[1]);
       await interaction.reply({
@@ -55,7 +55,7 @@ export default new Command(
     const words = Object.keys(globalThis.wordlist ?? {});
 
     for (let i = 0; i < 100; i++) {
-      next = next ?? [];
+      next = [...(next ?? [])];
       next.push([words[Math.random() * words.length], 1]);
       word = weightedRandom(next);
       if (word == null) break;
