@@ -109,16 +109,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 client.login(token);
 
 client.on(Events.MessageCreate, async (message) => {
-  if (message.author.bot) return;
+  try {
+    if (message.author.bot) return;
 
-  if (Math.floor(Math.random() * 50) === 0) {
-    const reactions = Object.values(emojis.reaction);
-    await message
-      .react(reactions[Math.floor(Math.random() * reactions.length)])
-      .catch(() => {});
-  }
+    if (Math.floor(Math.random() * 50) === 0) {
+      const reactions = Object.values(emojis.reaction);
+      await message
+        .react(reactions[Math.floor(Math.random() * reactions.length)])
+        .catch(() => {});
+    }
 
-  specialMessages(message).catch(console.error);
+    specialMessages(message).catch(console.error);
+  } catch {}
 });
 
 if (!existsSync('./words.msgpack.zst'))
