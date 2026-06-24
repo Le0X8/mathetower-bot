@@ -23,6 +23,10 @@ export const emojis = {
     ttpd: '<:torturedpoetsdept:1506313179687292928>',
     tloas: '<:thelifeofashowgirl:1506313178093715547>',
   },
+  icon: {
+    yes: '<:yes:1519251420384067646>',
+    no: '<:no:1519251421822976021>',
+  },
 
   // server emojis
   bahn: {

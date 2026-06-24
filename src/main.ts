@@ -232,8 +232,8 @@ async function specialMessages(message: Message<boolean>) {
     !content.includes('weshalb') &&
     (!content.includes('oder ') || content.includes('oder so'))
   ) {
-    await message.react('✅').catch(() => {});
-    await message.react('❌').catch(() => {});
+    await message.react(emojis.icon.yes).catch(() => {});
+    await message.react(emojis.icon.no).catch(() => {});
   }
 
   if (content.includes('kys') && message.reference) {
