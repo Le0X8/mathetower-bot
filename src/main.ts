@@ -121,7 +121,7 @@ client.on(Events.MessageCreate, async (message) => {
   specialMessages(message).catch(console.error);
 });
 
-if (!existsSync('./words.msgpack'))
+if (!existsSync('./words.msgpack.zst'))
   writeFileSync(
     './words.msgpack.zst',
     zstd.compress(
