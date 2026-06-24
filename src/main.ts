@@ -245,6 +245,7 @@ async function specialMessages(message: Message<boolean>) {
   ) {
     await message.react(emojis.icon.yes).catch(() => {});
     await message.react(emojis.icon.no).catch(() => {});
+    return;
   }
 
   if (content.includes('kys') && message.reference) {
@@ -252,9 +253,10 @@ async function specialMessages(message: Message<boolean>) {
     await ref.react('🇰');
     await ref.react('🇾');
     await ref.react('🇸');
+    return;
   }
 
-  reactions.forEach(async ([trigger, ...reaction]) => {
+  for (const [trigger, ...reaction] of reactions) {
     if (
       trigger instanceof Array
         ? trigger.some((trg) => content.includes(trg))
@@ -263,6 +265,7 @@ async function specialMessages(message: Message<boolean>) {
       for (const r of reaction) {
         await message.react(r);
       }
+      break;
     }
-  });
+  }
 }
