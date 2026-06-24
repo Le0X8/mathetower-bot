@@ -134,7 +134,7 @@ async function specialMessages(message: Message<boolean>) {
   if (content.length > 3) {
     const words = content
       .split(/[^a-zäöüß]/g)
-      .filter((w) => w.length > 1 && w.length < 20);
+      .filter((w) => w.length > 1 && w.length < 40);
     let before: [string, string] = ['0', '0'];
     words.forEach((word) => {
       if (
