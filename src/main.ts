@@ -1,5 +1,6 @@
 import config from '$config' with { type: 'json' };
 import { unpack, pack } from 'msgpackr';
+import * as zstd from 'zstd-napi';
 const token = config.token;
 
 import {
@@ -122,11 +123,16 @@ client.on(Events.MessageCreate, async (message) => {
 
 if (!existsSync('./words.msgpack'))
   writeFileSync(
-    './words.msgpack',
-    pack({ graph: {}, tokens: { '\0': '0' }, words: { '0': '\0' } }),
+    './words.msgpack.zst',
+    zstd.compress(
+      pack({ graph: {}, tokens: { '\0': '0' }, words: { '0': '\0' } }),
+      { compressionLevel: 1 },
+    ),
   );
 
-globalThis.wordlist = unpack(readFileSync('./words.msgpack'));
+globalThis.wordlist = unpack(
+  zstd.decompress(readFileSync('./words.msgpack.zst')),
+);
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
@@ -191,7 +197,10 @@ async function specialMessages(message: Message<boolean>) {
       globalThis.wordlist.graph[key] = [[word, 1]];
     }
 
-    writeFileSync('./words.msgpack', pack(globalThis.wordlist));
+    writeFileSync(
+      './words.msgpack.zst',
+      zstd.compress(pack(globalThis.wordlist), { compressionLevel: 1 }),
+    );
   }
 
   if (
