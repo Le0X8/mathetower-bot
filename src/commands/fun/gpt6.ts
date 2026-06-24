@@ -33,6 +33,9 @@ export default new Command(
   'wie /random nur noch besser',
   async (interaction) => {
     let start = interaction.options.getString('start', false);
+    const ignoreTerm = interaction.options.getInteger('ignoreterm', false) ?? 0;
+    const enableRandom =
+      interaction.options.getBoolean('enablerandom', false) ?? false;
     let before: [string, string] = ['0', '0'];
     if (start)
       before = ['\0', '\0', ...start.toLowerCase().split(/[^a-zäöüß]/g)]
@@ -51,7 +54,11 @@ export default new Command(
 
     if (interaction.options.getBoolean('weights', false)) {
       next = [...(next ?? [])];
-      next.push(['<RANDOM>', 0.02]);
+      if (0 < ignoreTerm || ignoreTerm < 0) {
+        const pos = next.findIndex(([name]) => name === null);
+        if (pos !== -1) next.splice(pos, 1);
+      }
+      if (enableRandom) next.push(['<RANDOM>', 0.02]);
       next.sort((a, b) => b[1] - a[1]);
       await interaction.reply({
         embeds: [
@@ -81,10 +88,15 @@ export default new Command(
 
     for (let i = 0; i < 250; i++) {
       next = [...(next ?? [])];
-      next.push([
-        words[Math.floor(Math.random() * words.length)].split('+')[1],
-        0.02,
-      ]);
+      if (i < ignoreTerm || ignoreTerm < 0) {
+        const pos = next.findIndex(([name]) => name === null);
+        if (pos !== -1) next.splice(pos, 1);
+      }
+      if (enableRandom)
+        next.push([
+          words[Math.floor(Math.random() * words.length)].split('+')[1],
+          0.02,
+        ]);
       let word = weightedRandom(next);
       if (word == null) break;
       arr.push(replace(wordlist.words[word]));
@@ -93,7 +105,7 @@ export default new Command(
     }
 
     let str = arr.join(' ');
-    str = str.replaceAll('\0', '').replaceAll('  ', '').trim().slice(0, 2000);
+    str = str.replaceAll('\0', '').replaceAll('  ', ' ').trim().slice(0, 2000);
 
     const replacements: Record<string, string> =
       store.get('replacements2') ?? {};
@@ -107,13 +119,25 @@ export default new Command(
   [
     {
       name: 'start',
-      description: 'Startwort',
+      description: 'Startkontext',
       type: ApplicationCommandOptionType.String,
       required: false,
     },
     {
       name: 'weights',
       description: 'Zeige Gewichtungen',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'ignoreterm',
+      description: 'Ignoriert trained Termination für die ersten n Wörter',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+    },
+    {
+      name: 'enablerandom',
+      description: 'Aktiviert kontextloses Random-Wort',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
