@@ -33,8 +33,10 @@ const client = new Client({
 });
 
 function refreshMembers() {
-  client.guilds.fetch(config.gid).then((guild) => {
-    guild.members.fetch().catch(console.error);
+  client.guilds.fetch().then((guilds) => {
+    guilds.forEach((guild) =>
+      guild.fetch().then((guild) => guild.members.fetch().catch(console.error)),
+    );
   });
 }
 
@@ -69,6 +71,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (!commandObject) return;
 
     if (commandObject.isAdminCommand) {
+      if (interaction.guildId !== config.gid) {
+        throw new Error('This command can only be used in the main server.');
+      }
       if (
         !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)
       ) {
@@ -215,7 +220,7 @@ async function specialMessages(message: Message<boolean>) {
   ) {
     await message.reply(
       `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${
-        message.content //i may be blind but where is the tracker being removed
+        message.content
           .replace('//x.com', '//vxtwitter.com')
           .replace('//twitter.com', '//vxtwitter.com')
           .replace('//www.instagram.com', '//www.vxinstagram.com')

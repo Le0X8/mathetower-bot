@@ -1,6 +1,7 @@
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { buildErrorEmbed } from '@/lib/embeds/error-embed.ts';
 import { formatDate, parseDate } from '@/lib/helpers/date.ts';
+import config from '$config' with { type: 'json' };
 import {
   ApplicationCommandOptionType,
   ChatInputCommandInteraction,
