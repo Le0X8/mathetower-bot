@@ -67,48 +67,52 @@ export async function registerCommands(client: Client) {
   try {
     const localCommands = await getCommands();
 
-    const guild = await client.guilds.fetch(guildId);
+    const guilds = await client.guilds.fetch();
 
-    const applicationCommands = await guild.commands.fetch();
+    for (const [_, oauthguild] of guilds) {
+      const guild = await oauthguild.fetch();
 
-    for (const localCommand of localCommands) {
-      const { name, description, options, deleted } = localCommand;
+      const applicationCommands = await guild.commands.fetch();
 
-      const existingCommand = applicationCommands.find(
-        (cmd) => cmd.name === name,
-      );
+      for (const localCommand of localCommands) {
+        const { name, description, options, deleted } = localCommand;
 
-      if (existingCommand) {
-        if (deleted) {
-          await guild.commands.delete(existingCommand.id);
+        const existingCommand = applicationCommands.find(
+          (cmd) => cmd.name === name,
+        );
 
-          console.log(`Deleted command "${name}".`);
+        if (existingCommand) {
+          if (deleted) {
+            await guild.commands.delete(existingCommand.id);
 
-          continue;
-        }
+            console.log(`Deleted command "${name}".`);
 
-        if (areCommandsDifferent(existingCommand, localCommand)) {
-          await guild.commands.edit(existingCommand.id, {
+            continue;
+          }
+
+          if (areCommandsDifferent(existingCommand, localCommand)) {
+            await guild.commands.edit(existingCommand.id, {
+              description,
+              options,
+            });
+
+            console.log(`Edited command "${name}".`);
+          }
+        } else {
+          if (deleted) {
+            console.log(`Skipped registering command "${name}".`);
+
+            continue;
+          }
+
+          await guild.commands.create({
+            name,
             description,
             options,
-          });
+          } as ApplicationCommandDataResolvable);
 
-          console.log(`Edited command "${name}".`);
+          console.log(`Registered command "${name}".`);
         }
-      } else {
-        if (deleted) {
-          console.log(`Skipped registering command "${name}".`);
-
-          continue;
-        }
-
-        await guild.commands.create({
-          name,
-          description,
-          options,
-        } as ApplicationCommandDataResolvable);
-
-        console.log(`Registered command "${name}".`);
       }
     }
   } catch (error) {
