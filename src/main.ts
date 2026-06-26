@@ -213,7 +213,9 @@ async function specialMessages(message: Message<boolean>) {
   }
 
   if (
-    !content.startsWith('!novx ') &&
+    (content.startsWith('!vx') ||
+      (!store.get(message.author.id, 'novx') &&
+        !content.startsWith('!novx '))) &&
     (content.includes('//x.com') ||
       content.includes('//twitter.com') ||
       content.includes('//www.instagram.com') ||
@@ -239,7 +241,7 @@ async function specialMessages(message: Message<boolean>) {
           .replace(/(\?|&)si=/g, '#') // YouTube
           .replace(/(\?|&)utm_/g, '#') // General UTM
           .split('#')[0]
-      }\n-# starte deine Nachricht mit \`!novx \` um zu verhindern, dass der Link ersetzt wird.`,
+      }\n-# starte deine Nachricht mit \`!novx <URL>\` um zu verhindern, dass der Link ersetzt wird.`,
     );
     message.delete();
     return;
