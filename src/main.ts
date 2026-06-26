@@ -233,7 +233,7 @@ async function specialMessages(message: Message<boolean>) {
           .replace(/(\?|&)si=/g, '#') // YouTube
           .replace(/(\?|&)utm_/g, '#') // General UTM
           .split('#')[0]
-      }\n-# starte deine Nachricht mit \`!novx <URL>\` um zu verhindern, dass der Link ersetzt wird.`,
+      }`,
     );
     message.delete();
     return;
