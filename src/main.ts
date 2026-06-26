@@ -206,8 +206,8 @@ async function specialMessages(message: Message<boolean>) {
   }
 
   if (
-    content.startsWith('!vx ') &&
-    !(store.get(message.author.id, 'novx') || content.startsWith('!novx '))
+    (!content.startsWith('!novx ') && !store.get(message.author.id, 'novx')) ||
+    content.startsWith('!vx ')
   )
     if (
       content.includes('//x.com') ||
