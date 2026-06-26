@@ -205,39 +205,39 @@ async function specialMessages(message: Message<boolean>) {
     appendFileSync('./dataset.txt', content + '\n');
   }
 
-  if (!content.startsWith('!novx '))
-    if (!store.get(message.author.id, 'novx') || content.startsWith('!vx '))
-      if (
-        content.includes('//x.com') ||
-        content.includes('//twitter.com') ||
-        content.includes('//www.instagram.com') ||
-        content.includes('//vm.seetiktok.com') ||
-        content.includes('//vm.tiktok.com') ||
-        content.includes('//www.reddit.com') ||
-        content.includes('//youtu.be') ||
-        content.includes('//youtube.com')
-      ) {
-        await message.reply(
-          `-# <@${message.author.id}>\n${
-            message.content
-              .replace('//x.com', '//fixvx.com')
-              .replace('//twitter.com', '//fixvx.com')
-              .replace('//www.instagram.com', '//www.vxinstagram.com')
-              .replace('//vm.seetiktok.com', '//kktiktok.com')
-              .replace('//vm.tiktok.com', '//kktiktok.com')
-              .replace('//www.reddit.com', '//vxreddit.com')
-              // tracking parameters
-              .replace(/(\?|&)igsh=/g, '#') // Instagram
-              .replace(/(\?|&)s=/g, '#') // Twitter
-              .replace(/(\?|&)fbclid=/g, '#') // Facebook
-              .replace(/(\?|&)si=/g, '#') // YouTube
-              .replace(/(\?|&)utm_/g, '#') // General UTM
-              .split('#')[0]
-          }\n-# starte deine Nachricht mit \`!novx <URL>\` um zu verhindern, dass der Link ersetzt wird.`,
-        );
-        message.delete();
-        return;
-      }
+  if (
+    !content.startsWith('!novx ') &&
+    (!store.get(message.author.id, 'novx') || content.startsWith('!vx ')) &&
+    (content.includes('//x.com') ||
+      content.includes('//twitter.com') ||
+      content.includes('//www.instagram.com') ||
+      content.includes('//vm.seetiktok.com') ||
+      content.includes('//vm.tiktok.com') ||
+      content.includes('//www.reddit.com') ||
+      content.includes('//youtu.be') ||
+      content.includes('//youtube.com'))
+  ) {
+    await message.reply(
+      `-# <@${message.author.id}>\n${
+        message.content
+          .replace('//x.com', '//fixvx.com')
+          .replace('//twitter.com', '//fixvx.com')
+          .replace('//www.instagram.com', '//www.vxinstagram.com')
+          .replace('//vm.seetiktok.com', '//kktiktok.com')
+          .replace('//vm.tiktok.com', '//kktiktok.com')
+          .replace('//www.reddit.com', '//vxreddit.com')
+          // tracking parameters
+          .replace(/(\?|&)igsh=/g, '#') // Instagram
+          .replace(/(\?|&)s=/g, '#') // Twitter
+          .replace(/(\?|&)fbclid=/g, '#') // Facebook
+          .replace(/(\?|&)si=/g, '#') // YouTube
+          .replace(/(\?|&)utm_/g, '#') // General UTM
+          .split('#')[0]
+      }\n-# starte deine Nachricht mit \`!novx <URL>\` um zu verhindern, dass der Link ersetzt wird.`,
+    );
+    message.delete();
+    return;
+  }
 
   if (
     content.endsWith('?') &&
