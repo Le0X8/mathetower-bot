@@ -83,7 +83,7 @@ export async function registerCommands(client: Client) {
 
         if (existingCommand) {
           if (deleted) {
-            await guild.commands.delete(existingCommand.id);
+            await guild.commands.delete(existingCommand.id).catch(() => {});
 
             console.log(`Deleted command "${name}".`);
 

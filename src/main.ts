@@ -1,8 +1,4 @@
 import config from '$config' with { type: 'json' };
-import { unpack, pack } from 'msgpackr';
-import * as zstd from 'zstd-napi';
-const token = config.token;
-
 import {
   ActivityType,
   Client,
@@ -12,7 +8,6 @@ import {
   MessageFlags,
   PermissionFlagsBits,
 } from 'discord.js';
-
 import { reactions } from '@/reactions.ts';
 import '@/store.ts';
 import '@/config/plantage.ts';
@@ -21,7 +16,89 @@ import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
 import { catchBanane } from '@/commands/debug/error.ts';
 import { emojis } from '$emojis';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, truncateSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+
+let gpt6Path = './gpt6/target/release/gpt6';
+if (!existsSync(gpt6Path)) {
+  gpt6Path += '.exe';
+  if (!existsSync(gpt6Path)) {
+    throw new Error(
+      'gpt6 binary not found, compile it first with `cargo build --release` in the gpt6 directory.',
+    );
+  }
+}
+
+async function gpt6Training() {
+  await globalThis.gpt6('\0');
+  truncateSync('./dataset.txt', 0);
+}
+
+const gpt6Process = spawn(gpt6Path, ['prompt'], {
+  stdio: ['pipe', 'pipe', 'pipe'],
+});
+
+gpt6Process.stderr.on('data', (data: Buffer) => {
+  console.error(data.toString());
+});
+
+gpt6Process.on('spawn', () => gpt6Training());
+
+gpt6Process.on('close', (code) => {
+  console.log(`gpt6 process exited with code ${code}`);
+  process.exit(code ?? 1);
+});
+
+let isProcessing = false;
+interface QueueItem {
+  input: string;
+  resolve: (value: string) => void;
+  reject: (reason: Error) => void;
+}
+let queue: QueueItem[] = [];
+
+function gpt6Next() {
+  if (queue.length === 0) {
+    isProcessing = false;
+    return;
+  }
+
+  isProcessing = true;
+  const { input, resolve } = queue.shift()!;
+
+  let output = '';
+
+  const onData = (data: Buffer) => {
+    output += data.toString();
+
+    if (output.includes('\n')) {
+      gpt6Process.stdout.off('data', onData);
+      resolve(output.trimEnd());
+      gpt6Next();
+    }
+  };
+
+  gpt6Process.stdout.on('data', onData);
+  gpt6Process.stdin.write(input + '\n');
+}
+
+globalThis.gpt6 = (input: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    if (!gpt6Process) {
+      reject(new Error('GPT6 is not running'));
+      return;
+    }
+
+    queue.push({ input, resolve, reject });
+
+    if (!isProcessing) {
+      gpt6Next();
+    }
+  });
+
+setInterval(() => gpt6Training(), 60 * 60 * 1000);
+
+const token = config.token;
 
 const client = new Client({
   intents: [
@@ -128,86 +205,11 @@ client.on(Events.MessageCreate, async (message) => {
   } catch {}
 });
 
-if (!existsSync('./words.msgpack.zst'))
-  writeFileSync(
-    './words.msgpack.zst',
-    zstd.compress(
-      pack({ graph: {}, tokens: { '\0': '0' }, words: { '0': '\0' } }),
-      { compressionLevel: 1 },
-    ),
-  );
-
-globalThis.wordlist = unpack(
-  zstd.decompress(readFileSync('./words.msgpack.zst')),
-);
-
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
   if (content.length > 3) {
-    const words = content
-      .split(/[^a-zäöüß]/g)
-      .filter((w) => w.length > 1 && w.length < 40);
-    let before: [string, string] = ['0', '0'];
-    words.forEach((word) => {
-      if (
-        /[bcdfghjklmnpqrstvwxyz\.\,\!\?\=]{5}/.test(
-          word
-            .replaceAll('sch', '.')
-            .replaceAll('ch', ',')
-            .replaceAll('ck', '!')
-            .replaceAll('ph', '?')
-            .replaceAll('qu', '='),
-        )
-      ) {
-        return;
-      }
-
-      if (wordlist.tokens[word]) {
-        word = wordlist.tokens[word];
-      } else {
-        const id = Object.keys(wordlist.tokens).length.toString(36);
-        wordlist.tokens[word] = id;
-        wordlist.words[id] = word;
-        word = id;
-      }
-
-      let key = before.join('+');
-      if (globalThis.wordlist.graph[key]) {
-        const pos = globalThis.wordlist.graph[key].findIndex(
-          (v) => v[0] === word,
-        );
-        if (pos !== -1) {
-          globalThis.wordlist.graph[key][pos][1]++;
-        } else {
-          globalThis.wordlist.graph[key].push([word, 1]);
-        }
-      } else {
-        globalThis.wordlist.graph[key] = [[word, 1]];
-      }
-      before[0] = before[1];
-      before[1] = word;
-    });
-
-    let key = before.join('+');
-    let word = null;
-    if (globalThis.wordlist.graph[key]) {
-      const pos = globalThis.wordlist.graph[key].findIndex(
-        (v) => v[0] === word,
-      );
-      if (pos !== -1) {
-        globalThis.wordlist.graph[key][pos][1]++;
-      } else {
-        globalThis.wordlist.graph[key].push([word, 1]);
-      }
-    } else {
-      globalThis.wordlist.graph[key] = [[word, 1]];
-    }
-
-    writeFileSync(
-      './words.msgpack.zst',
-      zstd.compress(pack(globalThis.wordlist), { compressionLevel: 1 }),
-    );
+    appendFileSync('./dataset.txt', content + '\n');
   }
 
   if (

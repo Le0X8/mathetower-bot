@@ -2,11 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 declare global {
   var store: Store;
-  var wordlist: {
-    graph: Record<string, [string | null, number][]>;
-    tokens: Record<string, string>;
-    words: Record<string, string>;
-  };
+  var gpt6: (input: string) => Promise<string>;
 }
 
 class Store {
