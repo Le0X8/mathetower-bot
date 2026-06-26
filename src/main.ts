@@ -213,26 +213,33 @@ async function specialMessages(message: Message<boolean>) {
   }
 
   if (
-    content.includes('//x.com') ||
-    content.includes('//twitter.com') ||
-    content.includes('//www.instagram.com') ||
-    content.includes('//vm.seetiktok.com') ||
-    content.includes('//vm.tiktok.com') ||
-    content.includes('//www.reddit.com')
+    !content.startsWith('!novx ') &&
+    (content.includes('//x.com') ||
+      content.includes('//twitter.com') ||
+      content.includes('//www.instagram.com') ||
+      content.includes('//vm.seetiktok.com') ||
+      content.includes('//vm.tiktok.com') ||
+      content.includes('//www.reddit.com') ||
+      content.includes('//youtu.be') ||
+      content.includes('//youtube.com'))
   ) {
     await message.reply(
-      `-# SUPER MAGA PALANTIR ICE PETER THIEL AI DATA HARVESTER 9000 entfernt\n\n<@${message.author.id}>\n\n${
+      `-# <@${message.author.id}>\n${
         message.content
-          .replace('//x.com', '//vxtwitter.com')
-          .replace('//twitter.com', '//vxtwitter.com')
+          .replace('//x.com', '//fixvx.com')
+          .replace('//twitter.com', '//fixvx.com')
           .replace('//www.instagram.com', '//www.vxinstagram.com')
           .replace('//vm.seetiktok.com', '//kktiktok.com')
           .replace('//vm.tiktok.com', '//kktiktok.com')
           .replace('//www.reddit.com', '//vxreddit.com')
           // tracking parameters
-          .replace(/(\?|&)igsh=/g, '#')
+          .replace(/(\?|&)igsh=/g, '#') // Instagram
+          .replace(/(\?|&)s=/g, '#') // Twitter
+          .replace(/(\?|&)fbclid=/g, '#') // Facebook
+          .replace(/(\?|&)si=/g, '#') // YouTube
+          .replace(/(\?|&)utm_/g, '#') // General UTM
           .split('#')[0]
-      }`,
+      }\n-# starte deine Nachricht mit \`!novx \` um zu verhindern, dass der Link ersetzt wird.`,
     );
     message.delete();
     return;
