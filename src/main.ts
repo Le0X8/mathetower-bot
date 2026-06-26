@@ -214,8 +214,9 @@ async function specialMessages(message: Message<boolean>) {
 
   if (
     (content.startsWith('!vx') ||
-      (!store.get(message.author.id, 'novx') &&
-        !content.startsWith('!novx '))) &&
+      !(
+        store.get(message.author.id, 'novx') && content.startsWith('!novx ')
+      )) &&
     (content.includes('//x.com') ||
       content.includes('//twitter.com') ||
       content.includes('//www.instagram.com') ||
