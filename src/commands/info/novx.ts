@@ -6,7 +6,7 @@ export default new Command(
   'Deaktiviert die automatische Ersetzung von Links in Nachrichten.',
   async (interaction) => {
     const novx = interaction.options.getBoolean('novx', true);
-    store.set('novx', interaction.user.id, novx);
+    store.set(interaction.user.id, 'novx', novx);
     await interaction.reply({
       content: `Automatische Link-Ersetzung ist jetzt ${
         novx ? 'deaktiviert' : 'aktiviert'
