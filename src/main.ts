@@ -194,13 +194,6 @@ client.on(Events.MessageCreate, async (message) => {
   try {
     if (message.author.bot) return;
 
-    if (Math.floor(Math.random() * 50) === 0) {
-      const reactions = Object.values(emojis.reaction);
-      await message
-        .react(reactions[Math.floor(Math.random() * reactions.length)])
-        .catch(() => {});
-    }
-
     specialMessages(message).catch(console.error);
   } catch {}
 });
@@ -208,23 +201,23 @@ client.on(Events.MessageCreate, async (message) => {
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
+  if (store.get(message.author.id, 'novx') || content.startsWith('!novx ')) {
+    if (!content.startsWith('!vx ')) return;
+  }
+
   if (content.length > 3 && !content.includes('://')) {
     appendFileSync('./dataset.txt', content + '\n');
   }
 
   if (
-    (content.startsWith('!vx') ||
-      !(
-        store.get(message.author.id, 'novx') && content.startsWith('!novx ')
-      )) &&
-    (content.includes('//x.com') ||
-      content.includes('//twitter.com') ||
-      content.includes('//www.instagram.com') ||
-      content.includes('//vm.seetiktok.com') ||
-      content.includes('//vm.tiktok.com') ||
-      content.includes('//www.reddit.com') ||
-      content.includes('//youtu.be') ||
-      content.includes('//youtube.com'))
+    content.includes('//x.com') ||
+    content.includes('//twitter.com') ||
+    content.includes('//www.instagram.com') ||
+    content.includes('//vm.seetiktok.com') ||
+    content.includes('//vm.tiktok.com') ||
+    content.includes('//www.reddit.com') ||
+    content.includes('//youtu.be') ||
+    content.includes('//youtube.com')
   ) {
     await message.reply(
       `-# <@${message.author.id}>\n${
@@ -284,5 +277,12 @@ async function specialMessages(message: Message<boolean>) {
       }
       break;
     }
+  }
+
+  if (Math.floor(Math.random() * 50) === 0) {
+    const reactions = Object.values(emojis.reaction);
+    await message
+      .react(reactions[Math.floor(Math.random() * reactions.length)])
+      .catch(() => {});
   }
 }
