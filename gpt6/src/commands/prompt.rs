@@ -102,6 +102,7 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
     graph.save()?;
 
     info("Training completed sucessfully.");
+    println!();
 
     Ok(())
 }
