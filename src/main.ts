@@ -208,7 +208,7 @@ client.on(Events.MessageCreate, async (message) => {
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
-  if (content.length > 3) {
+  if (content.length > 3 && !content.includes('://')) {
     appendFileSync('./dataset.txt', content + '\n');
   }
 
