@@ -3,4 +3,5 @@ config.json
 data.json
 commands.json
 *.zst
+dataset.txt
 dist
