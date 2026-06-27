@@ -1,3 +1,5 @@
+use rand::RngExt;
+
 use crate::{error, graph::Graph, info, tokens::Tokens};
 use std::{
     error::Error,
@@ -5,51 +7,88 @@ use std::{
     io::{BufRead, BufReader, Write, stdin, stdout},
 };
 
-pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn std::error::Error>> {
+pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
     let mut input = String::new();
-    while input.len() < 256 {
+    loop {
+        print!("\0");
         stdout().flush()?;
         input.clear();
         stdin().read_line(&mut input)?;
+        input = input.trim().to_string();
 
-        if input.trim() == "\0" {
+        // training mode
+        if input == "\0" {
             train(tokens, graph).unwrap_or_else(|e| error(&e.to_string()));
             continue;
         }
 
+        // random mode
+        if input.starts_with("\x01") {
+            let mut count = input
+                .trim_start_matches("\x01")
+                .parse::<usize>()
+                .unwrap_or(rand::rng().random_range(1..255));
+            count = count.clamp(1, 255);
+            println!("{}", detokenize(tokens, tokens.random(count)));
+            continue;
+        }
+
+        // gpt6 mode
         input = input.to_lowercase();
-        let input: Vec<_> = input
-            .trim()
+        let strs: Vec<_> = input
             .split(|c: char| !matches!(c, 'a'..='z' | 'ä' | 'ö' | 'ü' | 'ß'))
             .filter(|s| !s.is_empty())
             .collect();
 
         let mut stream = vec![];
-        if input.is_empty() {
+        if strs.is_empty() {
             stream.push(0);
         } else {
-            stream.push(tokens.tokenize(input.last().cloned().unwrap_or_default()));
+            stream.push(tokens.tokenize(strs.last().cloned().unwrap_or_default()));
         }
-        if input.len() > 1 {
-            stream.insert(0, tokens.tokenize(input[input.len() - 2]));
+        if strs.len() > 1 {
+            stream.insert(0, tokens.tokenize(strs[strs.len() - 2]));
         } else {
             stream.insert(0, 0);
         }
+
+        // show weights
+        if input.starts_with("\x02") {
+            let mut weights = graph.weights((stream[stream.len() - 2], stream[stream.len() - 1]));
+            println!("{} possible completions:", weights.len());
+            weights.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+            for (token, weight) in weights.iter().take(25) {
+                println!(
+                    "{weight:.2}: {}",
+                    if *token == 0 {
+                        "<TERMINATE>".to_string()
+                    } else {
+                        tokens
+                            .resolve(*token)
+                            .cloned()
+                            .unwrap_or("<TERMINATE>".to_string())
+                    }
+                );
+            }
+            continue;
+        }
+
         complete(graph, &mut stream);
         stream.drain(0..2);
         println!("{}", detokenize(tokens, stream));
     }
-    Ok(())
 }
 
 fn complete(graph: &Graph, stream: &mut Vec<u32>) {
+    let mut i = 0u8;
     while let Some(next) =
         graph.weighted_resolve((stream[stream.len() - 2], stream[stream.len() - 1]))
     {
         stream.push(next);
-        if next == 0 {
+        if next == 0 || i == u8::MAX {
             break;
         }
+        i += 1;
     }
 }
 

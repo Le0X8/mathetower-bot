@@ -32,28 +32,35 @@ impl Graph {
         self.0.get(&from)
     }
 
-    pub fn weighted_resolve(&self, from: (u32, u32)) -> Option<u32> {
+    pub fn weights(&self, from: (u32, u32)) -> Vec<(u32, f64)> {
         if let Some(freqs) = self.resolve(from) {
-            let weights: Vec<_> = freqs
+            freqs
                 .iter()
                 .map(|f| (f.token, (f.freq as f64 + 1.0).log2()))
-                .collect();
-            let total: f64 = weights.iter().map(|(_, w)| w).sum();
-            if total == 0.0 {
-                return None;
-            }
-            let random_value = rand::rng().random_range(0.0..total);
-            let mut cumul = 0.0;
-            for (token, weight) in weights {
-                cumul += weight;
-                if random_value < cumul {
-                    return Some(token);
-                }
-            }
-            None
+                .collect()
         } else {
-            None
+            vec![]
         }
+    }
+
+    pub fn weighted_resolve(&self, from: (u32, u32)) -> Option<u32> {
+        let weights = self.weights(from);
+        if weights.is_empty() {
+            return None;
+        }
+        let total: f64 = weights.iter().map(|(_, w)| w).sum();
+        if total == 0.0 {
+            return None;
+        }
+        let random_value = rand::rng().random_range(0.0..total);
+        let mut cumul = 0.0;
+        for (token, weight) in weights {
+            cumul += weight;
+            if random_value < cumul {
+                return Some(token);
+            }
+        }
+        None
     }
 
     pub fn len(&self) -> usize {

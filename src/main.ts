@@ -71,9 +71,9 @@ function gpt6Next() {
   const onData = (data: Buffer) => {
     output += data.toString();
 
-    if (output.includes('\n')) {
+    if (output.includes('\0')) {
       gpt6Process.stdout.off('data', onData);
-      resolve(output.trimEnd());
+      resolve(output.replaceAll('\0', '').trimEnd());
       gpt6Next();
     }
   };

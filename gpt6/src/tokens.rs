@@ -1,5 +1,6 @@
 use crate::info;
 use dh::{ReadVal, WriteVal};
+use rand::RngExt;
 use std::{collections::HashMap, error::Error, fs::File};
 use zstd::stream::{read::Decoder, write::Encoder};
 
@@ -42,6 +43,12 @@ impl Tokens {
         } else {
             self.add(self.words.len() as u32, word.to_string())
         }
+    }
+
+    pub fn random(&self, count: usize) -> Vec<u32> {
+        let mut result = vec![0; count];
+        result.fill_with(|| rand::rng().random_range(0..self.words.len() as u32));
+        result
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {
