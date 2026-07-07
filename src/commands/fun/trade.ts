@@ -13,7 +13,7 @@ export default new Command(
     const id = interaction.options.getInteger('id', true);
     const mutated = store.get(
       interaction.user.id,
-      'mutations',
+      'mutated',
     ) as MutatedBanane[];
     const mutation = mutated?.[id - 1];
     if (!mutation) {
@@ -37,7 +37,7 @@ export default new Command(
     const trades = store.get('trades') ?? [];
     trades.push([interaction.user.id, user?.id ?? null, mutation, amount]);
     mutated.splice(id - 1, 1);
-    store.set(interaction.user.id, 'mutations', mutated);
+    store.set(interaction.user.id, 'mutated', mutated);
     store.set('trades', null, trades);
 
     await interaction.reply({

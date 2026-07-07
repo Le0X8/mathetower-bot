@@ -24,9 +24,9 @@ export default new Command(
     const [senderId, receiverId, mutation, amount] = trade;
 
     if (senderId === interaction.user.id) {
-      const mutated = store.get(senderId, 'mutations') as MutatedBanane[];
+      const mutated = store.get(senderId, 'mutated') as MutatedBanane[];
       mutated.push(mutation);
-      store.set(senderId, 'mutations', mutated);
+      store.set(senderId, 'mutated', mutated);
       trades[id - 1] = 0;
       store.set('trades', null, trades);
 
@@ -58,9 +58,9 @@ export default new Command(
     const senderBalance = new Bananen(senderId);
     balance.transfer(senderBalance, amount);
 
-    const mutated = store.get(senderId, 'mutations') as MutatedBanane[];
+    const mutated = store.get(senderId, 'mutated') as MutatedBanane[];
     mutated.push(mutation);
-    store.set(senderId, 'mutations', mutated);
+    store.set(senderId, 'mutated', mutated);
 
     trades[id - 1] = 0;
     store.set('trades', null, trades);
