@@ -98,7 +98,10 @@ export default new Command(
   'Bekämpfe die Infektion auf deiner Plantage!',
   async (interaction) => {
     const plantage = new Plantage(interaction.user.id);
-    if (plantage.plantage.infection <= 0) {
+    if (
+      plantage.plantage.infection <= 0 ||
+      plantage.plantage.infection === undefined
+    ) {
       await interaction.reply({
         content: 'Deine Plantage ist nicht infiziert :)',
         ephemeral: true,
@@ -142,7 +145,8 @@ export default new Command(
             new ActionRowBuilder<ButtonBuilder>().addComponents(
               new ButtonBuilder()
                 .setLabel(str1(researchState))
-                .setStyle(ButtonStyle.Primary),
+                .setStyle(ButtonStyle.Primary)
+                .setCustomId('l'),
             ),
           ]
         : [],
