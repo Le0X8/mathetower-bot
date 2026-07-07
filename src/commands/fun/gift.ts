@@ -4,12 +4,14 @@ import { ApplicationCommandOptionType, GuildMember, Role } from 'discord.js';
 import config from '$config' with { type: 'json' };
 import { Bananen, BananeType } from '@/util/bananen.ts';
 import { Plantage } from '@/util/plantage.ts';
+import { getMutation } from '$commands/fun/mutation.ts';
 
 export default new Command(
   'gift',
   'Verschenkt Bananen',
   async (interaction) => {
     const sender = interaction.user;
+    const buff = getMutation(sender.id).investment;
     const receiver = interaction.options.getMentionable('user', true);
     let amount = interaction.options.getInteger('amount', true);
 
@@ -67,6 +69,12 @@ export default new Command(
       } else
         msgs.push(`${sender} hat \`${nb(singleAmount)}\` an <@${r}> gegeben.`);
 
+      const chance = Math.random() < Math.abs(buff) * 0.05;
+      if (buff > 0 && chance) {
+        senderBalance.add(BananeType.Gelb, Math.floor(singleAmount * 0.19));
+      } else if (buff < 0 && chance) {
+        senderBalance.remove(Math.floor(singleAmount * 0.19));
+      }
       senderBalance.transfer(receiverBalances[i], singleAmount);
     });
 

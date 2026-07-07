@@ -11,25 +11,7 @@ import {
   Interaction,
 } from 'discord.js';
 import { Plantage, UpgradeResult } from '@/util/plantage.ts';
-
-const multiplierPrice = (multiplier: number) =>
-  priceAdjust(
-    multiplier < 50
-      ? multiplier ** 1.5 * 5 + 100
-      : multiplier < 100
-        ? multiplier ** 1.5 * 10 + 100
-        : multiplier ** 2 * 10 + 100,
-  );
-const landPrice = (land: number) =>
-  priceAdjust(
-    land < 1
-      ? 0
-      : land < 50
-        ? land * 20 - 10
-        : land < 100
-          ? land * 200 - 100
-          : land * 2000 - 1000,
-  );
+import { setMutation } from '$commands/fun/mutation.ts';
 
 function maxUpgrade(
   plantage: Plantage,
@@ -51,6 +33,25 @@ export default new Command(
   'plantage',
   'Pflanze deine eigenen Bananen an!',
   async (interaction) => {
+    if (interaction.options.getInteger('use', false)) {
+      if (
+        setMutation(
+          interaction.user.id,
+          interaction.options.getInteger('use', true),
+        )
+      ) {
+        await interaction.reply({
+          content: `Du hast erfolgreich eine mutierte Bananensorte auf deiner Plantage gepflanzt! Dein Multiplikator wurde zurückgesetzt.`,
+        });
+      } else {
+        await interaction.reply({
+          content: `Du hast diese mutierte Bananensorte nicht in deinem Labor-Inventar!`,
+          ephemeral: true,
+        });
+      }
+      return;
+    }
+
     const user = interaction.options.getUser('user', false) || interaction.user;
 
     const plantage = new Plantage(user.id);
@@ -115,11 +116,11 @@ export default new Command(
         [
           [
             `Land: \`${plantage.plantage.land}m²\``,
-            `Nächster Kauf: \`${nb(landPrice(plantage.plantage.land))}\``,
+            `Nächster Kauf: \`${nb(plantage.landCost())}\``,
           ],
           [
             `Multiplikator: \`${plantage.plantage.multiplier}x\``,
-            `Nächster Kauf: \`${nb(multiplierPrice(plantage.plantage.multiplier))}\``,
+            `Nächster Kauf: \`${nb(plantage.multiplierCost())}\``,
           ],
           plantage.prestige > 0 && [
             `Prestige-Bonus: \`${plantage.prestige * 200}%\``,
@@ -150,39 +151,35 @@ export default new Command(
           case 'land':
             if (!plantage.landUpgrade()) {
               await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.plantage.land))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Der Preis für das nächste Land beträgt \`${nb(plantage.landCost())}\`.`,
                 ephemeral: true,
               });
               return;
             }
-            const spentLand = landPrice(plantage.plantage.land - 1);
             await interaction.editReply({
               embeds: [await embed()],
             });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
                 plantage.plantage.land
-              }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben.`,
+              }m²**.`,
             );
             break;
           case 'multiplier':
             if (!plantage.multiplierUpgrade()) {
               await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.plantage.multiplier))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Der Preis für den nächsten Multiplikator beträgt \`${nb(plantage.multiplierCost())}\`.`,
                 ephemeral: true,
               });
               return;
             }
-            const spentMultiplier = multiplierPrice(
-              plantage.plantage.multiplier - 1,
-            );
             await interaction.editReply({
               embeds: [await embed()],
             });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
                 plantage.plantage.multiplier
-              }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben.`,
+              }x**.`,
             );
             break;
           case 'max':
@@ -248,6 +245,12 @@ export default new Command(
       name: 'user',
       description: 'Wessen Plantage möchtest du sehen?',
       type: ApplicationCommandOptionType.User,
+      required: false,
+    },
+    {
+      name: 'use',
+      description: '(LÖSCHT MULTIPLIKATOR) Pflanze eine mutierte Bananensorte!',
+      type: ApplicationCommandOptionType.Integer,
       required: false,
     },
   ],

@@ -159,6 +159,44 @@ function aboutBanane(mutation: MutatedBanane, num: number) {
   );
 }
 
+export interface Buffs {
+  infection: number;
+  speed: number;
+  simplicity: number;
+  investment: number;
+  rarity: number;
+}
+
+export function getMutation(uid: string): Buffs {
+  const id = store.get(uid, 'mutationactive') ?? null;
+  if (!id)
+    return {
+      infection: 0,
+      speed: 0,
+      simplicity: 0,
+      investment: 0,
+      rarity: 0,
+    };
+  const mutation = store.get(uid, 'mutated')[id - 1];
+  const info = getMutationInfo(mutation);
+  return {
+    infection:
+      (info.g1 === Traits.Resistenz ? info.r1 * 4.5 : 0) +
+      (info.g3 === Traits.Resistenz2 ? info.r3 * 4.5 : 0),
+    speed: info.g1 === Traits.Geschwindigkeit ? info.r1 * 5 : 0,
+    simplicity: info.g2 === Traits.Einfachheit ? info.r2 * 2 : 0,
+    investment: info.g2 === Traits.Investment ? info.r2 * 5 : 0,
+    rarity: info.g3 === Traits.Seltenheit ? info.r3 * 5 : 0,
+  };
+}
+
+export function setMutation(uid: string, id: number | null) {
+  const mutations = store.get(uid, 'mutated') ?? [];
+  if (id !== null && (id < 1 || id > mutations.length)) return false;
+  store.set(uid, 'mutationactive', id);
+  return true;
+}
+
 export default new Command(
   'mutation',
   'Bearbeite Bananen mithilfe von Gentechnik!',
@@ -185,7 +223,7 @@ export default new Command(
 
           return [
             `**Mutierte Banane ${index + 1}**`,
-            `#${id} ${emoji} ${strongestTrait[1]} • insg. ${info.r1 + info.r2 + info.r3} Buffs`,
+            `${id} ${emoji} ${strongestTrait[1]} • insg. ${info.r1 + info.r2 + info.r3} Buffs`,
           ];
         });
 
