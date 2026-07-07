@@ -1,5 +1,10 @@
 import { Command } from '$commands';
-import { getId, getValue, MutatedBanane } from '$commands/fun/mutation.ts';
+import {
+  aboutBanane,
+  getId,
+  getValue,
+  MutatedBanane,
+} from '$commands/fun/mutation.ts';
 import { emojis } from '$emojis';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
@@ -22,6 +27,13 @@ export default new Command(
     }
 
     const [senderId, receiverId, mutation, amount] = trade;
+
+    if (interaction.options.getBoolean('view', false)) {
+      await interaction.reply({
+        embeds: [await aboutBanane(mutation)],
+      });
+      return;
+    }
 
     if (senderId === interaction.user.id) {
       const mutated = store.get(senderId, 'mutated') as MutatedBanane[];
@@ -78,6 +90,12 @@ export default new Command(
       description: 'Die ID des Angebots, das du akzeptieren möchtest.',
       type: ApplicationCommandOptionType.Integer,
       required: true,
+    },
+    {
+      name: 'view',
+      description: 'Zeigt die Details des Angebots an, ohne es zu akzeptieren.',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
     },
   ],
 );

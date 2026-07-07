@@ -113,7 +113,7 @@ function getEmoji([trait, strength]: [Traits, number]): string {
   }
 }
 
-function aboutBanane(mutation: MutatedBanane, num: number) {
+export function aboutBanane(mutation: MutatedBanane, num?: number) {
   const info = getMutationInfo(mutation);
   const id = getId(mutation);
   const strongestTrait = getStrongestTrait(info);
@@ -166,11 +166,13 @@ function aboutBanane(mutation: MutatedBanane, num: number) {
             emojis.banane.schlecht + getRange(info.r3) + emojis.banane.selten,
           ],
     ],
-    num != 0
-      ? 'Nutze `/plantage use:' +
+    typeof num === 'undefined'
+      ? null
+      : num != 0
+        ? 'Nutze `/plantage use:' +
           num +
           '` um diese Banane auf deiner Plantage anzubauen.'
-      : 'Nutze `/plantage use:0` um die aktuell aktive Banane zu deaktivieren.',
+        : 'Nutze `/plantage use:0` um die aktuell aktive Banane zu deaktivieren.',
   );
 }
 
