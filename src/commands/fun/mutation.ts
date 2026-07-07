@@ -16,7 +16,7 @@ function bellRandom(): number {
   return Math.max(-10, Math.min(10, value));
 }
 
-interface MutatedBanane {
+export interface MutatedBanane {
   types: [boolean, boolean, boolean];
   ranges: [number, number, number];
 }
@@ -50,7 +50,7 @@ function getMutationInfo(mutation: MutatedBanane): MutationInfo {
   };
 }
 
-function getId(mutation: MutatedBanane): string {
+export function getId(mutation: MutatedBanane): string {
   return (
     String.fromCharCode(
       0x41 +
@@ -69,7 +69,7 @@ function realValue(value: number): number {
   return value > 0 ? value ** 10 + 1 : 1 / (-value + 1);
 }
 
-function getValue(mutation: MutatedBanane): number {
+export function getValue(mutation: MutatedBanane): number {
   return (
     realValue(mutation.ranges[0]) *
     realValue(mutation.ranges[1]) *
