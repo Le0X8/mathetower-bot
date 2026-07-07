@@ -8,6 +8,22 @@ export const emojis = {
     sbahn: '<:sbahnane:1506733319188910210>',
     geerntet: '<:geerntet:1506742225613099098>',
     gold: '<:gold:1518542283488755712>',
+
+    mutierbar: '<:mutierbar:1523972736387518534>',
+
+    gestählt: '<:gestaehlt:1523972732423770164>',
+
+    einfach: '<:einfach:1523972729584222209>',
+    komplex: '<:komplex:1523972733803823165>',
+
+    langsam: '<:langsam:1523972735020171284>',
+    schnellwachsend: '<:schnellwachsend:1523972741051715584>',
+
+    investment: '<:investment:1523974163621216310>',
+    besteuert: '<:besteuert:1523974161830248600>',
+
+    schlecht: '<:schlecht:1523972737314590812>',
+    selten: '<:selten:1523972742934827108>',
   },
   era: {
     debut: '<:debut:1506311826495770624>',

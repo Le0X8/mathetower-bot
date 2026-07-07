@@ -278,11 +278,4 @@ async function specialMessages(message: Message<boolean>) {
       break;
     }
   }
-
-  if (Math.floor(Math.random() * 50) === 0) {
-    const reactions = Object.values(emojis.reaction);
-    await message
-      .react(reactions[Math.floor(Math.random() * reactions.length)])
-      .catch(() => {});
-  }
 }
