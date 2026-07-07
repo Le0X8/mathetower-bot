@@ -1,15 +1,10 @@
 import config from '$config' with { type: 'json' };
-import { maxUpgrade } from '@/commands/fun/plantage.ts';
 import { Bananen, BananeType } from '@/util/bananen.ts';
+import { Plantage, RawPlantage } from '@/util/plantage.ts';
 
 const minute = 60 * 1000;
 
 let lastPlantageTime = store.get('plantage') ?? Date.now();
-
-interface Plantage {
-  land: number;
-  multiplier: number;
-}
 
 function plantageRoutine() {
   const now = Date.now();
@@ -19,15 +14,14 @@ function plantageRoutine() {
   lastPlantageTime += minutesPassed * minute;
   store.set('plantage', null, lastPlantageTime);
 
-  const plantages: [string, Plantage][] = store.entries('plantage');
-  for (const [id, plantage] of plantages) {
+  const plantages: [string, RawPlantage][] = store.entries('plantage');
+  for (const [id] of plantages) {
     const user = id.split('+')[1];
-    const prestige = store.get(user, 'prestige') ?? 0;
-    const earnings = Math.ceil(
-      minutesPassed * plantage.multiplier * plantage.land * (prestige * 2 + 1),
+    const plantage = new Plantage(user);
+    new Bananen(user).add(
+      BananeType.Geerntet,
+      plantage.earnings() * minutesPassed,
     );
-    const balance = new Bananen(user);
-    balance.add(BananeType.Geerntet, earnings);
   }
 
   const donators: Record<string, number> = store.get('donators') ?? {};
@@ -42,13 +36,7 @@ function plantageRoutine() {
     bal.transfer(balance, payout, true);
     money -= payout;
   }
-  maxUpgrade(
-    config.uid,
-    store.get(config.uid, 'plantage') ?? { land: 0, multiplier: 1 },
-    bal,
-    'max',
-    money,
-  );
+  new Plantage(config.uid).maxAllUpgrade();
 }
 
 setInterval(plantageRoutine, 60 * 1000);

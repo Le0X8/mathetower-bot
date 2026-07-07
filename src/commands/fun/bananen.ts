@@ -9,6 +9,7 @@ import {
   BananeType,
   bananeValues,
 } from '@/util/bananen.ts';
+import { Plantage } from '@/util/plantage.ts';
 
 export const prestigeCost = (prestige: number) => 1e9 * (prestige + 1) ** 2;
 
@@ -45,7 +46,7 @@ export default new Command(
           return;
         }
         me.reset();
-        store.set(interaction.user.id, 'plantage', { land: 0, multiplier: 1 });
+        new Plantage(interaction.user.id).reset();
         const donators: Record<string, number> = store.get('donators') ?? {};
         delete donators[interaction.user.id];
         store.set('donators', null, donators);
@@ -66,10 +67,7 @@ export default new Command(
       const donators: Record<string, number> = store.get('donators') ?? {};
       const total = Object.values(donators).reduce((a, b) => a + b, 0);
       const top = Object.entries(donators).sort(([, a], [, b]) => b - a);
-      const plantage: { land: number; multiplier: number } = store.get(
-        id,
-        'plantage',
-      ) ?? { land: 0, multiplier: 1 };
+      const plantage = new Plantage(id);
 
       await interaction.reply({
         embeds: [
@@ -82,7 +80,7 @@ export default new Command(
                 total > 0 ? ((count / total) * 50).toFixed(2) : '0.00';
               return [
                 `**${i + 1}. @${user?.username ?? '#' + key}:** ${share}%`,
-                `\`${nb(count)}\` → \`${nb((count / total / 2) * (plantage.land * plantage.multiplier))}\`/min`,
+                `\`${nb(count)}\` → \`${nb((count / total / 2) * (plantage.plantage.land * plantage.plantage.multiplier))}\`/min`,
               ];
             }),
             '50% Rest wird für Upgrades verwendet.',

@@ -10,6 +10,7 @@ import {
   ButtonStyle,
   Interaction,
 } from 'discord.js';
+import { Plantage, UpgradeResult } from '@/util/plantage.ts';
 
 const multiplierPrice = (multiplier: number) =>
   priceAdjust(
@@ -30,76 +31,20 @@ const landPrice = (land: number) =>
           : land * 2000 - 1000,
   );
 
-export function maxUpgrade(
-  user: string,
-  plantage: { land: number; multiplier: number },
-  bananen: Bananen,
-  action: 'max' | 'maxbalance' | 'maxland' | 'maxmultiplier',
-  value: number,
-) {
-  const startMultiplier = plantage.multiplier;
-  const startLand = plantage.land;
-  const startValue = value;
-  let money = value;
-  switch (action) {
+function maxUpgrade(
+  plantage: Plantage,
+  type: 'max' | 'maxbalance' | 'maxland' | 'maxmultiplier',
+): UpgradeResult {
+  switch (type) {
     case 'max':
-      while (true) {
-        const multiplierCost = multiplierPrice(plantage.multiplier);
-        const landCost = landPrice(plantage.land);
-        if (multiplierCost < landCost && money >= multiplierCost) {
-          money -= multiplierCost;
-          plantage.multiplier += 1;
-        } else if (money >= landCost) {
-          money -= landCost;
-          plantage.land += 1;
-        } else {
-          break;
-        }
-      }
-      break;
+      return plantage.maxAllUpgrade();
     case 'maxbalance':
-      while (true) {
-        const multiplierCost = multiplierPrice(plantage.multiplier);
-        const landCost = landPrice(plantage.land);
-        if (plantage.multiplier <= plantage.land && money >= multiplierCost) {
-          money -= multiplierCost;
-          plantage.multiplier += 1;
-        } else if (plantage.multiplier > plantage.land && money >= landCost) {
-          money -= landCost;
-          plantage.land += 1;
-        } else {
-          break;
-        }
-      }
-      break;
+      return plantage.maxAllUpgradeBalanced();
     case 'maxland':
-      while (true) {
-        const landCost = landPrice(plantage.land);
-        if (money >= landCost) {
-          money -= landCost;
-          plantage.land += 1;
-        } else {
-          break;
-        }
-      }
-      break;
+      return plantage.maxLandUpgrade();
     case 'maxmultiplier':
-      while (true) {
-        const multiplierCost = multiplierPrice(plantage.multiplier);
-        if (money >= multiplierCost) {
-          money -= multiplierCost;
-          plantage.multiplier += 1;
-        } else {
-          break;
-        }
-      }
-      break;
+      return plantage.maxMultiplierUpgrade();
   }
-
-  const spent = startValue - money;
-  bananen.remove(spent);
-  store.set(user, 'plantage', plantage);
-  return [startMultiplier, startLand, spent, money];
 }
 
 export default new Command(
@@ -108,14 +53,7 @@ export default new Command(
   async (interaction) => {
     const user = interaction.options.getUser('user', false) || interaction.user;
 
-    const bananen = new Bananen(user.id);
-    let value = bananen.getValue();
-
-    const plantage: { land: number; multiplier: number } = store.get(
-      user.id,
-      'plantage',
-    ) ?? { land: 0, multiplier: 1 };
-    const prestige = store.get(user.id, 'prestige') ?? 0;
+    const plantage = new Plantage(user.id);
     const singleItem = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setLabel('\u2922 Land kaufen')
@@ -171,21 +109,21 @@ export default new Command(
     const embed = () =>
       buildEmbed(
         'Plantage von @' + user.username,
-        plantage.land < 1
+        plantage.plantage.land < 1
           ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze den Knopf unten, um 1m² Land zu kaufen.'
-          : `**Ertrag/min:** \`${amount(plantage.land * plantage.multiplier * (prestige * 2 + 1))}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
+          : `**Ertrag/min:** \`${amount(plantage.earnings())}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
         [
           [
-            `Land: \`${plantage.land}m²\``,
-            `Nächster Kauf: \`${nb(landPrice(plantage.land))}\``,
+            `Land: \`${plantage.plantage.land}m²\``,
+            `Nächster Kauf: \`${nb(landPrice(plantage.plantage.land))}\``,
           ],
           [
-            `Multiplikator: \`${plantage.multiplier}x\``,
-            `Nächster Kauf: \`${nb(multiplierPrice(plantage.multiplier))}\``,
+            `Multiplikator: \`${plantage.plantage.multiplier}x\``,
+            `Nächster Kauf: \`${nb(multiplierPrice(plantage.plantage.multiplier))}\``,
           ],
-          prestige > 0 && [
-            `Prestige-Bonus: \`${prestige * 200}%\``,
-            `Nächstes Prestige-Level: \`${nb(prestigeCost(prestige))}\``,
+          plantage.prestige > 0 && [
+            `Prestige-Bonus: \`${plantage.prestige * 200}%\``,
+            `Nächstes Prestige-Level: \`${nb(prestigeCost(plantage.prestige))}\``,
           ],
         ].filter(Boolean) as [string, string][],
         null,
@@ -208,60 +146,51 @@ export default new Command(
 
         switch (action?.customId) {
           case 'land':
-            if (value < landPrice(plantage.land)) {
+            if (!plantage.landUpgrade()) {
               await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.land))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Der Preis für das nächste Land beträgt \`${nb(landPrice(plantage.plantage.land))}\`.`,
                 ephemeral: true,
               });
               return;
             }
-            plantage.land += 1;
-            const spentLand = landPrice(plantage.land - 1);
-            bananen.remove(spentLand);
-            store.set(user.id, 'plantage', plantage);
+            const spentLand = landPrice(plantage.plantage.land - 1);
             await interaction.editReply({
               embeds: [await embed()],
             });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
-                plantage.land
-              }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentLand)}\`.`,
+                plantage.plantage.land
+              }m²**.\n\n-# Du hast \`${nb(spentLand)}\` für dieses Upgrade ausgegeben.`,
             );
             break;
           case 'multiplier':
-            if (value < multiplierPrice(plantage.multiplier)) {
+            if (!plantage.multiplierUpgrade()) {
               await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Dein aktueller Kontostand beträgt \`${nb(value)}\`. Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.multiplier))}\`.`,
+                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Der Preis für den nächsten Multiplikator beträgt \`${nb(multiplierPrice(plantage.plantage.multiplier))}\`.`,
                 ephemeral: true,
               });
               return;
             }
-            plantage.multiplier += 1;
-            const spentMultiplier = multiplierPrice(plantage.multiplier - 1);
-            bananen.remove(spentMultiplier);
-            store.set(user.id, 'plantage', plantage);
+            const spentMultiplier = multiplierPrice(
+              plantage.plantage.multiplier - 1,
+            );
             await interaction.editReply({
               embeds: [await embed()],
             });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
-                plantage.multiplier
-              }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben. Dein aktueller Kontostand beträgt \`${nb(value - spentMultiplier)}\`.`,
+                plantage.plantage.multiplier
+              }x**.\n\n-# Du hast \`${nb(spentMultiplier)}\` für dieses Upgrade ausgegeben.`,
             );
             break;
           case 'max':
           case 'maxbalance':
           case 'maxland':
           case 'maxmultiplier':
-            const [startMultiplier, startLand, spent, money] = maxUpgrade(
-              user.id,
+            const { multiplier, land, spent } = maxUpgrade(
               plantage,
-              bananen,
-              action?.customId,
-              value,
+              action.customId as any,
             );
-            const multiplier = plantage.multiplier - startMultiplier;
-            const land = plantage.land - startLand;
             await interaction.editReply({
               embeds: [await embed()],
             });
@@ -273,15 +202,15 @@ export default new Command(
                 ` gekauft!\n` +
                 (multiplier > 0
                   ? `\nDeine Plantage hat jetzt einen Multiplikator von **${
-                      plantage.multiplier
+                      plantage.plantage.multiplier
                     }x**.`
                   : '') +
                 (land > 0
                   ? `\nDeine Plantage hat jetzt eine Fläche von **${
-                      plantage.land
+                      plantage.plantage.land
                     }m²**.`
                   : 0) +
-                `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben. Dein aktueller Kontostand beträgt \`${nb(money)}\`.`,
+                `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben.`,
             );
             break;
           case 'switchtomax':
@@ -303,7 +232,6 @@ export default new Command(
             await action?.deferUpdate().catch(() => {});
             break;
         }
-        value = bananen.getValue();
       } catch {
         await interaction.editReply({
           components: [],
