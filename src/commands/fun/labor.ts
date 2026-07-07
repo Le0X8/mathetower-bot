@@ -226,6 +226,8 @@ export default new Command(
         time: 20_000, // 20 secs
       });
 
+      await msg.resource?.message?.reply(str2(researchState));
+
       switch (researchState) {
         case 0:
           researchState = 1;
@@ -283,7 +285,6 @@ export default new Command(
 
       store.set(interaction.user.id, 'labor', researchState);
       store.set(interaction.user.id, 'laborinventory', inventory);
-      await msg.resource?.message?.reply(str2(researchState));
 
       await interaction.editReply({
         components: [],
