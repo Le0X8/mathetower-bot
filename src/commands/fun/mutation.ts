@@ -1,6 +1,7 @@
 import { Command } from '$commands';
 import { emojis } from '$emojis';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 function gaussianRandom(mean: number, stdDev: number): number {
@@ -64,6 +65,18 @@ function getId(mutation: MutatedBanane): string {
   );
 }
 
+function realValue(value: number): number {
+  return value > 0 ? value ** 10 + 1 : 1 / (-value + 1);
+}
+
+function getValue(mutation: MutatedBanane): number {
+  return (
+    realValue(mutation.ranges[0]) *
+    realValue(mutation.ranges[1]) *
+    realValue(mutation.ranges[2])
+  );
+}
+
 function getRange(num: number): string {
   return ' `[' + '█'.repeat(num + 10) + '░'.repeat(20 - (num + 10)) + ']` ';
 }
@@ -107,7 +120,7 @@ function aboutBanane(mutation: MutatedBanane, num: number) {
   const emoji = getEmoji(strongestTrait);
   return buildEmbed(
     'Mutierte Banane #' + id + ' ' + emoji,
-    null,
+    `Wert: \`${nb(getValue(mutation))}\``,
     [
       info.g1 === Traits.Resistenz
         ? [
@@ -153,9 +166,11 @@ function aboutBanane(mutation: MutatedBanane, num: number) {
             emojis.banane.schlecht + getRange(info.r3) + emojis.banane.selten,
           ],
     ],
-    'Nutze `/plantage use:' +
-      num +
-      '` um diese Banane auf deiner Plantage anzubauen.',
+    num != 0
+      ? 'Nutze `/plantage use:' +
+          num +
+          '` um diese Banane auf deiner Plantage anzubauen.'
+      : 'Nutze `/plantage use:0` um die aktuell aktive Banane zu deaktivieren.',
   );
 }
 
@@ -208,8 +223,62 @@ export default new Command(
     const prestige = store.get(interaction.user.id, 'prestige') ?? 0;
     const used = store.get(interaction.user.id, 'prestigeused') ?? 0;
     const mutated: MutatedBanane[] =
-      store.get(interaction.user.id, 'mutated') ?? [];
+      store.get(
+        interaction.options.getUser('inventory', false)?.id ??
+          interaction.user.id,
+        'mutated',
+      ) ?? [];
     const available = prestige - used;
+
+    if (
+      interaction.options.getInteger('merge', false) &&
+      interaction.options.getInteger('merge2', false)
+    ) {
+      const id1 = interaction.options.getInteger('merge', true);
+      const id2 = interaction.options.getInteger('merge2', true);
+
+      if (id1 < 1 || id1 > mutated.length || id2 < 1 || id2 > mutated.length) {
+        await interaction.reply({
+          content: `Du hast keine mutierte Banane mit der Nummer \`${id1}\` oder \`${id2}\`!`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      if (id1 === id2) {
+        await interaction.reply({
+          content: `Du kannst nicht die gleiche Banane zusammenführen!`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      const mutation1 = mutated[id1 - 1];
+      mutated.splice(id1 - 1, 1);
+      const mutation2 = mutated[id2 < id1 ? id2 - 1 : id2 - 2];
+      mutated.splice(id2 < id1 ? id2 - 1 : id2 - 2, 1);
+
+      const newMutation: MutatedBanane = {
+        types: [
+          mutation1.types[0] || mutation2.types[0],
+          mutation1.types[1] || mutation2.types[1],
+          mutation1.types[2] || mutation2.types[2],
+        ],
+        ranges: [
+          Math.round((mutation1.ranges[0] + mutation2.ranges[0]) / 2),
+          Math.round((mutation1.ranges[1] + mutation2.ranges[1]) / 2),
+          Math.round((mutation1.ranges[2] + mutation2.ranges[2]) / 2),
+        ],
+      };
+
+      mutated.push(newMutation);
+      store.set(interaction.user.id, 'mutated', mutated);
+
+      await interaction.reply({
+        embeds: [await aboutBanane(newMutation, mutated.length)],
+      });
+      return;
+    }
 
     if (interaction.options.getInteger('info', false) !== null) {
       const id = interaction.options.getInteger('info', true);
@@ -237,7 +306,7 @@ export default new Command(
       return;
     }
 
-    if (interaction.options.getBoolean('inventory', false)) {
+    if (interaction.options.getUser('inventory', false)) {
       if (mutated.length === 0) {
         await interaction.reply('Du hast noch keine Bananen mutiert!');
         return;
@@ -253,7 +322,7 @@ export default new Command(
 
           return [
             `**Mutierte Banane ${index + 1}**`,
-            `${id} ${emoji} ${strongestTrait[1]} • insg. ${info.r1 + info.r2 + info.r3} Buffs`,
+            `${id} ${emoji} ${strongestTrait[1]} • \`${nb(getValue(mutation))}\``,
           ];
         });
 
@@ -316,12 +385,24 @@ export default new Command(
     {
       name: 'inventory',
       description: 'Zeige deine ersten 25 Bananen im Inventar an!',
-      type: ApplicationCommandOptionType.Boolean,
+      type: ApplicationCommandOptionType.User,
       required: false,
     },
     {
       name: 'info',
       description: 'Zeige Informationen zu einer mutierten Banane an!',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+    },
+    {
+      name: 'merge',
+      description: 'Führe zwei Bananen zusammen, um eine neue zu erhalten!',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+    },
+    {
+      name: 'merge2',
+      description: 'Wähle die zweite Banane für die Mutation aus!',
       type: ApplicationCommandOptionType.Integer,
       required: false,
     },

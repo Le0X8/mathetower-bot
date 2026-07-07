@@ -44,7 +44,7 @@ export default new Command(
         p.plantage.multiplier = 1;
         p.save();
         await interaction.reply({
-          content: `Du hast erfolgreich eine mutierte Bananensorte auf deiner Plantage gepflanzt! Dein Multiplikator wurde zurückgesetzt.`,
+          content: `Du hast erfolgreich eine mutierte Bananensorte auf deiner Plantage gepflanzt! Dein Multiplikator wurde zurückgesetzt.\n\nNutze \`/mutation info:0\`, um die aktivierte Banane zu sehen.`,
         });
       } else {
         await interaction.reply({
