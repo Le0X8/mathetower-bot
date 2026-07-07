@@ -126,7 +126,9 @@ export default new Command(
             `Nächstes Prestige-Level: \`${nb(prestigeCost(plantage.prestige))}\``,
           ],
         ].filter(Boolean) as [string, string][],
-        null,
+        plantage.plantage.infection
+          ? `⚠️ Deine Plantage ist zu ${plantage.plantage.infection}% infiziert!`
+          : null,
       );
 
     const msg = await interaction.reply({
