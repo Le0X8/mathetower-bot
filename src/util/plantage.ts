@@ -233,14 +233,15 @@ export class Plantage {
     );
   }
 
-  infection(): Plantage {
-    if (this.plantage.infection === 100) return this;
+  infection(): boolean {
+    if (this.plantage.infection === 100) return false;
     if (this.plantage.infection > 0) {
       if (infectionGrowthChance(this.plantage.infection)) {
         this.plantage.infection++;
         this.save();
+        return true;
       }
-      return this;
+      return false;
     }
     if (infectionChance(this.plantage.land)) {
       this.plantage.infection = 1;
@@ -248,8 +249,9 @@ export class Plantage {
         String.fromCharCode(0x41 + Math.floor(Math.random() * 26)) +
         Math.floor(Math.random() * 10);
       this.save();
+      return true;
     }
-    return this;
+    return false;
   }
 
   reset(): Plantage {

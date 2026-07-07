@@ -19,7 +19,8 @@ export function plantageRoutine(client: Client) {
   for (const [id] of plantages) {
     const user = id.split('+')[1];
     const plantage = new Plantage(user);
-    if (user != config.uid) plantage.infection();
+    let infected = false;
+    if (user != config.uid) infected = plantage.infection();
     if (user == config.uid && plantage.plantage.infection > 0) {
       plantage.plantage.infection = 0;
       plantage.plantage.infectionType = null;
@@ -27,11 +28,12 @@ export function plantageRoutine(client: Client) {
     }
 
     if (
-      plantage.plantage.infection === 1 ||
-      plantage.plantage.infection === 25 ||
-      plantage.plantage.infection === 50 ||
-      plantage.plantage.infection === 75 ||
-      plantage.plantage.infection === 100
+      infected &&
+      (plantage.plantage.infection === 1 ||
+        plantage.plantage.infection === 25 ||
+        plantage.plantage.infection === 50 ||
+        plantage.plantage.infection === 75 ||
+        plantage.plantage.infection === 100)
     ) {
       client.guilds.fetch(config.gid).then((guild) => {
         guild.channels.fetch(config.cid).then((channel) => {
