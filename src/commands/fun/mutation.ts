@@ -184,7 +184,7 @@ export interface Buffs {
 
 export function getMutation(uid: string): Buffs {
   const active = store.get(uid, 'mutationactive') ?? null;
-  if (!active)
+  if (!active || active === undefined)
     return {
       infection: 0,
       speed: 0,
