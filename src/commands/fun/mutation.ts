@@ -185,7 +185,7 @@ export default new Command(
 
           return [
             `**Mutierte Banane ${index + 1}**`,
-            `#${id} ${emoji} _${strongestTrait[1]}_`,
+            `#${id} ${emoji} ${strongestTrait[1]} • insg. ${info.r1 + info.r2 + info.r3} Buffs`,
           ];
         });
 
