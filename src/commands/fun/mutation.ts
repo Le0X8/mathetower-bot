@@ -230,6 +230,40 @@ export default new Command(
       ) ?? [];
     const available = prestige - used;
 
+    if (interaction.options.getUser('inventory', false)) {
+      if (mutated.length === 0) {
+        await interaction.reply('Du hast noch keine Bananen mutiert!');
+        return;
+      }
+
+      const bananen = mutated
+        .slice(0, 25)
+        .map((mutation, index): [string, string] => {
+          const info = getMutationInfo(mutation);
+          const id = getId(mutation);
+          const strongestTrait = getStrongestTrait(info);
+          const emoji = getEmoji(strongestTrait);
+
+          return [
+            `**Mutierte Banane ${index + 1}**`,
+            `${id} ${emoji} ${strongestTrait[1]} • \`${nb(getValue(mutation))}\``,
+          ];
+        });
+
+      await interaction.reply({
+        embeds: [
+          await buildEmbed(
+            'Mutierte Bananen',
+            'Weitere Details: `/mutation info:<Nummer>`',
+            bananen,
+            mutated.length > 25 ? `+${mutated.length - 25} weitere` : null,
+          ),
+        ],
+      });
+    }
+
+    // only add new methods after this comment!
+
     if (
       interaction.options.getInteger('merge', false) &&
       interaction.options.getInteger('merge2', false)
@@ -304,38 +338,6 @@ export default new Command(
         embeds: [await aboutBanane(mutation, id)],
       });
       return;
-    }
-
-    if (interaction.options.getUser('inventory', false)) {
-      if (mutated.length === 0) {
-        await interaction.reply('Du hast noch keine Bananen mutiert!');
-        return;
-      }
-
-      const bananen = mutated
-        .slice(0, 25)
-        .map((mutation, index): [string, string] => {
-          const info = getMutationInfo(mutation);
-          const id = getId(mutation);
-          const strongestTrait = getStrongestTrait(info);
-          const emoji = getEmoji(strongestTrait);
-
-          return [
-            `**Mutierte Banane ${index + 1}**`,
-            `${id} ${emoji} ${strongestTrait[1]} • \`${nb(getValue(mutation))}\``,
-          ];
-        });
-
-      await interaction.reply({
-        embeds: [
-          await buildEmbed(
-            'Mutierte Bananen',
-            'Weitere Details: `/mutation info:<Nummer>`',
-            bananen,
-            mutated.length > 25 ? `+${mutated.length - 25} weitere` : null,
-          ),
-        ],
-      });
     }
 
     if (interaction.options.getBoolean('mutate', false)) {
