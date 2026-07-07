@@ -9,7 +9,7 @@ const multiplierPrice = (multiplier: number, buff: number) =>
       : multiplier < 100
         ? multiplier ** 1.5 * 10 + 100
         : multiplier ** 2 * 10 + 100) *
-      (1 - buff * 0.02),
+      (1 - buff * 0.01),
   );
 const landPrice = (land: number, buff: number) =>
   priceAdjust(
@@ -20,7 +20,7 @@ const landPrice = (land: number, buff: number) =>
         : land < 100
           ? land * 200 - 100
           : land * 2000 - 1000) *
-      (1 - buff * 0.02),
+      (1 - buff * 0.01),
   );
 const infectionChance = (land: number, buff: number) =>
   Math.floor(Math.random() * 1e5) <
@@ -265,8 +265,8 @@ export class Plantage {
       (this.plantage.land *
         this.plantage.multiplier *
         (prestige * 2 + 1) *
-        (1 + this.mutation.speed * 0.1) *
-        (1 + this.mutation.rarity * 0.03)) /
+        (1 + this.mutation.speed * 0.01) *
+        (1 + this.mutation.rarity * 0.01)) /
       infection
     );
   }

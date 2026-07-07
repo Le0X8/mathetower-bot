@@ -45,8 +45,16 @@ export default new Command(
           });
           return;
         }
+        const plantage = new Plantage(interaction.user.id);
+        if (plantage.plantage.infection > 0) {
+          await interaction.reply({
+            content: `Du kannst nicht prestigen, während deine Plantage infiziert ist!`,
+            ephemeral: true,
+          });
+          return;
+        }
         me.reset();
-        new Plantage(interaction.user.id).reset();
+        plantage.reset();
         const donators: Record<string, number> = store.get('donators') ?? {};
         delete donators[interaction.user.id];
         store.set('donators', null, donators);

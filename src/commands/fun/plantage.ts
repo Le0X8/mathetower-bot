@@ -40,6 +40,9 @@ export default new Command(
           interaction.options.getInteger('use', true),
         )
       ) {
+        const p = new Plantage(interaction.user.id);
+        p.plantage.multiplier = 1;
+        p.save();
         await interaction.reply({
           content: `Du hast erfolgreich eine mutierte Bananensorte auf deiner Plantage gepflanzt! Dein Multiplikator wurde zurückgesetzt.`,
         });
