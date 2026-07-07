@@ -72,17 +72,18 @@ function percent(num: number): string {
   return (num < 0 ? '' : '+') + num + '%';
 }
 
-function getStrongestTrait(info: MutationInfo): [Traits, boolean] {
+function getStrongestTrait(info: MutationInfo): [Traits, number] {
   const traits = [
     { trait: info.g1, value: info.r1 },
     { trait: info.g2, value: info.r2 },
     { trait: info.g3, value: info.r3 },
   ];
   traits.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
-  return [traits[0].trait, traits[0].value > 0];
+  return [traits[0].trait, traits[0].value];
 }
 
-function getEmoji([trait, positive]: [Traits, boolean]): string {
+function getEmoji([trait, strength]: [Traits, number]): string {
+  const positive = strength > 0;
   switch (trait) {
     case Traits.Resistenz:
       return positive ? emojis.banane.gestählt : emojis.banane.braun;
@@ -182,7 +183,10 @@ export default new Command(
           const strongestTrait = getStrongestTrait(info);
           const emoji = getEmoji(strongestTrait);
 
-          return [`**Mutierte Banane ${index + 1}**`, `#${id} ${emoji}`];
+          return [
+            `**Mutierte Banane ${index + 1}**`,
+            `#${id} ${emoji} _${strongestTrait[1]}_`,
+          ];
         });
 
       await interaction.reply({
