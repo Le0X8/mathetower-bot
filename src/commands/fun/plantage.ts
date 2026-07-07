@@ -211,7 +211,7 @@ export default new Command(
                   ? `\nDeine Plantage hat jetzt eine Fläche von **${
                       plantage.plantage.land
                     }m²**.`
-                  : 0) +
+                  : '') +
                 `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben.`,
             );
             break;
