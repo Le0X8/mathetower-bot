@@ -211,7 +211,7 @@ export default new Command(
       store.get(interaction.user.id, 'mutated') ?? [];
     const available = prestige - used;
 
-    if (interaction.options.getInteger('info', false)) {
+    if (interaction.options.getInteger('info', false) !== null) {
       const id = interaction.options.getInteger('info', true);
       if (id < 0 || id > mutated.length) {
         await interaction.reply({
