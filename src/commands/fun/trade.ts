@@ -45,9 +45,9 @@ export default new Command(
         `Du hast erfolgreich deine **#${getId(mutation)}** für ${nb(amount)} zum Handel angeboten!\n\nTrade-ID: \`${
           trades.length
         }\`\nNutze \`/accept id:${trades.length}\`, um die Transaktion durchzuführen oder die Mutation zurückzunehmen!` +
-        user
+        (user
           ? `\n\nDiese Banane kann nur von <@${user}> gekauft werden.`
-          : '',
+          : ''),
     });
   },
   false,
