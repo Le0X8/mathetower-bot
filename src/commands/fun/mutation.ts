@@ -182,7 +182,7 @@ export default new Command(
           const strongestTrait = getStrongestTrait(info);
           const emoji = getEmoji(strongestTrait);
 
-          return [`**Mutierte Banane ${index + 1}**`, '#${id} ${emoji}'];
+          return [`**Mutierte Banane ${index + 1}**`, `#${id} ${emoji}`];
         });
 
       await interaction.reply({
