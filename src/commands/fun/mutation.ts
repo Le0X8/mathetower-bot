@@ -302,24 +302,30 @@ export default new Command(
 
       const newMutation: MutatedBanane = {
         types: [
-          Math.random() < 0.25
+          Math.random() < 0.1
             ? Math.random() < 0.5
-            : mutation1.types[0] || mutation2.types[0],
-          Math.random() < 0.25
+              ? mutation1.types[0]
+              : mutation2.types[0]
+            : Math.random() < 0.5,
+          Math.random() < 0.1
             ? Math.random() < 0.5
-            : mutation1.types[1] || mutation2.types[1],
-          Math.random() < 0.25
+              ? mutation1.types[1]
+              : mutation2.types[1]
+            : Math.random() < 0.5,
+          Math.random() < 0.1
             ? Math.random() < 0.5
-            : mutation1.types[2] || mutation2.types[2],
+              ? mutation1.types[1]
+              : mutation2.types[1]
+            : Math.random() < 0.5,
         ],
         ranges: [
-          Math.random() < 0.25
+          Math.random() < 0.1
             ? bellRandom()
             : randomBetween(mutation1.ranges[0], mutation2.ranges[0]),
-          Math.random() < 0.25
+          Math.random() < 0.1
             ? bellRandom()
             : randomBetween(mutation1.ranges[1], mutation2.ranges[1]),
-          Math.random() < 0.25
+          Math.random() < 0.1
             ? bellRandom()
             : randomBetween(mutation1.ranges[2], mutation2.ranges[2]),
         ],
