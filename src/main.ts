@@ -10,7 +10,7 @@ import {
 } from 'discord.js';
 import { reactions } from '@/reactions.ts';
 import '@/store.ts';
-import '@/config/plantage.ts';
+import { plantageRoutine } from '@/config/plantage.ts';
 import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
@@ -130,6 +130,8 @@ client.once(Events.ClientReady, (readyClient) => {
     ],
     status: 'online',
   });
+
+  setInterval(() => plantageRoutine(readyClient), 60 * 1000);
 
   refreshMembers();
   setInterval(refreshMembers, 60 * 60 * 1000);

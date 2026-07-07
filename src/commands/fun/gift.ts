@@ -3,6 +3,7 @@ import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType, GuildMember, Role } from 'discord.js';
 import config from '$config' with { type: 'json' };
 import { Bananen, BananeType } from '@/util/bananen.ts';
+import { Plantage } from '@/util/plantage.ts';
 
 export default new Command(
   'gift',
@@ -11,6 +12,14 @@ export default new Command(
     const sender = interaction.user;
     const receiver = interaction.options.getMentionable('user', true);
     let amount = interaction.options.getInteger('amount', true);
+
+    if (new Plantage(sender.id).plantage.infection > 99) {
+      await interaction.reply({
+        content: `Du bist zu stark infiziert, um Bananen zu verschenken!`,
+        ephemeral: true,
+      });
+      return;
+    }
 
     const receivers = [];
 
@@ -40,6 +49,11 @@ export default new Command(
 
     const msgs: string[] = [];
     receivers.forEach((r, i) => {
+      if (new Plantage(r).plantage.infection > 99) {
+        msgs.push(`<@${r}> ist zu stark infiziert, um Bananen zu empfangen!`);
+        return;
+      }
+
       if (r == config.uid) {
         const donators: Record<string, number> = store.get('donators') ?? {};
         donators[sender.id] = (donators[sender.id] ?? 0) + singleAmount;

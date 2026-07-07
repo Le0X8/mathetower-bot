@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import { prestigeCost } from '@/commands/fun/bananen.ts';
-import { Bananen, bananeStrings, BananeType } from '@/util/bananen.ts';
+import { bananeStrings, BananeType } from '@/util/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import {
