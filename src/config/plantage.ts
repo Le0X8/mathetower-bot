@@ -40,27 +40,27 @@ export function plantageRoutine(client: Client) {
           if (channel?.isTextBased()) {
             if (plantage.plantage.infection === 1)
               channel.send(
-                `# <@${user}>\nDeine Plantage ist infiziert!\nDein Prestige-Bonus ist deaktiviert und du kannst nicht prestigen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+                `<@${user}>\n# Deine Plantage ist infiziert!\nDein Prestige-Bonus ist deaktiviert und du kannst nicht prestigen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
               );
 
             if (plantage.plantage.infection === 25)
               channel.send(
-                `# <@${user}>\n25% deiner Plantage sind infiziert!\nDu kannst kein Land mehr kaufen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+                `<@${user}>\n# 25% deiner Plantage sind infiziert!\nDu kannst kein Land mehr kaufen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
               );
 
             if (plantage.plantage.infection === 50)
               channel.send(
-                `# <@${user}>\n50% deiner Plantage sind infiziert!\nDu kannst die Plantage nicht mehr upgraden, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+                `<@${user}>\n# 50% deiner Plantage sind infiziert!\nDu kannst die Plantage nicht mehr upgraden, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
               );
 
             if (plantage.plantage.infection === 75)
               channel.send(
-                `# <@${user}>\n75% deiner Plantage sind infiziert!\nDie Mutation deiner Plantage ist deaktiviert, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+                `<@${user}>\n# 75% deiner Plantage sind infiziert!\nDie Mutation deiner Plantage ist deaktiviert, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
               );
 
             if (plantage.plantage.infection === 100)
               channel.send(
-                `# <@${user}>\nDeine Plantage ist restlos infiziert!\nDu hast keinen Ertrag aus der Plantage mehr und kannst keine Geschenke mehr senden oder erhalten, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+                `<@${user}>\n# Deine Plantage ist restlos infiziert!\nDu hast keinen Ertrag aus der Plantage mehr und kannst keine Geschenke mehr senden oder erhalten, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
               );
           }
         });
