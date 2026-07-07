@@ -168,8 +168,8 @@ export interface Buffs {
 }
 
 export function getMutation(uid: string): Buffs {
-  const id = store.get(uid, 'mutationactive') ?? null;
-  if (!id)
+  const active = store.get(uid, 'mutationactive') ?? null;
+  if (!active)
     return {
       infection: 0,
       speed: 0,
@@ -177,7 +177,7 @@ export function getMutation(uid: string): Buffs {
       investment: 0,
       rarity: 0,
     };
-  const mutation = store.get(uid, 'mutated')[id - 1];
+  const mutation = active;
   const info = getMutationInfo(mutation);
   return {
     infection:
@@ -191,9 +191,13 @@ export function getMutation(uid: string): Buffs {
 }
 
 export function setMutation(uid: string, id: number | null) {
+  if (id === 0) {
+    store.set(uid, 'mutationactive', null);
+    return true;
+  }
   const mutations = store.get(uid, 'mutated') ?? [];
   if (id !== null && (id < 1 || id > mutations.length)) return false;
-  store.set(uid, 'mutationactive', id);
+  store.set(uid, 'mutationactive', id === null ? null : mutations[id - 1]);
   return true;
 }
 
@@ -206,6 +210,32 @@ export default new Command(
     const mutated: MutatedBanane[] =
       store.get(interaction.user.id, 'mutated') ?? [];
     const available = prestige - used;
+
+    if (interaction.options.getInteger('info', false)) {
+      const id = interaction.options.getInteger('info', true);
+      if (id < 0 || id > mutated.length) {
+        await interaction.reply({
+          content: `Du hast keine mutierte Banane mit der Nummer \`${id}\`!`,
+          ephemeral: true,
+        });
+        return;
+      }
+      const mutation =
+        id === 0
+          ? (store.get(interaction.user.id, 'mutationactive') ?? null)
+          : mutated[id - 1];
+      if (!mutation) {
+        await interaction.reply({
+          content: `Du hast keine Banane aktiviert!`,
+          ephemeral: true,
+        });
+        return;
+      }
+      await interaction.reply({
+        embeds: [await aboutBanane(mutation, id)],
+      });
+      return;
+    }
 
     if (interaction.options.getBoolean('inventory', false)) {
       if (mutated.length === 0) {
@@ -228,7 +258,14 @@ export default new Command(
         });
 
       await interaction.reply({
-        embeds: [await buildEmbed('Mutierte Bananen', null, bananen, null)],
+        embeds: [
+          await buildEmbed(
+            'Mutierte Bananen',
+            'Weitere Details: `/mutation info:<Nummer>`',
+            bananen,
+            mutated.length > 25 ? `+${mutated.length - 25} weitere` : null,
+          ),
+        ],
       });
     }
 
@@ -280,6 +317,12 @@ export default new Command(
       name: 'inventory',
       description: 'Zeige deine ersten 25 Bananen im Inventar an!',
       type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'info',
+      description: 'Zeige Informationen zu einer mutierten Banane an!',
+      type: ApplicationCommandOptionType.Integer,
       required: false,
     },
   ],
