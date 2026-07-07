@@ -29,7 +29,16 @@ enum Traits {
   Seltenheit,
 }
 
-function getMutationInfo(mutation: MutatedBanane) {
+interface MutationInfo {
+  g1: Traits;
+  g2: Traits;
+  g3: Traits;
+  r1: number;
+  r2: number;
+  r3: number;
+}
+
+function getMutationInfo(mutation: MutatedBanane): MutationInfo {
   return {
     g1: mutation.types[0] ? Traits.Geschwindigkeit : Traits.Resistenz,
     g2: mutation.types[1] ? Traits.Investment : Traits.Einfachheit,
@@ -56,18 +65,47 @@ function getId(mutation: MutatedBanane): string {
 }
 
 function getRange(num: number): string {
-  return '█'.repeat(num + 10) + '░'.repeat(20 - (num + 10));
+  return ' `[' + '█'.repeat(num + 10) + '░'.repeat(20 - (num + 10)) + ']` ';
 }
 
 function percent(num: number): string {
   return (num < 0 ? '' : '+') + num + '%';
 }
 
-function aboutBanane(mutation: MutatedBanane) {
+function getStrongestTrait(info: MutationInfo): [Traits, boolean] {
+  const traits = [
+    { trait: info.g1, value: info.r1 },
+    { trait: info.g2, value: info.r2 },
+    { trait: info.g3, value: info.r3 },
+  ];
+  traits.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+  return [traits[0].trait, traits[0].value > 0];
+}
+
+function getEmoji([trait, positive]: [Traits, boolean]): string {
+  switch (trait) {
+    case Traits.Resistenz:
+      return positive ? emojis.banane.gestählt : emojis.banane.braun;
+    case Traits.Geschwindigkeit:
+      return positive ? emojis.banane.schnellwachsend : emojis.banane.langsam;
+    case Traits.Einfachheit:
+      return positive ? emojis.banane.einfach : emojis.banane.komplex;
+    case Traits.Investment:
+      return positive ? emojis.banane.investment : emojis.banane.besteuert;
+    case Traits.Resistenz2:
+      return positive ? emojis.banane.gestählt : emojis.banane.braun;
+    case Traits.Seltenheit:
+      return positive ? emojis.banane.selten : emojis.banane.schlecht;
+  }
+}
+
+function aboutBanane(mutation: MutatedBanane, num: number) {
   const info = getMutationInfo(mutation);
   const id = getId(mutation);
+  const strongestTrait = getStrongestTrait(info);
+  const emoji = getEmoji(strongestTrait);
   return buildEmbed(
-    'Mutierte Banane #' + id,
+    'Mutierte Banane #' + id + ' ' + emoji,
     null,
     [
       info.g1 === Traits.Resistenz
@@ -114,7 +152,9 @@ function aboutBanane(mutation: MutatedBanane) {
             emojis.banane.schlecht + getRange(info.r3) + emojis.banane.selten,
           ],
     ],
-    null,
+    'Nutze `/plantage use:' +
+      num +
+      '` um diese Banane auf deiner Plantage anzubauen.',
   );
 }
 
@@ -127,6 +167,28 @@ export default new Command(
     const mutated: MutatedBanane[] =
       store.get(interaction.user.id, 'mutated') ?? [];
     const available = prestige - used;
+
+    if (interaction.options.getBoolean('inventory', false)) {
+      if (mutated.length === 0) {
+        await interaction.reply('Du hast noch keine Bananen mutiert!');
+        return;
+      }
+
+      const bananen = mutated
+        .slice(0, 25)
+        .map((mutation, index): [string, string] => {
+          const info = getMutationInfo(mutation);
+          const id = getId(mutation);
+          const strongestTrait = getStrongestTrait(info);
+          const emoji = getEmoji(strongestTrait);
+
+          return [`**Mutierte Banane ${index + 1}**`, '#${id} ${emoji}'];
+        });
+
+      await interaction.reply({
+        embeds: [await buildEmbed('Mutierte Bananen', null, bananen, null)],
+      });
+    }
 
     if (interaction.options.getBoolean('mutate', false)) {
       if (available <= 0) {
@@ -145,7 +207,7 @@ export default new Command(
       store.set(interaction.user.id, 'mutated', mutated);
 
       await interaction.reply({
-        embeds: [await aboutBanane(mutation)],
+        embeds: [await aboutBanane(mutation, mutated.length)],
       });
       return;
     }
@@ -169,6 +231,12 @@ export default new Command(
     {
       name: 'mutate',
       description: 'Mutiere eine Banane!',
+      type: ApplicationCommandOptionType.Boolean,
+      required: false,
+    },
+    {
+      name: 'inventory',
+      description: 'Zeige deine ersten 25 Bananen im Inventar an!',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
