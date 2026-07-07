@@ -218,6 +218,12 @@ export function setMutation(uid: string, id: number | null) {
   return true;
 }
 
+function randomBetween(a: number, b: number): number {
+  const min = Math.min(a, b);
+  const max = Math.max(a, b);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export default new Command(
   'mutation',
   'Bearbeite Bananen mithilfe von Gentechnik!',
@@ -309,13 +315,13 @@ export default new Command(
         ranges: [
           Math.random() < 0.25
             ? bellRandom()
-            : Math.round((mutation1.ranges[0] + mutation2.ranges[0]) / 2),
+            : randomBetween(mutation1.ranges[0], mutation2.ranges[0]),
           Math.random() < 0.25
             ? bellRandom()
-            : Math.round((mutation1.ranges[1] + mutation2.ranges[1]) / 2),
+            : randomBetween(mutation1.ranges[1], mutation2.ranges[1]),
           Math.random() < 0.25
             ? bellRandom()
-            : Math.round((mutation1.ranges[2] + mutation2.ranges[2]) / 2),
+            : randomBetween(mutation1.ranges[2], mutation2.ranges[2]),
         ],
       };
 
