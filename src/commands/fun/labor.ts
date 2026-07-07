@@ -3,6 +3,7 @@ import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { Plantage } from '@/util/plantage.ts';
 import {
   ActionRowBuilder,
+  ApplicationCommandOptionType,
   ButtonBuilder,
   ButtonStyle,
   Interaction,
@@ -93,10 +94,73 @@ function str2(researchState: number): string {
   }
 }
 
+interface Inventory {
+  cures: Record<string, boolean>;
+  recipes: Record<string, boolean>;
+  families: Record<string, boolean>;
+}
+
 export default new Command(
   'labor',
   'Bekämpfe die Infektion auf deiner Plantage!',
   async (interaction) => {
+    const inventory: Inventory = store.get(
+      interaction.user.id,
+      'laborinventory',
+    ) ?? { cures: {}, recipes: {}, families: {} };
+
+    if (interaction.options.getBoolean('inventory', false)) {
+      await interaction.reply({
+        embeds: [
+          await buildEmbed(
+            'Labor-Inventar',
+            null,
+            [
+              [
+                '**Gegenmittel:**',
+                Object.keys(inventory.cures)
+                  .map((cure) => `\`${cure}\``)
+                  .join(', ') || 'keine',
+              ],
+              [
+                '**Rezepte:**',
+                Object.keys(inventory.recipes)
+                  .map((recipe) => `\`${recipe}\``)
+                  .join(', ') || 'keine',
+              ],
+              [
+                '**Familien:**',
+                Object.keys(inventory.families)
+                  .map((family) => `\`${family}\``)
+                  .join(', ') || 'keine',
+              ],
+            ],
+            null,
+          ),
+        ],
+      });
+      return;
+    }
+
+    const help = interaction.options.getUser('help', false);
+    if (help) {
+      const inv2: Inventory = store.get(help.id, 'laborinventory') ?? {
+        cures: {},
+        recipes: {},
+        families: {},
+      };
+
+      inv2.families = { ...inv2.families, ...inventory.families };
+      inv2.recipes = { ...inv2.recipes, ...inventory.recipes };
+
+      store.set(help.id, 'laborinventory', inv2);
+
+      await interaction.reply({
+        content: `Du hast dein gesamtes Wissen über Infektionen und Gegenmittel an <@${help.id}> weitergegeben!`,
+      });
+      return;
+    }
+
     const plantage = new Plantage(interaction.user.id);
     if (
       plantage.plantage.infection <= 0 ||
@@ -157,7 +221,7 @@ export default new Command(
       i.user.id === interaction.user.id;
 
     try {
-      const action = await msg.resource?.message?.awaitMessageComponent({
+      await msg.resource?.message?.awaitMessageComponent({
         filter: collectorFilter,
         time: 20_000, // 20 secs
       });
@@ -176,6 +240,10 @@ export default new Command(
           break;
         case 2:
           researchState = 3;
+          inventory.recipes[plantage.plantage.infectionType ?? ''] = true;
+          inventory.families[
+            plantage.plantage.infectionType?.slice(0, 1) ?? ''
+          ] = true;
           store.set(
             interaction.user.id,
             'laborlock',
@@ -184,6 +252,7 @@ export default new Command(
           break;
         case 3:
           researchState = 4;
+          inventory.cures[plantage.plantage.infectionType ?? ''] = true;
           plantage.plantage.infection = 0;
           plantage.plantage.infectionType = null;
           plantage.save();
@@ -198,6 +267,10 @@ export default new Command(
           break;
         case 6:
           researchState = 3;
+          inventory.recipes[plantage.plantage.infectionType ?? ''] = true;
+          inventory.families[
+            plantage.plantage.infectionType?.slice(0, 1) ?? ''
+          ] = true;
           store.set(
             interaction.user.id,
             'laborlock',
@@ -209,6 +282,7 @@ export default new Command(
       }
 
       store.set(interaction.user.id, 'labor', researchState);
+      store.set(interaction.user.id, 'laborinventory', inventory);
       await msg.resource?.message?.reply(str2(researchState));
 
       await interaction.editReply({
@@ -220,4 +294,20 @@ export default new Command(
       });
     }
   },
+  false,
+  [
+    {
+      name: 'inventory',
+      type: ApplicationCommandOptionType.Boolean,
+      description: 'Zeigt deine Heilmittel und Rezepte an.',
+      required: false,
+    },
+    {
+      name: 'help',
+      type: ApplicationCommandOptionType.User,
+      description:
+        'Hilft anderen Spielern bei der Bekämpfung der Infektion auf ihrer Plantage.',
+      required: false,
+    },
+  ],
 );
