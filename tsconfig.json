@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
+      "$strings": ["./src/lib/strings.ts"],
       "$emojis": ["./src/lib/emojis.ts"],
       "$config": ["./config.json"],
       "$commands": ["./src/commands/commands.ts"],

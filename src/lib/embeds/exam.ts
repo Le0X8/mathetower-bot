@@ -1,14 +1,15 @@
 import { formatDate } from '@/lib/helpers/date.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import strings from '$strings';
 
 export async function examGet(subject: string) {
   const value = store.get('exam+' + subject.toLowerCase());
   subject = subject.toUpperCase();
   const embed = await buildEmbed(
-    `${subject}-Klausurtermine`,
-    value ? null : `Keine Klausurtermine für **${subject}** gesetzt.`,
+    strings.exam.dates(subject),
+    value ? null : strings.exam.none(subject),
     value?.map((d: Date, i: number) => [
-      i === 0 ? 'Ersttermin' : 'Zweittermin',
+      i === 0 ? strings.exam.first : strings.exam.second,
       formatDate(new Date(d)),
     ]) ?? [],
     null,
@@ -27,15 +28,15 @@ export async function examList() {
     .map(([key, value]) => {
       const subject = key.split('+')[1].toUpperCase();
       const [date1, date2] = value.map((d: Date) => formatDate(new Date(d)));
-      return [subject, `Ersttermin: ${date1}\nZweittermin: ${date2}`] as [
-        string,
-        string,
-      ];
+      return [
+        subject,
+        `${strings.exam.first}: ${date1}\n${strings.exam.second}: ${date2}`,
+      ] as [string, string];
     });
 
   const embed = await buildEmbed(
-    'Anstehende Klausuren',
-    klausuren.length > 0 ? null : 'Keine Klausuren gesetzt.',
+    strings.exam.planned,
+    klausuren.length > 0 ? null : strings.exam.none(),
     klausuren,
     null,
   );
