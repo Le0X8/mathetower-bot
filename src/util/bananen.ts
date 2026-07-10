@@ -1,4 +1,5 @@
 import { emojis } from '$emojis';
+import { fromAmount } from '@/lib/helpers/bananen.ts';
 
 export class Bananen {
   uid: string;
@@ -137,7 +138,8 @@ export class Bananen {
     return this.diff > 0 ? this.diff : 0;
   }
 
-  getAmount(amount: number): number {
+  getAmount(amount: number | string): number {
+    if (typeof amount === 'string') amount = fromAmount(amount);
     if (amount < 0) return -amount * this.getValue();
     return amount;
   }

@@ -13,7 +13,7 @@ export default new Command(
     const sender = interaction.user;
     const buff = getMutation(sender.id).investment;
     const receiver = interaction.options.getMentionable('user', true);
-    let amount = interaction.options.getInteger('amount', true);
+    let amount: string | number = interaction.options.getString('amount', true);
 
     if (new Plantage(sender.id).plantage.infection > 99) {
       await interaction.reply({
@@ -98,7 +98,7 @@ export default new Command(
       name: 'amount',
       description:
         'Anzahl der zu verschenkenden normalen Bananen (in \u0e3f), -1 für alles',
-      type: ApplicationCommandOptionType.Integer,
+      type: ApplicationCommandOptionType.String,
       required: true,
     },
   ],

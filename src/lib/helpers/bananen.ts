@@ -31,3 +31,32 @@ export function priceAdjust(price: number): number {
   if (price < 1e30) return Math.ceil(price / 1e25) * 1e25;
   return Math.ceil(price / 1e28) * 1e28;
 }
+
+export function fromAmount(a: string): number {
+  const amount = parseFloat(a);
+  const suffix = a.slice(-1);
+  switch (suffix) {
+    case 'k':
+      return amount * 1e3;
+    case 'M':
+      return amount * 1e6;
+    case 'G':
+      return amount * 1e9;
+    case 'T':
+      return amount * 1e12;
+    case 'P':
+      return amount * 1e15;
+    case 'E':
+      return amount * 1e18;
+    case 'Z':
+      return amount * 1e21;
+    case 'Y':
+      return amount * 1e24;
+    case 'R':
+      return amount * 1e27;
+    case 'Q':
+      return amount * 1e30;
+    default:
+      return amount;
+  }
+}
