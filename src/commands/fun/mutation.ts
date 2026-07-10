@@ -51,6 +51,7 @@ function getMutationInfo(mutation: MutatedBanane): MutationInfo {
 }
 
 export function getId(mutation: MutatedBanane): string {
+  if (!mutation) return '0-000';
   return (
     String.fromCharCode(
       0x41 +
@@ -59,9 +60,9 @@ export function getId(mutation: MutatedBanane): string {
         (mutation.types[2] ? 4 : 0),
     ) +
     '-' +
-    String.fromCharCode(0x41 + mutation.ranges[0] + 10) +
-    String.fromCharCode(0x41 + mutation.ranges[1] + 10) +
-    String.fromCharCode(0x41 + mutation.ranges[2] + 10)
+    String.fromCharCode(0x4b - mutation.ranges[0]) +
+    String.fromCharCode(0x4b - mutation.ranges[1]) +
+    String.fromCharCode(0x4b - mutation.ranges[2])
   );
 }
 
@@ -214,6 +215,11 @@ export function setMutation(uid: string, id: number | null) {
   }
   const mutations = store.get(uid, 'mutated') ?? [];
   if (id !== null && (id < 1 || id > mutations.length)) return false;
+  if (
+    id !== null &&
+    getId(store.get(uid, 'mutationactive')) === getId(mutations[id - 1])
+  )
+    return false;
   store.set(uid, 'mutationactive', id === null ? null : mutations[id - 1]);
   return true;
 }
@@ -321,13 +327,22 @@ export default new Command(
         ranges: [
           Math.random() < 0.1
             ? bellRandom()
-            : randomBetween(mutation1.ranges[0], mutation2.ranges[0]),
+            : randomBetween(
+                Math.max(mutation1.ranges[0] - 2, -10),
+                Math.min(mutation2.ranges[0] + 5, 10),
+              ),
           Math.random() < 0.1
             ? bellRandom()
-            : randomBetween(mutation1.ranges[1], mutation2.ranges[1]),
+            : randomBetween(
+                Math.max(mutation1.ranges[1] - 2, -10),
+                Math.min(mutation2.ranges[1] + 5, 10),
+              ),
           Math.random() < 0.1
             ? bellRandom()
-            : randomBetween(mutation1.ranges[2], mutation2.ranges[2]),
+            : randomBetween(
+                Math.max(mutation1.ranges[2] - 2, -10),
+                Math.min(mutation2.ranges[2] + 5, 10),
+              ),
         ],
       };
 
