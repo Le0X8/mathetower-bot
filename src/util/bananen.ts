@@ -138,7 +138,7 @@ export class Bananen {
   }
 
   getAmount(amount: number): number {
-    if (amount < 0) return Math.ceil(this.getValue() / -amount);
+    if (amount < 0) return -amount * this.getValue();
     return amount;
   }
 }
