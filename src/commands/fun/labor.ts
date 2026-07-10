@@ -283,6 +283,7 @@ export default new Command(
           break;
       }
 
+      if (researchState === 4) researchState = 0;
       store.set(interaction.user.id, 'labor', researchState);
       store.set(interaction.user.id, 'laborinventory', inventory);
 
