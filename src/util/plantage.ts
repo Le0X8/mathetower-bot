@@ -272,6 +272,9 @@ export class Plantage {
   }
 
   infection(): boolean {
+    const cooldown = store.get(this.uid, 'infection-cooldown');
+    if (cooldown && Date.now() < cooldown) return false;
+    store.set(this.uid, 'infection-cooldown', undefined);
     if (this.plantage.infection === 100) return false;
     if (this.plantage.infection > 0) {
       if (infectionGrowthChance(this.plantage.infection)) {

@@ -254,6 +254,11 @@ export default new Command(
           break;
         case 3:
           researchState = 4;
+          store.set(
+            interaction.user.id,
+            'infection-cooldown',
+            Date.now() + 60 * 60 * 24 * 7 * 1000,
+          );
           inventory.cures[plantage.plantage.infectionType ?? ''] = true;
           plantage.plantage.infection = 0;
           plantage.plantage.infectionType = null;
