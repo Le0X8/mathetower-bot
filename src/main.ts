@@ -196,13 +196,14 @@ client.on(Events.MessageCreate, async (message) => {
   try {
     if (message.author.bot) return;
 
-    appendFileSync('./dataset.txt', message.content + '\n');
     specialMessages(message).catch(console.error);
   } catch {}
 });
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
+
+  appendFileSync('./dataset.txt', message.content + '\n');
 
   if (
     !content.includes('!novx') &&
