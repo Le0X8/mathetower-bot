@@ -261,14 +261,14 @@ export class Plantage {
     const prestige = this.plantage.infection > 0 ? 0 : this.prestige;
     const infection =
       this.plantage.infection > 0 ? (100 - this.plantage.infection) / 100 : 1;
-    return (
-      (this.plantage.land *
-        this.plantage.multiplier *
-        (prestige * 2 + 1) *
-        (1 + this.mutation.speed * 0.01) *
-        (1 + this.mutation.rarity * 0.01)) /
-      infection
-    );
+    return infection === 0
+      ? 0
+      : (this.plantage.land *
+          this.plantage.multiplier *
+          (prestige * 2 + 1) *
+          (1 + this.mutation.speed * 0.01) *
+          (1 + this.mutation.rarity * 0.01)) /
+          infection;
   }
 
   infection(): boolean {
