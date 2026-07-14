@@ -109,13 +109,14 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
         .lines()
         .flat_map(|line| {
             line.unwrap_or_default()
-                .split(". ")
-                .map(|s| s.replace(",", " , ").trim().to_string())
+                .to_lowercase()
+                .split('.')
+                .map(|s| s.trim().to_string())
                 .collect::<Vec<_>>()
         })
         .filter(|s| !s.is_empty())
         .map(|s| {
-            s.split(' ')
+            s.split(|c: char| !matches!(c, 'a'..='z' | 'ä' | 'ö' | 'ü' | 'ß'))
                 .filter(|s| !s.is_empty())
                 .map(|s| tokens.tokenize(s))
                 .collect::<Vec<_>>()
