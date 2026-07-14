@@ -24,6 +24,17 @@ export const emojis = {
 
     schlecht: '<:schlecht:1523972737314590812>',
     selten: '<:selten:1523972742934827108>',
+
+    seasonal: ['<:season1:1526479900968489080>'],
+
+    skins: {
+      _1: '<:season1:1526479900968489080>',
+
+      corn: '🌽',
+      apple: '🍎',
+      baguette: '🥖',
+      tomato: '🍅',
+    },
   },
   era: {
     debut: '<:debut:1506311826495770624>',
