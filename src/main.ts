@@ -96,7 +96,7 @@ globalThis.gpt6 = (input: string): Promise<string> =>
     }
   });
 
-setInterval(() => gpt6Training(), 60 * 60 * 1000);
+setInterval(() => gpt6Training(), 10 * 60 * 1000);
 
 const token = config.token;
 
