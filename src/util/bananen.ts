@@ -64,11 +64,18 @@ export class Bananen {
   }
 
   getValue(): number {
-    return Object.entries(this.bananen).reduce(
+    const val = Object.entries(this.bananen).reduce(
       (prev, [key, count]) =>
         prev + (bananeValues[parseInt(key) as BananeType] ?? 0) * count,
       0,
     );
+
+    if (Number.isNaN(val) || !Number.isFinite(val)) {
+      this.reset();
+      return 0;
+    }
+
+    return val;
   }
 
   addRandom(): {
