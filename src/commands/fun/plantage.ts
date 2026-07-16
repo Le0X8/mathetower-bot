@@ -141,101 +141,102 @@ export default new Command(
     const collectorFilter = (i: Interaction) => i.user.id === user.id;
 
     while (true) {
-      try {
-        const action = await msg.resource?.message?.awaitMessageComponent({
+      const action = await msg.resource?.message
+        ?.awaitMessageComponent({
           filter: collectorFilter,
           time: 20_000, // 20 secs
+        })
+        .catch(async () => {
+          await interaction.editReply({
+            components: [],
+          });
+          return null;
         });
+      if (!action) break;
 
-        switch (action?.customId) {
-          case 'land':
-            if (!plantage.landUpgrade()) {
-              await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Der Preis für das nächste Land beträgt \`${nb(plantage.landCost())}\`.`,
-                ephemeral: true,
-              });
-              return;
-            }
-            await interaction.editReply({
-              embeds: [await embed()],
+      switch (action?.customId) {
+        case 'land':
+          if (!plantage.landUpgrade()) {
+            await action?.reply({
+              content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um mehr Land zu kaufen! Der Preis für das nächste Land beträgt \`${nb(plantage.landCost())}\`.`,
+              ephemeral: true,
             });
-            await action?.reply(
-              `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
-                plantage.plantage.land
-              }m²**.`,
-            );
-            break;
-          case 'multiplier':
-            if (!plantage.multiplierUpgrade()) {
-              await action?.reply({
-                content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Der Preis für den nächsten Multiplikator beträgt \`${nb(plantage.multiplierCost())}\`.`,
-                ephemeral: true,
-              });
-              return;
-            }
-            await interaction.editReply({
-              embeds: [await embed()],
+            return;
+          }
+          await interaction.editReply({
+            embeds: [await embed()],
+          });
+          await action?.reply(
+            `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
+              plantage.plantage.land
+            }m²**.`,
+          );
+          break;
+        case 'multiplier':
+          if (!plantage.multiplierUpgrade()) {
+            await action?.reply({
+              content: `-# <@${user.id}>\nDu hast nicht genug Bananen, um den Multiplikator zu erhöhen! Der Preis für den nächsten Multiplikator beträgt \`${nb(plantage.multiplierCost())}\`.`,
+              ephemeral: true,
             });
-            await action?.reply(
-              `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
-                plantage.plantage.multiplier
-              }x**.`,
-            );
-            break;
-          case 'max':
-          case 'maxbalance':
-          case 'maxland':
-          case 'maxmultiplier':
-            const { multiplier, land, spent } = maxUpgrade(
-              plantage,
-              action.customId as any,
-            );
-            await interaction.editReply({
-              embeds: [await embed()],
-            });
-            await action?.reply(
-              `-# <@${user.id}>\nDu hast erfolgreich ` +
-                (multiplier > 0 ? `\`${multiplier}x\` Multiplikator` : '') +
-                (multiplier > 0 && land > 0 ? ` und ` : '') +
-                (land > 0 ? `\`${land}m²\` Land` : '') +
-                ` gekauft!\n` +
-                (multiplier > 0
-                  ? `\nDeine Plantage hat jetzt einen Multiplikator von **${
-                      plantage.plantage.multiplier
-                    }x**.`
-                  : '') +
-                (land > 0
-                  ? `\nDeine Plantage hat jetzt eine Fläche von **${
-                      plantage.plantage.land
-                    }m²**.`
-                  : '') +
-                `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben.`,
-            );
-            break;
-          case 'switchtomax':
-            await interaction.editReply({
-              components: [maxItem],
-            });
-            await action?.deferUpdate().catch(() => {});
-            break;
-          case 'switchtoall':
-            await interaction.editReply({
-              components: [allItem],
-            });
-            await action?.deferUpdate().catch(() => {});
-            break;
-          case 'switchtosingle':
-            await interaction.editReply({
-              components: [singleItem],
-            });
-            await action?.deferUpdate().catch(() => {});
-            break;
-        }
-      } catch {
-        await interaction.editReply({
-          components: [],
-        });
-        break;
+            return;
+          }
+          await interaction.editReply({
+            embeds: [await embed()],
+          });
+          await action?.reply(
+            `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
+              plantage.plantage.multiplier
+            }x**.`,
+          );
+          break;
+        case 'max':
+        case 'maxbalance':
+        case 'maxland':
+        case 'maxmultiplier':
+          const { multiplier, land, spent } = maxUpgrade(
+            plantage,
+            action.customId as any,
+          );
+          await interaction.editReply({
+            embeds: [await embed()],
+          });
+          await action?.reply(
+            `-# <@${user.id}>\nDu hast erfolgreich ` +
+              (multiplier > 0 ? `\`${multiplier}x\` Multiplikator` : '') +
+              (multiplier > 0 && land > 0 ? ` und ` : '') +
+              (land > 0 ? `\`${land}m²\` Land` : '') +
+              ` gekauft!\n` +
+              (multiplier > 0
+                ? `\nDeine Plantage hat jetzt einen Multiplikator von **${
+                    plantage.plantage.multiplier
+                  }x**.`
+                : '') +
+              (land > 0
+                ? `\nDeine Plantage hat jetzt eine Fläche von **${
+                    plantage.plantage.land
+                  }m²**.`
+                : '') +
+              `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben.`,
+          );
+          break;
+        case 'switchtomax':
+          await interaction.editReply({
+            components: [maxItem],
+          });
+          await action?.deferUpdate().catch(() => {});
+          break;
+        case 'switchtoall':
+          await interaction.editReply({
+            components: [allItem],
+          });
+          await action?.deferUpdate().catch(() => {});
+          break;
+        case 'switchtosingle':
+          await interaction.editReply({
+            components: [singleItem],
+          });
+          await action?.deferUpdate().catch(() => {});
+          break;
       }
     }
   },
