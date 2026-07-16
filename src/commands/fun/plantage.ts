@@ -186,10 +186,20 @@ export default new Command(
           case 'maxbalance':
           case 'maxland':
           case 'maxmultiplier':
-            const { multiplier, land, spent } = maxUpgrade(
+            const { multiplier, land, spent, remaining } = maxUpgrade(
               plantage,
               action.customId as any,
             );
+            if (remaining === -1) {
+              await action?.reply({
+                content: `-# <@${user.id}>\nDu musst zuerst prestigen, bevor du weitere Upgrades durchführen kannst!`,
+                ephemeral: true,
+              });
+              await interaction.editReply({
+                components: [],
+              });
+              return;
+            }
             await interaction.editReply({
               embeds: [await embed()],
             });
