@@ -51,7 +51,7 @@ function getMutationInfo(mutation: MutatedBanane): MutationInfo {
 }
 
 export function getId(mutation: MutatedBanane): string {
-  if (!mutation) return '0-000';
+  if (!mutation || !mutation.types || !mutation.ranges) return '0-000';
   return (
     String.fromCharCode(
       0x41 +
