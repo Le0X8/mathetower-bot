@@ -56,6 +56,14 @@ export default new Command(
         return;
       }
 
+      const cooldown = store.get(r, 'giftcooldown') ?? 0;
+      if (Date.now() < cooldown) {
+        msgs.push(
+          `<@${r}> kann bis zum <t:${Math.floor(cooldown / 1000)}:f> keine Bananen empfangen!`,
+        );
+        return;
+      }
+
       if (r == config.uid) {
         const donators: Record<string, number> = store.get('donators') ?? {};
         donators[sender.id] = (donators[sender.id] ?? 0) + singleAmount;

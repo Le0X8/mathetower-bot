@@ -65,6 +65,11 @@ export default new Command(
           }!\n\nAlle Bananen, Plantagen und Investitionen wurden gecleart, dafür hast du jetzt einen permanenten Bonus von ${prestige * 200}% auf alle Erträge deiner Plantage!\nDu kannst dir das nächste Prestige-Level holen, wenn du ${nb(prestigeCost(prestige))} Bananen verdient hast!`,
         });
         store.set(interaction.user.id, 'prestige', prestige);
+        store.set(
+          interaction.user.id,
+          'giftcooldown',
+          Date.now() + 1000 * 60 * 60 * 24,
+        );
         return;
 
       default:
