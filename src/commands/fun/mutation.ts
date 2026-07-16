@@ -66,6 +66,22 @@ export function getId(mutation: MutatedBanane): string {
   );
 }
 
+export function fromId(id: string): MutatedBanane {
+  id = id.toUpperCase();
+  if (!/^[A-G]-[A-K]{3}$/.test(id)) throw new Error('Invalid ID');
+  const types = [
+    (id.charCodeAt(0) - 0x41) & 1 ? true : false,
+    (id.charCodeAt(0) - 0x41) & 2 ? true : false,
+    (id.charCodeAt(0) - 0x41) & 4 ? true : false,
+  ];
+  const ranges = [
+    0x4b - id.charCodeAt(2),
+    0x4b - id.charCodeAt(3),
+    0x4b - id.charCodeAt(4),
+  ];
+  return { types, ranges } as MutatedBanane;
+}
+
 function realValue(value: number): number {
   return value > 0 ? value ** 10 + 1 : 1 / (-value + 1);
 }
