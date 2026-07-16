@@ -38,13 +38,6 @@ const mustPrestige = (user: string) =>
   new Bananen(user).getValue() >
   prestigeCost(store.get(user, 'prestige') ?? 0) * 1e3;
 
-class PrestigeError extends Error {
-  constructor() {
-    super('You have to prestige before you can do further upgrades.');
-    this.name = 'PrestigeError';
-  }
-}
-
 export interface RawPlantage {
   land: number;
   multiplier: number;
@@ -79,7 +72,8 @@ export class Plantage {
 
   maxAllUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 25) return this.maxMultiplierUpgrade();
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
     const startMultiplier = this.plantage.multiplier;
     const startLand = this.plantage.land;
     const bananen = new Bananen(this.uid);
@@ -117,7 +111,8 @@ export class Plantage {
 
   maxAllUpgradeBalanced(): UpgradeResult {
     if (this.plantage.infection >= 25) return this.maxMultiplierUpgrade();
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
     const startMultiplier = this.plantage.multiplier;
     const startLand = this.plantage.land;
     const bananen = new Bananen(this.uid);
@@ -162,7 +157,8 @@ export class Plantage {
   maxLandUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 25)
       return { land: 0, multiplier: 0, spent: 0, remaining: 0 };
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
     const startMultiplier = this.plantage.multiplier;
     const startLand = this.plantage.land;
     const bananen = new Bananen(this.uid);
@@ -194,7 +190,8 @@ export class Plantage {
   maxMultiplierUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 50)
       return { land: 0, multiplier: 0, spent: 0, remaining: 0 };
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
     const startMultiplier = this.plantage.multiplier;
     const startLand = this.plantage.land;
     const bananen = new Bananen(this.uid);
@@ -228,7 +225,7 @@ export class Plantage {
 
   landUpgrade(): boolean {
     if (this.plantage.infection >= 25) return false;
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid)) return false;
     const b = new Bananen(this.uid);
     if (b.getValue() < landPrice(this.plantage.land, this.mutation.simplicity))
       return false;
@@ -244,7 +241,7 @@ export class Plantage {
 
   multiplierUpgrade(): boolean {
     if (this.plantage.infection >= 50) return false;
-    if (mustPrestige(this.uid)) throw new PrestigeError();
+    if (mustPrestige(this.uid)) return false;
     const b = new Bananen(this.uid);
     if (
       b.getValue() <
