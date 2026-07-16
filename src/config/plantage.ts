@@ -85,5 +85,14 @@ export function plantageRoutine(client: Client) {
     bal.transfer(balance, payout, true);
     money -= payout;
   }
-  new Plantage(config.uid).maxAllUpgrade();
+  try {
+    new Plantage(config.uid).maxAllUpgrade();
+  } catch {
+    const me = new Bananen(config.uid);
+    const plantage = new Plantage(config.uid);
+    me.reset();
+    plantage.reset();
+    const prestige = (store.get(config.uid, 'prestige') ?? 0) + 1;
+    store.set(config.uid, 'prestige', prestige);
+  }
 }
