@@ -39,9 +39,25 @@ export default new Command(
           return;
         }
         if (user.id !== interaction.user.id) {
+          const r = user.id;
+          if (new Plantage(r).plantage.infection > 99) {
+            await interaction.reply(
+              `<@${r}> ist zu stark infiziert, um Bananen zu empfangen!`,
+            );
+            return;
+          }
+
+          const cooldown = store.get(r, 'giftcooldown') ?? 0;
+          if (Date.now() < cooldown) {
+            await interaction.reply(
+              `<@${r}> kann bis zum <t:${Math.floor(cooldown / 1000)}:f> keine Bananen empfangen!`,
+            );
+            return;
+          }
+
           me.transfer(b, cost);
           await interaction.reply({
-            content: `# <@${user.id}>\nDu hast \`${nb(value)}\` Bananen von <@${interaction.user.id}> geschenkt bekommen, damit du prestigen kannst!`,
+            content: `# <@${user.id}>\nDu hast \`${nb(cost)}\` Bananen von <@${interaction.user.id}> geschenkt bekommen, damit du prestigen kannst!`,
           });
           return;
         }
