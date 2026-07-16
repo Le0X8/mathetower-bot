@@ -34,11 +34,7 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         }
 
         // gpt6 mode
-        input = input.to_lowercase();
-        let strs: Vec<_> = input
-            .split(|c: char| !matches!(c, 'a'..='z' | 'ä' | 'ö' | 'ü' | 'ß'))
-            .filter(|s| !s.is_empty())
-            .collect();
+        let strs: Vec<_> = input.split(' ').filter(|s| !s.is_empty()).collect();
 
         let mut stream = vec![];
         if strs.is_empty() {
@@ -109,14 +105,13 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
         .lines()
         .flat_map(|line| {
             line.unwrap_or_default()
-                .to_lowercase()
-                .split('.')
+                .split(". ")
                 .map(|s| s.trim().to_string())
                 .collect::<Vec<_>>()
         })
         .filter(|s| !s.is_empty())
         .map(|s| {
-            s.split(|c: char| !matches!(c, 'a'..='z' | 'ä' | 'ö' | 'ü' | 'ß'))
+            s.split(' ')
                 .filter(|s| !s.is_empty())
                 .map(|s| tokens.tokenize(s))
                 .collect::<Vec<_>>()
