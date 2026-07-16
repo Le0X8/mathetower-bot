@@ -51,6 +51,11 @@ export default new Command(
 
     const msgs: string[] = [];
     receivers.forEach((r, i) => {
+      if (r == sender.id) {
+        msgs.push(`<@${r}> bist du selber junge`);
+        return;
+      }
+
       if (new Plantage(r).plantage.infection > 99) {
         msgs.push(`<@${r}> ist zu stark infiziert, um Bananen zu empfangen!`);
         return;
