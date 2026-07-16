@@ -74,7 +74,7 @@ export class Plantage {
     const value = bananen.getValue();
     const startValue = value;
     let money = value;
-    while (true) {
+    for (let i = 0; i < 1e5; i++) {
       const multiplierCost = multiplierPrice(
         this.plantage.multiplier,
         this.mutation.simplicity,
@@ -111,7 +111,7 @@ export class Plantage {
     const value = bananen.getValue();
     const startValue = value;
     let money = value;
-    while (true) {
+    for (let i = 0; i < 1e5; i++) {
       const multiplierCost = multiplierPrice(
         this.plantage.multiplier,
         this.mutation.simplicity,
@@ -155,7 +155,7 @@ export class Plantage {
     const value = bananen.getValue();
     const startValue = value;
     let money = value;
-    while (true) {
+    for (let i = 0; i < 1e5; i++) {
       const landCost = landPrice(this.plantage.land, this.mutation.simplicity);
       if (money >= landCost) {
         money -= landCost;
@@ -186,7 +186,7 @@ export class Plantage {
     const value = bananen.getValue();
     const startValue = value;
     let money = value;
-    while (true) {
+    for (let i = 0; i < 1e5; i++) {
       const multiplierCost = multiplierPrice(
         this.plantage.multiplier,
         this.mutation.simplicity,
