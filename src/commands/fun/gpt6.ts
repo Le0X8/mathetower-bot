@@ -7,7 +7,10 @@ export default new Command(
   'gpt6',
   'wie /random nur noch besser',
   async (interaction) => {
-    const start = interaction.options.getString('start', false) ?? '';
+    const start = (interaction.options.getString('start', false) ?? '')
+      .replaceAll('\0', '')
+      .replaceAll('\x01', '')
+      .replaceAll('\x02', '');
     const weights = interaction.options.getBoolean('weights', false) ?? false;
     const out = await globalThis.gpt6((weights ? '\x02' : '') + start);
     if (weights) {
