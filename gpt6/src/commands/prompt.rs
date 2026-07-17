@@ -14,7 +14,7 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         stdout().flush()?;
         input.clear();
         stdin().read_line(&mut input)?;
-        input = input.replace('\x02', "").trim().to_string();
+        input = input.trim().to_string();
 
         // training mode
         if input == "\0" {
@@ -34,7 +34,11 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         }
 
         // gpt6 mode
-        let strs: Vec<_> = input.split(' ').filter(|s| !s.is_empty()).collect();
+        let filtered_input = input.replace('\x02', "");
+        let strs: Vec<_> = filtered_input
+            .split(' ')
+            .filter(|s| !s.is_empty())
+            .collect();
 
         let mut stream = vec![];
         if strs.is_empty() {
