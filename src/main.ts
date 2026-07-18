@@ -19,6 +19,8 @@ import { emojis } from '$emojis';
 import { appendFileSync, existsSync, truncateSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 
+const gpt6TrainInterval = 10*60*1000;
+
 let gpt6Path = './gpt6/target/release/gpt6';
 if (!existsSync(gpt6Path)) {
   gpt6Path += '.exe';
@@ -32,6 +34,10 @@ if (!existsSync(gpt6Path)) {
 async function gpt6Training() {
   await globalThis.gpt6('\0');
   truncateSync('./dataset.txt', 0);
+  const trainchannel = await client.channels.fetch('1526510303502667826');
+  if(trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()){
+    await trainchannel.send("GPT6 was trained!");
+  }
 }
 
 const gpt6Process = spawn(gpt6Path, ['prompt'], {
@@ -96,7 +102,7 @@ globalThis.gpt6 = (input: string): Promise<string> =>
     }
   });
 
-setInterval(() => gpt6Training(), 10 * 60 * 1000);
+setInterval(() => gpt6Training(), gpt6TrainInterval);
 
 const token = config.token;
 
