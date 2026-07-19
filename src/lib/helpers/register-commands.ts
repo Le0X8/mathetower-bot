@@ -85,7 +85,7 @@ export async function registerCommands(client: Client) {
           if (deleted) {
             await guild.commands.delete(existingCommand.id).catch(() => {});
 
-            console.log(`Deleted command "${name}".`);
+            console.error(`Deleted command "${name}".`);
 
             continue;
           }
@@ -96,11 +96,11 @@ export async function registerCommands(client: Client) {
               options,
             });
 
-            console.log(`Edited command "${name}".`);
+            console.error(`Edited command "${name}".`);
           }
         } else {
           if (deleted) {
-            console.log(`Skipped registering command "${name}".`);
+            console.error(`Skipped registering command "${name}".`);
 
             continue;
           }
@@ -111,7 +111,7 @@ export async function registerCommands(client: Client) {
             options,
           } as ApplicationCommandDataResolvable);
 
-          console.log(`Registered command "${name}".`);
+          console.error(`Registered command "${name}".`);
         }
       }
     }

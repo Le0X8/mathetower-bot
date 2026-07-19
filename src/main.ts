@@ -1,6 +1,7 @@
 import config from '$config' with { type: 'json' };
 import {
   ActivityType,
+  Channel,
   Client,
   Events,
   GatewayIntentBits,
@@ -19,23 +20,42 @@ import { emojis } from '$emojis';
 import { appendFileSync, existsSync, truncateSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 
-const gpt6TrainInterval = 10*60*1000;
+const gpt6TrainInterval = 10 * 60 * 1000;
 
 const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
+let trainchannel: Channel | null = null;
+
+let stderrCache: string[] = [];
 process.stderr.write = (
   buffer: Uint8Array | string,
   encodingOrCb?: BufferEncoding | ((err?: Error) => void),
-  cb?: (err?: Error) => void
+  cb?: (err?: Error | null) => void,
 ): boolean => {
-  const stderrOut = buffer.toString();
-  if(trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()){
-    trainchannel.send('`' + stderrOut + '`');
+  const stderrOut = buffer.toString().trim();
+  console.log(stderrOut);
+  stderrCache.push(stderrOut);
+  if (trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()) {
+    trainchannel.send(
+      '-# `stderr` @ ' +
+        new Date().toLocaleTimeString('en-US', {
+          timeZone: 'Europe/Berlin',
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }) +
+        '\n```md\n' +
+        stderrCache.join('\n').replace(/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/g, '') +
+        '\n```',
+    );
+    stderrCache = [];
   }
   return originalStderrWrite(buffer, encodingOrCb as any, cb);
 };
-
-
 
 let gpt6Path = './gpt6/target/release/gpt6';
 if (!existsSync(gpt6Path)) {
@@ -51,7 +71,7 @@ async function gpt6Training() {
   await globalThis.gpt6('\0');
   truncateSync('./dataset.txt', 0);
   const trainchannel = await client.channels.fetch(config.status_cid);
-  if(trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()){
+  if (trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()) {
     await trainchannel.send('GPT6 was trained!');
   }
 }
@@ -139,7 +159,8 @@ function refreshMembers() {
   });
 }
 
-client.once(Events.ClientReady, (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
+  trainchannel = await client.channels.fetch(config.status_cid);
   registerCommands(readyClient);
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
   client.user?.setPresence({
@@ -213,8 +234,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.login(token);
-
-const trainchannel = await client.channels.fetch(config.status_cid);
 
 client.on(Events.MessageCreate, async (message) => {
   try {
