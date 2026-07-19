@@ -37,7 +37,9 @@ process.stderr.write = (
   stderrCache.push(stderrOut);
   if (trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()) {
     trainchannel.send(
-      '-# `stderr` @ ' +
+      '-# stderr (' +
+        config.env +
+        ') @ ' +
         new Date().toLocaleTimeString('en-US', {
           timeZone: 'Europe/Berlin',
           hour12: false,
@@ -140,7 +142,7 @@ globalThis.gpt6 = (input: string): Promise<string> =>
 
 setInterval(() => gpt6Training(), gpt6TrainInterval);
 
-const token = config.token;
+const token = config.discord_token;
 
 const client = new Client({
   intents: [
@@ -162,6 +164,7 @@ function refreshMembers() {
 client.once(Events.ClientReady, async (readyClient) => {
   trainchannel = await client.channels.fetch(config.status_cid);
   registerCommands(readyClient);
+  console.error('Finished discord login');
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
   client.user?.setPresence({
     activities: [
@@ -193,7 +196,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (!commandObject) return;
 
     if (commandObject.isAdminCommand) {
-      if (interaction.guildId !== config.gid) {
+      if (interaction.guildId !== config.home_gid) {
         throw new Error('This command can only be used in the main server.');
       }
       if (
@@ -214,7 +217,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if ((error as Error).message === 'banane 🍌') {
         return await catchBanane(interaction);
       }
-      await client.users.fetch(config.owner).then(async (user) => {
+      await client.users.fetch(config.owner_uid).then(async (user) => {
         user
           .send({
             embeds: [

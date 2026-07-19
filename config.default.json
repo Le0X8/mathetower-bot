@@ -1,8 +1,9 @@
 {
-  "token": "",
-  "uid": "",
-  "gid": "",
-  "cid": "",
-  "owner": "",
-  "status_cid": ""
+  "discord_token": "",
+  "bot_uid": "",
+  "owner_uid": "",
+  "home_gid": "",
+  "notifications_cid": "",
+  "status_cid": "",
+  "env": "testing"
 }

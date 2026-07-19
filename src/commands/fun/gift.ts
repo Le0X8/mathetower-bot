@@ -69,7 +69,7 @@ export default new Command(
         return;
       }
 
-      if (r == config.uid) {
+      if (r == config.bot_uid) {
         const donators: Record<string, number> = store.get('donators') ?? {};
         donators[sender.id] = (donators[sender.id] ?? 0) + singleAmount;
         store.set('donators', null, donators);

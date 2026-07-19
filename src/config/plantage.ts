@@ -20,8 +20,8 @@ export function plantageRoutine(client: Client) {
     const user = id.split('+')[1];
     const plantage = new Plantage(user);
     let infected = false;
-    if (user != config.uid) infected = plantage.infection();
-    if (user == config.uid && plantage.plantage.infection > 0) {
+    if (user != config.bot_uid) infected = plantage.infection();
+    if (user == config.bot_uid && plantage.plantage.infection > 0) {
       plantage.plantage.infection = 0;
       plantage.plantage.infectionType = null;
       plantage.save();
@@ -35,35 +35,33 @@ export function plantageRoutine(client: Client) {
         plantage.plantage.infection === 75 ||
         plantage.plantage.infection === 100)
     ) {
-      client.guilds.fetch(config.gid).then((guild) => {
-        guild.channels.fetch(config.cid).then((channel) => {
-          if (channel?.isTextBased()) {
-            if (plantage.plantage.infection === 1)
-              channel.send(
-                `<@${user}>\n# Deine Plantage ist infiziert!\nDein Prestige-Bonus ist deaktiviert und du kannst nicht prestigen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
-              );
+      client.channels.fetch(config.notifications_cid).then((channel) => {
+        if (channel?.isTextBased() && !channel.isDMBased()) {
+          if (plantage.plantage.infection === 1)
+            channel.send(
+              `<@${user}>\n# Deine Plantage ist infiziert!\nDein Prestige-Bonus ist deaktiviert und du kannst nicht prestigen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+            );
 
-            if (plantage.plantage.infection === 25)
-              channel.send(
-                `<@${user}>\n# 25% deiner Plantage sind infiziert!\nDu kannst kein Land mehr kaufen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
-              );
+          if (plantage.plantage.infection === 25)
+            channel.send(
+              `<@${user}>\n# 25% deiner Plantage sind infiziert!\nDu kannst kein Land mehr kaufen, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+            );
 
-            if (plantage.plantage.infection === 50)
-              channel.send(
-                `<@${user}>\n# 50% deiner Plantage sind infiziert!\nDu kannst die Plantage nicht mehr upgraden, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
-              );
+          if (plantage.plantage.infection === 50)
+            channel.send(
+              `<@${user}>\n# 50% deiner Plantage sind infiziert!\nDu kannst die Plantage nicht mehr upgraden, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+            );
 
-            if (plantage.plantage.infection === 75)
-              channel.send(
-                `<@${user}>\n# 75% deiner Plantage sind infiziert!\nDie Mutation deiner Plantage ist deaktiviert, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
-              );
+          if (plantage.plantage.infection === 75)
+            channel.send(
+              `<@${user}>\n# 75% deiner Plantage sind infiziert!\nDie Mutation deiner Plantage ist deaktiviert, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+            );
 
-            if (plantage.plantage.infection === 100)
-              channel.send(
-                `<@${user}>\n# Deine Plantage ist restlos infiziert!\nDu hast keinen Ertrag aus der Plantage mehr und kannst keine Geschenke mehr senden oder erhalten, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
-              );
-          }
-        });
+          if (plantage.plantage.infection === 100)
+            channel.send(
+              `<@${user}>\n# Deine Plantage ist restlos infiziert!\nDu hast keinen Ertrag aus der Plantage mehr und kannst keine Geschenke mehr senden oder erhalten, bis die Plantage wieder gesund ist.\nBenutze \`/labor\`, um mit der Herstellung eines Gegenmittels zu beginnen.`,
+            );
+        }
       });
     }
 
@@ -74,7 +72,7 @@ export function plantageRoutine(client: Client) {
   }
 
   const donators: Record<string, number> = store.get('donators') ?? {};
-  const bal = new Bananen(config.uid);
+  const bal = new Bananen(config.bot_uid);
   let money = bal.getValue();
   const totalDonations = Object.values(donators).reduce((a, b) => a + b, 0);
   const spendable = Math.floor(money / 2);
@@ -86,13 +84,13 @@ export function plantageRoutine(client: Client) {
     money -= payout;
   }
   try {
-    new Plantage(config.uid).maxAllUpgrade();
+    new Plantage(config.bot_uid).maxAllUpgrade();
   } catch {
-    const me = new Bananen(config.uid);
-    const plantage = new Plantage(config.uid);
+    const me = new Bananen(config.bot_uid);
+    const plantage = new Plantage(config.bot_uid);
     me.reset();
     plantage.reset();
-    const prestige = (store.get(config.uid, 'prestige') ?? 0) + 1;
-    store.set(config.uid, 'prestige', prestige);
+    const prestige = (store.get(config.bot_uid, 'prestige') ?? 0) + 1;
+    store.set(config.bot_uid, 'prestige', prestige);
   }
 }

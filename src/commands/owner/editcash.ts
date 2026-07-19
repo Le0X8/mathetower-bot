@@ -7,7 +7,7 @@ export default new Command(
   'zzz-owner-editcash',
   '[Owner-exclusive] Bearbeitet Bananen',
   async (interaction) => {
-    if (interaction.user.id !== config.owner) {
+    if (interaction.user.id !== config.owner_uid) {
       await interaction.reply({
         content: 'You are not permitted to use this command.',
         ephemeral: true,

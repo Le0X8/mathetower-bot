@@ -92,7 +92,7 @@ export default new Command(
         break;
     }
 
-    if (id == config.uid) {
+    if (id == config.bot_uid) {
       const donators: Record<string, number> = store.get('donators') ?? {};
       const total = Object.values(donators).reduce((a, b) => a + b, 0);
       const top = Object.entries(donators).sort(([, a], [, b]) => b - a);

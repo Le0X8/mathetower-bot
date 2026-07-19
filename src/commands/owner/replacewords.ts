@@ -14,7 +14,7 @@ export default new Command(
   'zzz-owner-replacewords',
   '[Owner-exclusive] Tauscht im /random-Command einen Substring gegen was anderes aus',
   async (interaction) => {
-    if (interaction.user.id !== config.owner) {
+    if (interaction.user.id !== config.owner_uid) {
       await interaction.reply({
         content: 'You are not permitted to use this command.',
         ephemeral: true,

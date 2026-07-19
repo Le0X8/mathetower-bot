@@ -1,6 +1,3 @@
-import config from '$config' with { type: 'json' };
-const guildId = config.gid;
-
 import { Client, ApplicationCommandDataResolvable } from 'discord.js';
 
 import { getCommands } from './get-commands.ts';
