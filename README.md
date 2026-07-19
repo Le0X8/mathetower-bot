@@ -1,6 +1,6 @@
 # mathetower-bot
 
-Discord bot for slash commands, campus info, and a banana economy game.
+Discord bot for campus info, utility automation, and a persistent banana economy game.
 
 ## Stack
 - Node.js + TypeScript
@@ -43,46 +43,41 @@ Discord bot for slash commands, campus info, and a banana economy game.
 - `pnpm build`: Build Rust `gpt6` binary, then bundle TypeScript with `tsup`
 - `pnpm test`: Placeholder script that exits with error
 
-## Slash commands
-### Info
-- `/help`
-- `/mensa`
-- `/klausuren`
-- `/novx`
+## Feature overview
+- **Slash command platform**
+  - Registers and updates command definitions across all guilds on startup.
+  - Supports normal, admin-gated, debug, and owner-only command categories.
 
-### Game / fun
-- `/bananen`
-- `/plantage`
-- `/labor`
-- `/mutation`
-- `/trade`
-- `/accept`
-- `/gift`
-- `/gamble`
-- `/leaderboard`
-- `/lootbox`
-- `/kill`
-- `/era`
-- `/waow`
-- `/schnellbahn1`
-- `/minuten`
-- `/gpt6`
-- `/random`
+- **Campus info workflows**
+  - Mensa menu retrieval with location and dietary filtering.
+  - Exam date lookup by module plus admin-managed exam date updates.
+  - Embedded help output and user-facing error reporting.
 
-### Admin / debug / owner
-- `/set-exams` (admin, only in `home_gid`)
-- `/bugreport`
-- `/error`
-- `/zzz-debug`
-- `/zzz-owner-editcash`
-- `/zzz-owner-replacewords`
+- **Persistent banana economy**
+  - Per-user inventory with multiple banana types and value-based accounting.
+  - Transfer, gifting, gambling, shop, ranking, and progression mechanics.
+  - Data is persisted in `data.json` via the internal key-value store.
+
+- **Plantage progression system**
+  - Passive minute-based earnings using land, multipliers, prestige, and mutation buffs.
+  - Upgrade modes for single buys, balanced maxing, and strategy-specific maxing.
+  - Infection lifecycle with progression thresholds and gameplay restrictions.
+
+- **Mutation and infection gameplay loop**
+  - Laboratory command flow to craft and apply mutation effects.
+  - Mutation buffs affect rarity, growth speed, infection behavior, and pricing.
+  - Infection milestones trigger notifications and temporarily disable capabilities.
+
+- **GPT6 text generation integration**
+  - Background Rust process serves completions for `/gpt6` and `/random`.
+  - Queued request handling with periodic retraining from `dataset.txt`.
+  - Runtime stderr forwarding into the configured status channel.
+
+- **Message-level automation**
+  - Rewrites social media links to alternative frontends; users can opt out with `/novx`.
+  - Strips common tracking query parameters in rewritten URLs.
+  - Applies trigger-based emoji reactions and lightweight interaction behaviors.
 
 ## Runtime files
 - `data.json`: Persistent bot state (auto-created)
 - `dataset.txt`: Collected message text used for GPT6 training
-
-## Behavior highlights
-- Registers/updates slash commands on startup for all guilds the bot is in.
-- Runs a minute-based plantage routine for passive earnings and infection events.
-- Rewrites social media links to alternative frontends unless disabled per user with `/novx`.
-- Retrains GPT6 periodically and posts stderr updates to `status_cid`.
