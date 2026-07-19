@@ -1,4 +1,5 @@
 import { Command } from '$commands';
+
 import set_exams from './admin/set-exams.ts';
 import bugreport from './debug/bugreport.ts';
 import zzz_debug from './debug/debug.ts';

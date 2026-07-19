@@ -1,5 +1,5 @@
 import { Command } from '$commands';
-import { Bananen } from '@/util/bananen.ts';
+import { Bananen } from '@/api/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';

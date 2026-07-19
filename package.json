@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup",
-    "gpt6build": "cd gpt6 && cargo build --release",
+    "prebuild": "cd gpt6 && cargo build --release",
     "dev": "tsx src/main.ts",
     "lint": "eslint src"
   },

@@ -2,8 +2,8 @@ import { Command } from '$commands';
 import { nb } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType, GuildMember, Role } from 'discord.js';
 import config from '$config' with { type: 'json' };
-import { Bananen, BananeType } from '@/util/bananen.ts';
-import { Plantage } from '@/util/plantage.ts';
+import { Bananen, BananeType } from '@/api/bananen.ts';
+import { Plantage } from '@/api/plantage.ts';
 import { getMutation } from '$commands/fun/mutation.ts';
 
 export default new Command(

@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import config from '$config' with { type: 'json' };
-import { Bananen, BananeType } from '@/util/bananen.ts';
+import { Bananen, BananeType } from '@/api/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(

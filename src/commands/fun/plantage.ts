@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import { prestigeCost } from '@/commands/fun/bananen.ts';
-import { bananeStrings, BananeType } from '@/util/bananen.ts';
+import { bananeStrings, BananeType } from '@/api/bananen.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { amount, nb, priceAdjust } from '@/lib/helpers/bananen.ts';
 import {
@@ -10,7 +10,7 @@ import {
   ButtonStyle,
   Interaction,
 } from 'discord.js';
-import { Plantage, UpgradeResult } from '@/util/plantage.ts';
+import { Plantage, UpgradeResult } from '@/api/plantage.ts';
 import { setMutation } from '$commands/fun/mutation.ts';
 
 function maxUpgrade(

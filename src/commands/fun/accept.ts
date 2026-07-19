@@ -8,7 +8,7 @@ import {
 import { emojis } from '$emojis';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
-import { Bananen } from '@/util/bananen.ts';
+import { Bananen } from '@/api/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(

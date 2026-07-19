@@ -1,6 +1,6 @@
 import config from '$config' with { type: 'json' };
-import { Bananen, BananeType } from '@/util/bananen.ts';
-import { Plantage, RawPlantage } from '@/util/plantage.ts';
+import { Bananen, BananeType } from '@/api/bananen.ts';
+import { Plantage, RawPlantage } from '@/api/plantage.ts';
 import { Client } from 'discord.js';
 
 const minute = 60 * 1000;

@@ -8,8 +8,8 @@ import {
   bananeStrings,
   BananeType,
   bananeValues,
-} from '@/util/bananen.ts';
-import { Plantage } from '@/util/plantage.ts';
+} from '@/api/bananen.ts';
+import { Plantage } from '@/api/plantage.ts';
 
 export const prestigeCost = (prestige: number) => 1e9 * (prestige + 1) ** 2;
 

@@ -1,7 +1,7 @@
 import { Command } from '$commands';
 import { emojis } from '$emojis';
 import { nb, amount as am } from '@/lib/helpers/bananen.ts';
-import { Bananen, BananeType } from '@/util/bananen.ts';
+import { Bananen, BananeType } from '@/api/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(

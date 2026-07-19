@@ -1,7 +1,7 @@
 import { Command } from '$commands';
 import { emojis } from '$emojis';
 import { amount } from '@/lib/helpers/bananen.ts';
-import { Bananen } from '@/util/bananen.ts';
+import { Bananen } from '@/api/bananen.ts';
 
 const lootboxPrice = 1e12;
 

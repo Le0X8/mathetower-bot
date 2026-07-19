@@ -1,6 +1,6 @@
 import { Command } from '$commands';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
-import { Plantage } from '@/util/plantage.ts';
+import { Plantage } from '@/api/plantage.ts';
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,

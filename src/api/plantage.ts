@@ -1,7 +1,7 @@
 import { prestigeCost } from '$commands/fun/bananen.ts';
 import { Buffs, getMutation } from '$commands/fun/mutation.ts';
 import { priceAdjust } from '@/lib/helpers/bananen.ts';
-import { Bananen } from '@/util/bananen.ts';
+import { Bananen } from '@/api/bananen.ts';
 
 const multiplierPrice = (multiplier: number, buff: number) =>
   priceAdjust(

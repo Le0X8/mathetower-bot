@@ -1,5 +1,5 @@
 import { Command } from '$commands';
-import { Bananen } from '@/util/bananen.ts';
+import { Bananen } from '@/api/bananen.ts';
 import { nb } from '@/lib/helpers/bananen.ts';
 import { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 
