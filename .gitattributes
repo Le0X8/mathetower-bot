@@ -1,7 +1,2 @@
 *.md linguist-language=markdown
 *.md linguist-detectable
-*.json linguist-language=json
-*.json linguist-detectable
-*.toml linguist-language=toml
-*.toml linguist-detectable
-pnpm-workspace.yaml linguist-detectable
