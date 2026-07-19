@@ -12,13 +12,13 @@ import {
 import { reactions } from '@/reactions.ts';
 import '@/store.ts';
 import { plantageRoutine } from '@/config/plantage.ts';
-import { getCommands } from '@/lib/helpers/get-commands.ts';
 import { registerCommands } from '@/lib/helpers/register-commands.ts';
 import { buildErrorEmbed } from './lib/embeds/error-embed.ts';
 import { catchBanane } from '@/commands/debug/error.ts';
 import { emojis } from '$emojis';
 import { appendFileSync, existsSync, truncateSync } from 'node:fs';
 import { spawn } from 'node:child_process';
+import { commands } from '$commands/list.ts';
 
 const gpt6TrainInterval = 10 * 60 * 1000;
 
@@ -186,7 +186,10 @@ client.once(Events.ClientReady, async (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const localCommands = await getCommands();
+  const localCommands = Object.entries(commands).map(([name, command]) => ({
+    ...command,
+    name: name.replaceAll('_', '-'),
+  }));
 
   try {
     const commandObject = localCommands.find(

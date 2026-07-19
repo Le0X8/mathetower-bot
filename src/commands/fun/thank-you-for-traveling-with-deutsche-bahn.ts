@@ -11,6 +11,7 @@ import {
   DiscordjsErrorCodes,
 } from 'discord.js';
 import { emojis } from '$emojis';
+import { Command } from '$commands';
 
 const CANCELLED_BONUS = 42;
 
@@ -18,11 +19,11 @@ function calculateS(delayMinutes: number): number {
   return Math.round(Math.pow(delayMinutes, 1.4));
 }
 
-export default {
-  name: 'schnellbahn1',
-  description: 'Sammle deine Verspätungen mit der S1!',
+export default new Command(
+  'schnellbahn1',
+  'Sammle deine Verspätungen mit der S1!',
 
-  async callback(interaction: ChatInputCommandInteraction) {
+  async (interaction: ChatInputCommandInteraction) => {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
@@ -177,4 +178,4 @@ export default {
       }
     }
   },
-};
+);

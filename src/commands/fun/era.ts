@@ -1,3 +1,4 @@
+import { Command } from '$commands';
 import { emojis } from '$emojis';
 import {
   ApplicationCommandOptionType,
@@ -44,19 +45,10 @@ const eras = [
     ' The Life of a Showgirl](https://tserasarchive.taylorswift.com/thelifeofashowgirl)\n\n_Keep it one hundred on the land, the sea, the sky_',
 ];
 
-export default {
-  name: 'era',
-  description: 'zeigt dir deine akutelle era an',
-  options: [
-    {
-      name: 'user',
-      description: 'Wessen era möchtest du sehen?',
-      type: ApplicationCommandOptionType.User,
-      required: false,
-    },
-  ],
-
-  async callback(interaction: ChatInputCommandInteraction) {
+export default new Command(
+  'era',
+  'zeigt dir deine akutelle era an',
+  async (interaction: ChatInputCommandInteraction) => {
     const user = interaction.options.getUser('user') || interaction.user;
     const today = new Date();
     const year = today.getFullYear();
@@ -80,4 +72,13 @@ export default {
         : [],
     });
   },
-};
+  false,
+  [
+    {
+      name: 'user',
+      description: 'Wessen era möchtest du sehen?',
+      type: ApplicationCommandOptionType.User,
+      required: false,
+    },
+  ],
+);

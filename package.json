@@ -5,8 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "tsx src/lib/helpers/prebuild.ts",
-    "build": "pnpm run prebuild && tsup",
+    "build": "tsup",
     "gpt6build": "cd gpt6 && cargo build --release",
     "dev": "tsx src/main.ts",
     "lint": "eslint src"

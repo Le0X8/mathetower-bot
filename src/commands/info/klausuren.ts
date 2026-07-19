@@ -3,20 +3,12 @@ import {
   ChatInputCommandInteraction,
 } from 'discord.js';
 import { examGet, examList } from '@/lib/embeds/exam.ts';
+import { Command } from '$commands';
 
-export default {
-  name: 'klausuren',
-  description: 'Zeigt die Klausurtermine von einem Modul',
-  options: [
-    {
-      name: 'subject',
-      description: 'Das Modul, für das du die Klausurtermine wissen möchtest',
-      type: ApplicationCommandOptionType.String,
-      required: false,
-    },
-  ],
-
-  async callback(interaction: ChatInputCommandInteraction) {
+export default new Command(
+  'klausuren',
+  'Zeigt die Klausurtermine von einem Modul',
+  async (interaction: ChatInputCommandInteraction) => {
     let subject = interaction.options.getString('subject');
     if (subject) {
       interaction.reply({ embeds: [await examGet(subject)] });
@@ -24,4 +16,13 @@ export default {
       interaction.reply({ embeds: [await examList()] });
     }
   },
-};
+  false,
+  [
+    {
+      name: 'subject',
+      description: 'Das Modul, für das du die Klausurtermine wissen möchtest',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    },
+  ],
+);

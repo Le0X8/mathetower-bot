@@ -1,3 +1,4 @@
+import { Command } from '$commands';
 import { Mensa } from '@/config/mensa.ts';
 import { menuToday } from '@/lib/embeds/menu.ts';
 import {
@@ -5,10 +6,16 @@ import {
   ChatInputCommandInteraction,
 } from 'discord.js';
 
-export default {
-  name: 'mensa',
-  description: 'Zeigt den Mensaplan',
-  options: [
+export default new Command(
+  'mensa',
+  'Zeigt den Mensaplan',
+  async (interaction: ChatInputCommandInteraction) => {
+    const mensa = interaction.options.getInteger('mensa') ?? Mensa.Mensa;
+    const filter = interaction.options.getInteger('filter') ?? undefined;
+    interaction.reply({ embeds: await menuToday(mensa, filter) });
+  },
+  false,
+  [
     {
       name: 'mensa',
       description: 'Für welche Mensa willst du den Plan sehen?',
@@ -32,10 +39,4 @@ export default {
       required: false,
     },
   ],
-
-  async callback(interaction: ChatInputCommandInteraction) {
-    const mensa = interaction.options.getInteger('mensa') ?? Mensa.Mensa;
-    const filter = interaction.options.getInteger('filter') ?? undefined;
-    interaction.reply({ embeds: await menuToday(mensa, filter) });
-  },
-};
+);

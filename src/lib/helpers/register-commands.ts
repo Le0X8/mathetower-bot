@@ -1,6 +1,5 @@
 import { Client, ApplicationCommandDataResolvable } from 'discord.js';
-
-import { getCommands } from './get-commands.ts';
+import { commands } from '$commands/list.ts';
 
 function areCommandsDifferent(existingCommand: any, localCommand: any) {
   const areChoicesDifferent = (existingChoices: any[], localChoices: any[]) => {
@@ -62,7 +61,11 @@ function areCommandsDifferent(existingCommand: any, localCommand: any) {
 
 export async function registerCommands(client: Client) {
   try {
-    const localCommands = await getCommands();
+    const localCommands = Object.entries(commands).map(([name, command]) => ({
+      ...command,
+      deleted: false,
+      name: name.replaceAll('_', '-'),
+    }));
 
     const guilds = await client.guilds.fetch();
 
@@ -90,7 +93,7 @@ export async function registerCommands(client: Client) {
           if (areCommandsDifferent(existingCommand, localCommand)) {
             await guild.commands.edit(existingCommand.id, {
               description,
-              options,
+              options: options as any,
             });
 
             console.error(`Edited command "${name}".`);

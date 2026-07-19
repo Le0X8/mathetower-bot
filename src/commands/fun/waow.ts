@@ -1,10 +1,11 @@
+import { Command } from '$commands';
 import { ChatInputCommandInteraction } from 'discord.js';
 
-export default {
-  name: 'waow',
-  description: 'waow',
+export default new Command(
+  'waow',
+  'waow',
 
-  async callback(interaction: ChatInputCommandInteraction) {
+  async (interaction: ChatInputCommandInteraction) => {
     interaction.reply({
       files: [
         {
@@ -14,4 +15,4 @@ export default {
       ],
     });
   },
-};
+);
