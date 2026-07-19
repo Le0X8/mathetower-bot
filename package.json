@@ -11,8 +11,8 @@
     "lint": "eslint src"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Leonard Lesinski",
+  "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@napi-rs/canvas": "^1.0.0",
