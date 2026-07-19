@@ -1,7 +1,10 @@
+import { Channel, Client } from 'discord.js';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 declare global {
   var store: Store;
+  var client: Client;
+  var statusChannel: Channel | null;
   var gpt6: (input: string) => Promise<string>;
 }
 
