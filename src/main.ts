@@ -21,6 +21,22 @@ import { spawn } from 'node:child_process';
 
 const gpt6TrainInterval = 10*60*1000;
 
+const originalStderrWrite = process.stderr.write.bind(process.stderr);
+
+process.stderr.write = (
+  buffer: Uint8Array | string,
+  encodingOrCb?: BufferEncoding | ((err?: Error) => void),
+  cb?: (err?: Error) => void
+): boolean => {
+  const stderrOut = buffer.toString();
+  if(trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()){
+    trainchannel.send('`' + stderrOut + '`');
+  }
+  return originalStderrWrite(buffer, encodingOrCb as any, cb);
+};
+
+
+
 let gpt6Path = './gpt6/target/release/gpt6';
 if (!existsSync(gpt6Path)) {
   gpt6Path += '.exe';
@@ -34,9 +50,9 @@ if (!existsSync(gpt6Path)) {
 async function gpt6Training() {
   await globalThis.gpt6('\0');
   truncateSync('./dataset.txt', 0);
-  const trainchannel = await client.channels.fetch('1526510303502667826');
+  const trainchannel = await client.channels.fetch(config.status_cid);
   if(trainchannel && trainchannel.isTextBased() && !trainchannel.isDMBased()){
-    await trainchannel.send("GPT6 was trained!");
+    await trainchannel.send('GPT6 was trained!');
   }
 }
 
@@ -197,6 +213,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.login(token);
+
+const trainchannel = await client.channels.fetch(config.status_cid);
 
 client.on(Events.MessageCreate, async (message) => {
   try {
