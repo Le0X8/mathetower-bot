@@ -29,6 +29,11 @@ function maxUpgrade(
   }
 }
 
+const amount2 = (a: number) =>
+  a < 1e10
+    ? a.toLocaleString('de-DE')
+    : a.toExponential(2).replace(/e\+?/, 'e');
+
 export default new Command(
   'plantage',
   'Pflanze deine eigenen Bananen an!',
@@ -115,11 +120,11 @@ export default new Command(
           : `**Ertrag/min:** \`${amount(plantage.earnings())}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
         [
           [
-            `Land: \`${amount(plantage.plantage.land)}m²\``,
+            `Land: \`${amount2(plantage.plantage.land)}m²\``,
             `Nächster Kauf: \`${nb(plantage.landCost())}\``,
           ],
           [
-            `Multiplikator: \`${amount(plantage.plantage.multiplier)}x\``,
+            `Multiplikator: \`${amount2(plantage.plantage.multiplier)}x\``,
             `Nächster Kauf: \`${nb(plantage.multiplierCost())}\``,
           ],
           plantage.prestige > 0 && [
@@ -160,9 +165,9 @@ export default new Command(
               embeds: [await embed()],
             });
             await action?.reply(
-              `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${
-                plantage.plantage.land
-              }m²**.`,
+              `-# <@${user.id}>\nDu hast erfolgreich 1m² Land für deine Plantage gekauft! Deine Plantage hat jetzt eine Fläche von **${amount2(
+                plantage.plantage.land,
+              )}m²**.`,
             );
             break;
           case 'multiplier':
@@ -177,9 +182,9 @@ export default new Command(
               embeds: [await embed()],
             });
             await action?.reply(
-              `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${
-                plantage.plantage.multiplier
-              }x**.`,
+              `-# <@${user.id}>\nDu hast erfolgreich den Multiplikator deiner Plantage erhöht! Deine Plantage hat jetzt einen Multiplikator von **${amount2(
+                plantage.plantage.multiplier,
+              )}x**.`,
             );
             break;
           case 'max':
@@ -205,19 +210,21 @@ export default new Command(
             });
             await action?.reply(
               `-# <@${user.id}>\nDu hast erfolgreich ` +
-                (multiplier > 0 ? `\`${multiplier}x\` Multiplikator` : '') +
+                (multiplier > 0
+                  ? `\`${amount2(multiplier)}x\` Multiplikator`
+                  : '') +
                 (multiplier > 0 && land > 0 ? ` und ` : '') +
-                (land > 0 ? `\`${land}m²\` Land` : '') +
+                (land > 0 ? `\`${amount2(land)}m²\` Land` : '') +
                 ` gekauft!\n` +
                 (multiplier > 0
-                  ? `\nDeine Plantage hat jetzt einen Multiplikator von **${
-                      plantage.plantage.multiplier
-                    }x**.`
+                  ? `\nDeine Plantage hat jetzt einen Multiplikator von **${amount2(
+                      plantage.plantage.multiplier,
+                    )}x**.`
                   : '') +
                 (land > 0
-                  ? `\nDeine Plantage hat jetzt eine Fläche von **${
-                      plantage.plantage.land
-                    }m²**.`
+                  ? `\nDeine Plantage hat jetzt eine Fläche von **${amount2(
+                      plantage.plantage.land,
+                    )}m²**.`
                   : '') +
                 `\n\n-# Du hast \`${nb(spent)}\` für diese Upgrades ausgegeben.`,
             );
