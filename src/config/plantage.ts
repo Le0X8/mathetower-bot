@@ -83,6 +83,7 @@ export function plantageRoutine(client: Client) {
     bal.transfer(balance, payout, true);
     money -= payout;
   }
+  console.error('auto upgrading mathetower...');
   try {
     new Plantage(config.bot_uid).maxAllUpgradeBalanced();
   } catch {

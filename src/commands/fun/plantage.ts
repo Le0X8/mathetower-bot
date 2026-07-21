@@ -152,7 +152,6 @@ export default new Command(
           time: 20_000, // 20 secs
         });
 
-        console.error('plantageupgrade', interaction.user.id, action?.customId);
         switch (action?.customId) {
           case 'land':
             if (!plantage.landUpgrade()) {
