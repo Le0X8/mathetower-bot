@@ -149,6 +149,7 @@ function maxAffordable(
   }
   while (hi - lo > 1) {
     const mid = lo + Math.floor((hi - lo) / 2);
+    if (mid === lo || mid === hi) break;
     if (totalCost(pieces, start, mid, buff) <= budget) lo = mid;
     else hi = mid;
   }
@@ -176,6 +177,7 @@ function maxLevelUnderPrice(
   }
   while (hi - lo > 1) {
     const mid = lo + Math.floor((hi - lo) / 2);
+    if (mid === lo || mid === hi) break;
     if (singlePrice(pieces, mid, buff) <= priceCeiling) lo = mid;
     else hi = mid;
   }
@@ -235,9 +237,6 @@ export function maxUpgradeBothCheapestFirst(
   budget: number,
   buff: number,
 ): { newLand: number; newMultiplier: number; spent: number } {
-  throw new Error(
-    'Temporarily unavailable, use maxUpgradeBothBalanced instead',
-  );
   const costAtCeiling = (priceCeiling: number) => {
     const newLand = maxLevelUnderPrice(landPieces, land, buff, priceCeiling);
     const newMultiplier = maxLevelUnderPrice(
@@ -264,6 +263,7 @@ export function maxUpgradeBothCheapestFirst(
   let hi = budget;
   while (hi - lo > 1) {
     const mid = lo + Math.floor((hi - lo) / 2);
+    if (mid === lo || mid === hi) break;
     if (costAtCeiling(mid).cost <= budget) lo = mid;
     else hi = mid;
   }
@@ -302,14 +302,13 @@ export function maxUpgradeBothBalanced(
   let lo = Math.max(land, multiplier);
   let hi = lo + 1;
   while (costAtTarget(hi) <= budget) {
-    console.log({ hi });
     lo = hi;
     hi = lo * 2 + 1;
     if (hi > 1e15) break;
   }
   while (hi - lo > 1) {
-    console.log({ lo, hi });
     const mid = lo + Math.floor((hi - lo) / 2);
+    if (mid === lo || mid === hi) break;
     if (costAtTarget(mid) <= budget) lo = mid;
     else hi = mid;
   }
