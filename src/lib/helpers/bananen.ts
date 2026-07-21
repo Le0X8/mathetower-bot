@@ -58,7 +58,7 @@ export function amount(a: number): string {
 }
 
 export function nb(a: number): string {
-  return `${amount(a)} \u0e3f`;
+  return `${amount(a)}\u0e3f`;
 }
 
 export function priceAdjust(price: number): number {
