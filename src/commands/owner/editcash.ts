@@ -17,7 +17,10 @@ export default new Command(
 
     const user = interaction.options.getUser('user', true);
     const property = interaction.options.getString('property', true);
-    const value = interaction.options.getInteger('value', false);
+    let value: string | number | null = interaction.options.getString(
+      'value',
+      false,
+    );
 
     let balance = new Bananen(user.id);
     const donators: Record<string, number> = store.get('donators') ?? {};
@@ -26,14 +29,15 @@ export default new Command(
 
     switch (property) {
       case 'invested':
-        if (typeof value != 'number') {
+        if (typeof value != 'string') {
           await interaction.reply({
             content: `Dieser Nutzer hat aktuell ${invested} investierte Bananen.`,
             ephemeral: true,
           });
           return;
         }
-        donators[user.id] = value;
+        value = getAmount(value);
+        donators[user.id] = value as number;
         store.set('donators', null, donators);
         await interaction.reply(
           `Investierte Bananen von ${user.username} wurden auf ${value} gesetzt.`,
@@ -81,8 +85,11 @@ export default new Command(
     {
       name: 'value',
       description: 'value',
-      type: ApplicationCommandOptionType.Integer,
+      type: ApplicationCommandOptionType.String,
       required: false,
     },
   ],
 );
+function getAmount(value: string): any {
+  throw new Error('Function not implemented.');
+}
