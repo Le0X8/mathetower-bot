@@ -302,11 +302,13 @@ export function maxUpgradeBothBalanced(
   let lo = Math.max(land, multiplier);
   let hi = lo + 1;
   while (costAtTarget(hi) <= budget) {
+    console.log({ hi });
     lo = hi;
     hi = lo * 2 + 1;
     if (hi > 1e15) break;
   }
   while (hi - lo > 1) {
+    console.log({ lo, hi });
     const mid = lo + Math.floor((hi - lo) / 2);
     if (costAtTarget(mid) <= budget) lo = mid;
     else hi = mid;
