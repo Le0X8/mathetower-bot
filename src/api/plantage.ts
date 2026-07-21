@@ -216,7 +216,7 @@ export class Plantage {
       ? 0
       : (this.plantage.land *
           this.plantage.multiplier *
-          (prestige * 2 + 1) *
+          (prestige / 2 + 1) *
           (1 + this.mutation.speed * 0.01) *
           (1 + this.mutation.rarity * 0.01)) /
           infection;

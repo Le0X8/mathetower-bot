@@ -109,21 +109,21 @@ export default new Command(
 
     const embed = () =>
       buildEmbed(
-        'Plantage von @' + user.username,
+        'Plantage von @' + user.username.replaceAll('_', '\_'),
         plantage.plantage.land < 1
           ? 'Dieser Nutzer hat noch kein Land für seine Plantage gekauft.\nNutze den Knopf unten, um 1m² Land zu kaufen.'
           : `**Ertrag/min:** \`${amount(plantage.earnings())}\` ${bananeStrings(BananeType.Geerntet)[1]}`,
         [
           [
-            `Land: \`${plantage.plantage.land}m²\``,
+            `Land: \`${amount(plantage.plantage.land)}m²\``,
             `Nächster Kauf: \`${nb(plantage.landCost())}\``,
           ],
           [
-            `Multiplikator: \`${plantage.plantage.multiplier}x\``,
+            `Multiplikator: \`${amount(plantage.plantage.multiplier)}x\``,
             `Nächster Kauf: \`${nb(plantage.multiplierCost())}\``,
           ],
           plantage.prestige > 0 && [
-            `Prestige-Bonus: \`${plantage.prestige * 200}%\``,
+            `Prestige-Bonus: \`${plantage.prestige * 50}%\``,
             `Nächstes Prestige-Level: \`${nb(prestigeCost(plantage.prestige))}\``,
           ],
         ].filter(Boolean) as [string, string][],
