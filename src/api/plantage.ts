@@ -71,6 +71,8 @@ export class Plantage {
 
     bananen.remove(upgrade.spent);
 
+    this.plantage.land += upgrade.newLand;
+    this.plantage.multiplier += upgrade.newMultiplier;
     this.save();
     return {
       land: upgrade.newLand,
@@ -94,6 +96,8 @@ export class Plantage {
 
     bananen.remove(upgrade.spent);
 
+    this.plantage.land += upgrade.newLand;
+    this.plantage.multiplier += upgrade.newMultiplier;
     this.save();
     return {
       land: upgrade.newLand,
@@ -117,6 +121,7 @@ export class Plantage {
 
     bananen.remove(upgrade.spent);
 
+    this.plantage.land += upgrade.newLand;
     this.save();
     return {
       land: upgrade.newLand,
@@ -140,6 +145,7 @@ export class Plantage {
 
     bananen.remove(upgrade.spent);
 
+    this.plantage.multiplier += upgrade.newMultiplier;
     this.save();
     return {
       land: 0,
