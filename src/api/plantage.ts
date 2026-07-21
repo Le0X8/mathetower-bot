@@ -1,28 +1,15 @@
 import { prestigeCost } from '$commands/fun/bananen.ts';
 import { Buffs, getMutation } from '$commands/fun/mutation.ts';
-import { priceAdjust } from '@/lib/helpers/bananen.ts';
 import { Bananen } from '@/api/bananen.ts';
+import {
+  maxUpgradeBothBalanced,
+  maxUpgradeBothCheapestFirst,
+  maxUpgradeLand,
+  maxUpgradeMultiplier,
+  priceOneLand,
+  priceOneMultiplier,
+} from '@/lib/plantage-costs.ts';
 
-const multiplierPrice = (multiplier: number, buff: number) =>
-  priceAdjust(
-    (multiplier < 50
-      ? multiplier ** 1.5 * 5 + 100
-      : multiplier < 100
-        ? multiplier ** 1.5 * 10 + 100
-        : multiplier ** 2 * 10 + 100) *
-      (1 - buff * 0.01),
-  );
-const landPrice = (land: number, buff: number) =>
-  priceAdjust(
-    (land < 1
-      ? 0
-      : land < 50
-        ? land * 20 - 10
-        : land < 100
-          ? land * 200 - 100
-          : land * 2000 - 1000) *
-      (1 - buff * 0.01),
-  );
 const infectionChance = (land: number, buff: number) =>
   Math.floor(Math.random() * 1e5) <
   Math.min(1e-9 * land ** 2, 1e3) * (1 - buff / 10);
@@ -72,165 +59,106 @@ export class Plantage {
 
   maxAllUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 25) return this.maxMultiplierUpgrade();
-    if (mustPrestige(this.uid))
-      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
-    const startMultiplier = this.plantage.multiplier;
-    const startLand = this.plantage.land;
+    /* if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 }; */
     const bananen = new Bananen(this.uid);
-    const value = bananen.getValue();
-    const startValue = value;
-    let money = value;
-    for (let i = 0; i < 1e5; i++) {
-      const multiplierCost = multiplierPrice(
-        this.plantage.multiplier,
-        this.mutation.simplicity,
-      );
-      const landCost = landPrice(this.plantage.land, this.mutation.simplicity);
-      if (multiplierCost < landCost && money >= multiplierCost) {
-        money -= multiplierCost;
-        this.plantage.multiplier += 1;
-      } else if (money >= landCost) {
-        money -= landCost;
-        this.plantage.land += 1;
-      } else {
-        break;
-      }
-    }
+    const upgrade = maxUpgradeBothCheapestFirst(
+      this.plantage.land,
+      this.plantage.multiplier,
+      bananen.getValue(),
+      this.mutation.simplicity,
+    );
 
-    const spent = startValue - money;
-    bananen.remove(spent);
+    bananen.remove(upgrade.spent);
 
     this.save();
     return {
-      land: this.plantage.land - startLand,
-      multiplier: this.plantage.multiplier - startMultiplier,
-      spent,
-      remaining: money,
+      land: upgrade.newLand,
+      multiplier: upgrade.newMultiplier,
+      spent: upgrade.spent,
+      remaining: bananen.getValue(),
     };
   }
 
   maxAllUpgradeBalanced(): UpgradeResult {
     if (this.plantage.infection >= 25) return this.maxMultiplierUpgrade();
-    if (mustPrestige(this.uid))
-      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
-    const startMultiplier = this.plantage.multiplier;
-    const startLand = this.plantage.land;
+    /* if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 }; */
     const bananen = new Bananen(this.uid);
-    const value = bananen.getValue();
-    const startValue = value;
-    let money = value;
-    for (let i = 0; i < 1e5; i++) {
-      const multiplierCost = multiplierPrice(
-        this.plantage.multiplier,
-        this.mutation.simplicity,
-      );
-      const landCost = landPrice(this.plantage.land, this.mutation.simplicity);
-      if (
-        this.plantage.multiplier <= this.plantage.land &&
-        money >= multiplierCost
-      ) {
-        money -= multiplierCost;
-        this.plantage.multiplier += 1;
-      } else if (
-        this.plantage.multiplier > this.plantage.land &&
-        money >= landCost
-      ) {
-        money -= landCost;
-        this.plantage.land += 1;
-      } else {
-        break;
-      }
-    }
+    const upgrade = maxUpgradeBothBalanced(
+      this.plantage.land,
+      this.plantage.multiplier,
+      bananen.getValue(),
+      this.mutation.simplicity,
+    );
 
-    const spent = startValue - money;
-    bananen.remove(spent);
+    bananen.remove(upgrade.spent);
 
     this.save();
     return {
-      land: this.plantage.land - startLand,
-      multiplier: this.plantage.multiplier - startMultiplier,
-      spent,
-      remaining: money,
+      land: upgrade.newLand,
+      multiplier: upgrade.newMultiplier,
+      spent: upgrade.spent,
+      remaining: bananen.getValue(),
     };
   }
 
   maxLandUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 25)
       return { land: 0, multiplier: 0, spent: 0, remaining: 0 };
-    if (mustPrestige(this.uid))
-      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
-    const startMultiplier = this.plantage.multiplier;
-    const startLand = this.plantage.land;
+    /* if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 }; */
     const bananen = new Bananen(this.uid);
-    const value = bananen.getValue();
-    const startValue = value;
-    let money = value;
-    for (let i = 0; i < 1e5; i++) {
-      const landCost = landPrice(this.plantage.land, this.mutation.simplicity);
-      if (money >= landCost) {
-        money -= landCost;
-        this.plantage.land += 1;
-      } else {
-        break;
-      }
-    }
+    const upgrade = maxUpgradeLand(
+      this.plantage.land,
+      bananen.getValue(),
+      this.mutation.simplicity,
+    );
 
-    const spent = startValue - money;
-    bananen.remove(spent);
+    bananen.remove(upgrade.spent);
 
     this.save();
     return {
-      land: this.plantage.land - startLand,
-      multiplier: this.plantage.multiplier - startMultiplier,
-      spent,
-      remaining: money,
+      land: upgrade.newLand,
+      multiplier: 0,
+      spent: upgrade.spent,
+      remaining: bananen.getValue(),
     };
   }
 
   maxMultiplierUpgrade(): UpgradeResult {
     if (this.plantage.infection >= 50)
       return { land: 0, multiplier: 0, spent: 0, remaining: 0 };
-    if (mustPrestige(this.uid))
-      return { land: 0, multiplier: 0, spent: 0, remaining: -1 };
-    const startMultiplier = this.plantage.multiplier;
-    const startLand = this.plantage.land;
+    /* if (mustPrestige(this.uid))
+      return { land: 0, multiplier: 0, spent: 0, remaining: -1 }; */
     const bananen = new Bananen(this.uid);
-    const value = bananen.getValue();
-    const startValue = value;
-    let money = value;
-    for (let i = 0; i < 1e5; i++) {
-      const multiplierCost = multiplierPrice(
-        this.plantage.multiplier,
-        this.mutation.simplicity,
-      );
-      if (money >= multiplierCost) {
-        money -= multiplierCost;
-        this.plantage.multiplier += 1;
-      } else {
-        break;
-      }
-    }
+    const upgrade = maxUpgradeMultiplier(
+      this.plantage.multiplier,
+      bananen.getValue(),
+      this.mutation.simplicity,
+    );
 
-    const spent = startValue - money;
-    bananen.remove(spent);
+    bananen.remove(upgrade.spent);
 
     this.save();
     return {
-      land: this.plantage.land - startLand,
-      multiplier: this.plantage.multiplier - startMultiplier,
-      spent,
-      remaining: money,
+      land: 0,
+      multiplier: upgrade.newMultiplier,
+      spent: upgrade.spent,
+      remaining: bananen.getValue(),
     };
   }
 
   landUpgrade(): boolean {
     if (this.plantage.infection >= 25) return false;
-    if (mustPrestige(this.uid)) return false;
+    /* if (mustPrestige(this.uid)) return false; */
     const b = new Bananen(this.uid);
-    if (b.getValue() < landPrice(this.plantage.land, this.mutation.simplicity))
+    if (
+      b.getValue() < priceOneLand(this.plantage.land, this.mutation.simplicity)
+    )
       return false;
     this.plantage.land += 1;
-    const spentLand = landPrice(
+    const spentLand = priceOneLand(
       this.plantage.land - 1,
       this.mutation.simplicity,
     );
@@ -241,15 +169,15 @@ export class Plantage {
 
   multiplierUpgrade(): boolean {
     if (this.plantage.infection >= 50) return false;
-    if (mustPrestige(this.uid)) return false;
+    /* if (mustPrestige(this.uid)) return false; */
     const b = new Bananen(this.uid);
     if (
       b.getValue() <
-      multiplierPrice(this.plantage.multiplier, this.mutation.simplicity)
+      priceOneMultiplier(this.plantage.multiplier, this.mutation.simplicity)
     )
       return false;
     this.plantage.multiplier += 1;
-    const spentMultiplier = multiplierPrice(
+    const spentMultiplier = priceOneMultiplier(
       this.plantage.multiplier - 1,
       this.mutation.simplicity,
     );
@@ -259,11 +187,14 @@ export class Plantage {
   }
 
   multiplierCost(): number {
-    return multiplierPrice(this.plantage.multiplier, this.mutation.simplicity);
+    return priceOneMultiplier(
+      this.plantage.multiplier,
+      this.mutation.simplicity,
+    );
   }
 
   landCost(): number {
-    return landPrice(this.plantage.land, this.mutation.simplicity);
+    return priceOneLand(this.plantage.land, this.mutation.simplicity);
   }
 
   save(): Plantage {
