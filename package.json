@@ -2,10 +2,10 @@
   "name": "mathetower",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main.js",
+  "main": "dist/main.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsup",
+    "build": "tsdown",
     "prebuild": "cd gpt6 && cargo build --release",
     "dev": "tsx src/main.ts",
     "lint": "eslint src"
@@ -38,7 +38,7 @@
     "jiti": "^2.7.0",
     "oxfmt": "^0.59.0",
     "prettier": "^3.8.3",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.22.12",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2"
