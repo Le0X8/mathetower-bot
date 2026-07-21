@@ -84,7 +84,7 @@ export function plantageRoutine(client: Client) {
     money -= payout;
   }
   try {
-    new Plantage(config.bot_uid).maxAllUpgrade();
+    new Plantage(config.bot_uid).maxAllUpgradeBalanced();
   } catch {
     const me = new Bananen(config.bot_uid);
     const plantage = new Plantage(config.bot_uid);
