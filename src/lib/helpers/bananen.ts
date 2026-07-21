@@ -75,7 +75,7 @@ export function priceAdjust(price: number): number {
 
 export function fromAmount(a: string): number {
   const amount = parseFloat(a);
-  const suffix = a.replace(amount.toString(), '').toLowerCase();
+  const suffix = a.replace(amount.toString(), '').toLowerCase().trim();
 
   for (let i = 0; i < suffixes.length; i++) {
     if (suffix === suffixes[i].toLowerCase()) {
