@@ -46,6 +46,8 @@ export function amount(a: number): string {
   a = Math.ceil(a);
   const a2 = Math.abs(a);
 
+  if (a2 < 1e3) return a.toString();
+
   for (let i = 0; i < suffixes.length; i++) {
     const max = Math.pow(10, (i + 1) * 3);
     if (a2 < max) {
