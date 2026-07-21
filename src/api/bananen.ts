@@ -102,7 +102,7 @@ export class Bananen {
   }
 
   reset(): Bananen {
-    this.diff -= this.getValue();
+    //this.diff -= this.getValue();
     this.bananen = {} as unknown as Record<BananeType, number>;
     return this.save();
   }
