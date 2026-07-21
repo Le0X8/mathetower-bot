@@ -1,6 +1,7 @@
 import { Command } from '$commands';
 import config from '$config' with { type: 'json' };
 import { Bananen, BananeType } from '@/api/bananen.ts';
+import { fromAmount } from '@/lib/helpers/bananen.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -36,7 +37,7 @@ export default new Command(
           });
           return;
         }
-        value = getAmount(value);
+        value = fromAmount(value);
         donators[user.id] = value as number;
         store.set('donators', null, donators);
         await interaction.reply(
@@ -90,6 +91,3 @@ export default new Command(
     },
   ],
 );
-function getAmount(value: string): any {
-  throw new Error('Function not implemented.');
-}
