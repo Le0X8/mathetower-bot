@@ -45,13 +45,14 @@ export default new Command(
         );
         break;
       case 'cash':
-        if (typeof value != 'number') {
+        if (typeof value != 'string') {
           await interaction.reply({
             content: `Dieser Nutzer hat aktuell ${cash} Bananen.`,
             ephemeral: true,
           });
           return;
         }
+        value = fromAmount(value);
         balance.setValue(value);
         await interaction.reply(
           `Bananen von ${user.username} wurden auf ${value} gesetzt.`,
