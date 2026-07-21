@@ -50,7 +50,7 @@ export function amount(a: number): string {
     const max = Math.pow(10, (i + 1) * 3);
     if (a2 < max) {
       const value = a / Math.pow(10, i * 3);
-      return `${value.toFixed(2)}${suffixes[i]}`;
+      return `${value.toFixed(2)} ${suffixes[i]}`;
     }
   }
 
@@ -58,7 +58,7 @@ export function amount(a: number): string {
 }
 
 export function nb(a: number): string {
-  return `${amount(a)}\u0e3f`;
+  return `${amount(a)} \u0e3f`;
 }
 
 export function priceAdjust(price: number): number {
