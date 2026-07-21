@@ -70,7 +70,7 @@ export class Bananen {
       0,
     );
 
-    if (Number.isNaN(val) || !Number.isFinite(val)) {
+    if (Number.isNaN(val) || !Number.isFinite(val) || val < 0) {
       this.reset();
       return 0;
     }
