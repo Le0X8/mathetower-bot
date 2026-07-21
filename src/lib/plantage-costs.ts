@@ -235,6 +235,9 @@ export function maxUpgradeBothCheapestFirst(
   budget: number,
   buff: number,
 ): { newLand: number; newMultiplier: number; spent: number } {
+  throw new Error(
+    'Temporarily unavailable, use maxUpgradeBothBalanced instead',
+  );
   const costAtCeiling = (priceCeiling: number) => {
     const newLand = maxLevelUnderPrice(landPieces, land, buff, priceCeiling);
     const newMultiplier = maxLevelUnderPrice(
