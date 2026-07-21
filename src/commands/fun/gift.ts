@@ -62,12 +62,12 @@ export default new Command(
       }
 
       const cooldown = store.get(r, 'giftcooldown') ?? 0;
-      if (Date.now() < cooldown) {
+      /* if (Date.now() < cooldown) {
         msgs.push(
           `<@${r}> kann bis zum <t:${Math.floor(cooldown / 1000)}:f> keine Bananen empfangen!`,
         );
         return;
-      }
+      } */
 
       if (r == config.bot_uid) {
         const donators: Record<string, number> = store.get('donators') ?? {};

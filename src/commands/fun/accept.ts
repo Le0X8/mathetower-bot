@@ -69,12 +69,12 @@ export default new Command(
 
     const r = senderId;
     const cooldown = store.get(r, 'giftcooldown') ?? 0;
-    if (Date.now() < cooldown) {
+    /* if (Date.now() < cooldown) {
       await interaction.reply(
         `<@${r}> kann bis zum <t:${Math.floor(cooldown / 1000)}:f> keine Bananen empfangen!`,
       );
       return;
-    }
+    } */
 
     const senderBalance = new Bananen(senderId);
     balance.transfer(senderBalance, amount);

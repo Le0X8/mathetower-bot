@@ -47,13 +47,13 @@ export default new Command(
             return;
           }
 
-          const cooldown = store.get(r, 'giftcooldown') ?? 0;
+          /* const cooldown = store.get(r, 'giftcooldown') ?? 0;
           if (Date.now() < cooldown) {
             await interaction.reply(
               `<@${r}> kann bis zum <t:${Math.floor(cooldown / 1000)}:f> keine Bananen empfangen!`,
             );
             return;
-          }
+          } */
 
           me.transfer(b, cost);
           await interaction.reply({
