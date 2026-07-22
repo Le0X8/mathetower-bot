@@ -237,6 +237,7 @@ export function maxUpgradeBothCheapestFirst(
   budget: number,
   buff: number,
 ): { newLand: number; newMultiplier: number; spent: number } {
+  throw new Error();
   const costAtCeiling = (priceCeiling: number) => {
     const newLand = maxLevelUnderPrice(landPieces, land, buff, priceCeiling);
     const newMultiplier = maxLevelUnderPrice(
