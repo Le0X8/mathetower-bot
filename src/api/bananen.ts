@@ -70,7 +70,15 @@ export class Bananen {
       0,
     );
 
-    if (Number.isNaN(val) || !Number.isFinite(val) || val < 0) {
+    if (Number.isNaN(val) || !Number.isFinite(val)) {
+      this.bananen = {
+        [BananeType.Gelb]: Number.MAX_VALUE,
+      } as unknown as Record<BananeType, number>;
+      this.save();
+      return Number.MAX_VALUE;
+    }
+
+    if (val < 0) {
       this.reset();
       return 0;
     }
