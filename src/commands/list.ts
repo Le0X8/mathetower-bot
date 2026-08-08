@@ -26,6 +26,7 @@ import klausuren from './info/klausuren.ts';
 import mensa from './info/mensa.ts';
 import novx from './info/novx.ts';
 import zzz_owner_editcash from './owner/editcash.ts';
+import zzz_owner_setrole from './owner/setrole.ts';
 import zzz_owner_replacewords from './owner/replacewords.ts';
 
 export const commands: Record<string, Command> = {
@@ -55,5 +56,6 @@ export const commands: Record<string, Command> = {
   mensa,
   novx,
   zzz_owner_editcash,
+  zzz_owner_setrole,
   zzz_owner_replacewords,
 };
