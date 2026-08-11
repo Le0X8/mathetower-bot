@@ -1,5 +1,7 @@
 import { Command } from '$commands';
 
+import alias from './admin/alias.ts';
+import forget from './admin/forget.ts';
 import set_exams from './admin/set-exams.ts';
 import bugreport from './debug/bugreport.ts';
 import zzz_debug from './debug/debug.ts';
@@ -31,6 +33,8 @@ import zzz_owner_setrole from './owner/setrole.ts';
 import zzz_owner_replacewords from './owner/replacewords.ts';
 
 export const commands: Record<string, Command> = {
+  alias,
+  forget,
   set_exams,
   bugreport,
   zzz_debug,

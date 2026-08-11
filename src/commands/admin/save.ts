@@ -24,7 +24,9 @@ export async function saveMsg(msg: Message) {
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
     ),
-  ).slice(0, 5);
+  )
+    .slice(0, 5)
+    .map((tag) => store.get(tag, 'recall.alias') ?? tag);
   if (tags.length == 0) {
     return msg.react(emojis.icon.no);
   }

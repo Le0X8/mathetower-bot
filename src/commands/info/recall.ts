@@ -8,6 +8,7 @@ async function print(
   interaction: ChatInputCommandInteraction,
   id: string,
   data: { author: string; content: string; date: string; tags: string[] },
+  fromPermalink = false,
 ) {
   const date = new Date(data.date).toLocaleDateString('de-DE', {
     year: 'numeric',
@@ -22,9 +23,9 @@ async function print(
     'unknown';
 
   return interaction.reply(
-    `-# von @${author}, ${date}\n${data.content}\n-# Permalink: \`/r ${id}\` \u2022 Tags: ${data.tags
-      .map((t: string) => `\`${t}\``)
-      .join(', ')}`,
+    `-# von @${author}, ${date}\n${data.content}\n-# ` + fromPermalink
+      ? `Tags: ${data.tags.map((t: string) => `\`${t}\``).join(', ')}`
+      : `Permalink: \`/r ${id}\``,
   );
 }
 
@@ -42,7 +43,9 @@ export default new Command(
           .map((tag) => tag.trim())
           .filter((tag) => tag.length > 0),
       ),
-    ).slice(0, 5);
+    )
+      .slice(0, 5)
+      .map((tag) => store.get(tag, 'recall.alias') ?? tag);
 
     if (tags.length == 0) {
       await interaction.reply({
@@ -63,7 +66,7 @@ export default new Command(
         return;
       }
 
-      await print(interaction, id, data);
+      await print(interaction, id, data, true);
       return;
     }
 
