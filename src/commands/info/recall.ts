@@ -23,9 +23,10 @@ async function print(
     'unknown';
 
   return interaction.reply(
-    `-# von @${author}, ${date}\n${data.content}\n-# ` + fromPermalink
-      ? `Tags: ${data.tags.map((t: string) => `\`${t}\``).join(', ')}`
-      : `Permalink: \`/r ${id}\``,
+    `-# von @${author}, ${date}\n${data.content}\n-# ` +
+      (fromPermalink
+        ? `Tags: ${data.tags.map((t: string) => `\`${t}\``).join(', ')}`
+        : `Permalink: \`/r ${id}\``),
   );
 }
 
