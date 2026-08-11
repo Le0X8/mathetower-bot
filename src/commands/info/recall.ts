@@ -1,6 +1,15 @@
 import { Command } from '$commands';
 import { ApplicationCommandOptionType } from 'discord.js';
 
+function print(
+  id: string,
+  data: { author: string; content: string; tags: string[] },
+) {
+  return `-# <@${data.author}>\n${data.content}\n\n-# Gelistet unter: ${data.tags
+    .map((t: string) => `\`${t}\``)
+    .join(', ')}\n-# Permalink: \`/r ${id}\``;
+}
+
 export default new Command(
   'r',
   'Gespeicherte Nachricht',
@@ -36,11 +45,8 @@ export default new Command(
         return;
       }
 
-      await interaction.reply(
-        `-# <@${data.author}>\n${data.content}\n\n-# Gelistet unter: ${data.tags
-          .map((t: string) => `\`${t}\``)
-          .join(', ')}\n-# Permalink: \`/r ${id}\``,
-      );
+      await interaction.reply(print(id, data));
+      return;
     }
 
     let ids = new Set<string>();
@@ -70,11 +76,8 @@ export default new Command(
         return;
       }
 
-      await interaction.reply(
-        `-# <@${data.author}>\n${data.content}\n\n-# Gelistet unter: ${data.tags
-          .map((t: string) => `\`${t}\``)
-          .join(', ')}\n-# Permalink: \`/r ${id}\``,
-      );
+      await interaction.reply(print(id, data));
+      return;
     }
 
     await interaction.reply(
