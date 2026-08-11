@@ -1,13 +1,31 @@
 import { Command } from '$commands';
-import { ApplicationCommandOptionType } from 'discord.js';
+import {
+  ApplicationCommandOptionType,
+  ChatInputCommandInteraction,
+} from 'discord.js';
 
-function print(
+async function print(
+  interaction: ChatInputCommandInteraction,
   id: string,
-  data: { author: string; content: string; tags: string[] },
+  data: { author: string; content: string; date: string; tags: string[] },
 ) {
-  return `-# <@${data.author}>\n${data.content}\n\n-# Gelistet unter: ${data.tags
-    .map((t: string) => `\`${t}\``)
-    .join(', ')}\n-# Permalink: \`/r ${id}\``;
+  const date = new Date(data.date).toLocaleDateString('de-DE', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const author =
+    interaction.guild?.members.cache.get(data.author)?.user.username ??
+    'unknown';
+
+  return interaction.reply(
+    `-# von @${author}, ${date}\n${data.content}\n-# Permalink: \`/r ${id}\` \u2022 Tags: ${data.tags
+      .map((t: string) => `\`${t}\``)
+      .join(', ')}`,
+  );
 }
 
 export default new Command(
@@ -45,7 +63,7 @@ export default new Command(
         return;
       }
 
-      await interaction.reply(print(id, data));
+      await print(interaction, id, data);
       return;
     }
 
@@ -76,14 +94,14 @@ export default new Command(
         return;
       }
 
-      await interaction.reply(print(id, data));
+      await print(interaction, id, data);
       return;
     }
 
     await interaction.reply(
       `Es wurden mehrere Nachrichten gefunden, die in allen Tags \`${tags.join(
         '`, `',
-      )}\` vorkommen. Bitte gib eine eindeutige ID an.`,
+      )}\` vorkommen: \`${Array.from(ids).join(', ')}\`. Bitte gib eine eindeutige ID an.`,
     );
   },
   false,
