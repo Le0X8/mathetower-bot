@@ -39,8 +39,9 @@ export async function saveMsg(msg: Message) {
   }
   const author = ref.author.id;
 
-  const other = store.get(tags[0], 'recall.tag') ?? [];
-  const id = tags[0] + '-' + (other.length + 1);
+  let counter = store.get(tags[0], 'recall.tagcount') ?? 0;
+  const id = tags[0] + '-' + ++counter;
+  store.set(tags[0], 'recall.tagcount', counter);
   for (const tag of tags) {
     const other = store.get(tag, 'recall.tag') ?? [];
     other.push(id);
