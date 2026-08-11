@@ -21,7 +21,8 @@ export async function saveMsg(msg: Message) {
         .trim()
         .toLowerCase()
         .split(' ')
-        .map((tag) => tag.trim()),
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0),
     ),
   ).slice(0, 5);
   if (tags.length == 0) {
