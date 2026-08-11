@@ -18,10 +18,13 @@ export default new Command(
 
     const tags = data.tags;
     for (const tag of data.tags) {
-      const other = store.get(tag, 'recall.tag') ?? [];
+      const other: string[] = store.get(tag, 'recall.tag') ?? [];
+      console.error(JSON.stringify({ other }));
       const index = other.indexOf(id);
+      console.error(JSON.stringify({ index }));
       if (index > -1) {
         other.splice(index, 1);
+        console.error(2, JSON.stringify({ other }));
         store.set(tag, 'recall.tag', other);
       }
     }
