@@ -2,7 +2,7 @@ import config from '$config' with { type: 'json' };
 import { emojis } from '$emojis';
 import { Message, PermissionFlagsBits } from 'discord.js';
 
-export async function save(msg: Message) {
+export async function saveMsg(msg: Message) {
   if (
     ((msg.guild?.id != config.home_gid ||
       !(await msg.member?.fetch())?.permissions.has(

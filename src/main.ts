@@ -18,6 +18,7 @@ import { emojis } from '$emojis';
 import { appendFileSync } from 'node:fs';
 import { commands } from '$commands/list.ts';
 import './routines/gpt6.ts';
+import { saveMsg } from '$commands/admin/save.ts';
 
 const token = config.discord_token;
 
@@ -128,6 +129,8 @@ client.on(Events.MessageCreate, async (message) => {
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
+
+  if (content.includes('!save')) return saveMsg(message);
 
   if (content.length > 3) {
     appendFileSync('./dataset.txt', content + '\n');
