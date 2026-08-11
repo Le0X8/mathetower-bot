@@ -87,26 +87,17 @@ export default new Command(
       return;
     }
 
-    if (ids.size == 1) {
-      const id = Array.from(ids)[0];
-      const data = store.get(id, 'recall.content');
-      if (!data) {
-        await interaction.reply({
-          content: `Keine Nachricht unter \`${id}\` gefunden.`,
-          ephemeral: true,
-        });
-        return;
-      }
-
-      await print(interaction, id, data);
+    const id = Array.from(ids)[Math.floor(Math.random() * ids.size)];
+    const data = store.get(id, 'recall.content');
+    if (!data) {
+      await interaction.reply({
+        content: `Keine Nachricht unter \`${id}\` gefunden.`,
+        ephemeral: true,
+      });
       return;
     }
 
-    await interaction.reply(
-      `Es wurden mehrere Nachrichten gefunden, die in allen Tags \`${tags.join(
-        '`, `',
-      )}\` vorkommen: \`${Array.from(ids).join(', ')}\`. Bitte gib eine eindeutige ID an.`,
-    );
+    await print(interaction, id, data);
   },
   false,
   [

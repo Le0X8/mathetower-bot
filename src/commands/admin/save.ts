@@ -3,14 +3,7 @@ import { emojis } from '$emojis';
 import { Message, PermissionFlagsBits } from 'discord.js';
 
 export async function saveMsg(msg: Message) {
-  if (
-    ((msg.guild?.id != config.home_gid ||
-      !(await msg.member?.fetch())?.permissions.has(
-        PermissionFlagsBits.Administrator,
-      )) &&
-      msg.author.id != config.owner_uid) ||
-    !msg.reference
-  ) {
+  if (!msg.reference) {
     return msg.react(emojis.icon.no);
   }
 

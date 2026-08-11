@@ -1,5 +1,6 @@
 import { Command } from '$commands';
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import config from '$config' with { type: 'json' };
 
 export default new Command(
   'alias',
@@ -41,12 +42,24 @@ export default new Command(
       return;
     }
 
+    if (
+      interaction.guild?.id != config.home_gid ||
+      (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) &&
+        interaction.user.id != config.owner_uid)
+    ) {
+      await interaction.reply({
+        content: 'Nur Admins können Aliase entfernen.',
+        ephemeral: true,
+      });
+      return;
+    }
+
     store.clear('recall.alias+' + alias);
     await interaction.reply({
       content: `Alias \`${alias}\` wurde entfernt.`,
     });
   },
-  true,
+  false,
   [
     {
       name: 'alias',
