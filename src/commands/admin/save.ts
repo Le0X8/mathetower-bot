@@ -35,8 +35,7 @@ export async function saveMsg(msg: Message) {
   const date = (ref.editedAt ?? ref.createdAt).toISOString();
   let content = ref.content.trim().slice(0, 2000);
   if (ref.attachments.size > 0) {
-    content +=
-      '\n' + ref.attachments.map((a) => `[${a.name}](${a.url})`).join('\n');
+    content += '\n' + ref.attachments.map((a) => a.url).join('\n');
   }
   if (!content) {
     return msg.react(emojis.icon.no);
