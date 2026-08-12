@@ -134,7 +134,11 @@ async function specialMessages(message: Message<boolean>) {
   const chatmode = store.get(message.channelId, 'chatmode');
   if (chatmode) {
     const model = getModel(chatmode);
-    const out = await globalThis.gpt6(instructions.prompt(model, content));
+    const parts = message.content.split('\n');
+    if (parts.length == 0) return;
+    const out = await globalThis.gpt6(
+      instructions.prompt(model, parts[parts.length - 1]),
+    );
     if (out.trim().toLowerCase() != message.content.trim().toLowerCase()) {
       await message.reply(out.trim().slice(0, 2000));
       return;
