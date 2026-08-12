@@ -61,6 +61,7 @@ export default new Command(
       choices: [
         { name: 'GPT-7', value: Model.Gpt7 },
         { name: 'GPT-6', value: Model.Gpt6 },
+        { name: 'GPT-8 beta', value: Model.Gpt8 },
       ],
     },
   ],

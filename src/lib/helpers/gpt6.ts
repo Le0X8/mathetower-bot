@@ -1,6 +1,7 @@
 export enum Model {
   Gpt6 = 'gpt6',
   Gpt7 = 'gpt7',
+  Gpt8 = 'gpt8',
 }
 
 export const models = [Model.Gpt6, Model.Gpt7];
@@ -8,6 +9,7 @@ export const models = [Model.Gpt6, Model.Gpt7];
 export function getModel(model: string): Model {
   if (model === Model.Gpt6) return Model.Gpt6;
   if (model === Model.Gpt7) return Model.Gpt7;
+  if (model === Model.Gpt8) return Model.Gpt8;
   return Model.Gpt7;
 }
 

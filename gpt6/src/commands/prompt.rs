@@ -4,6 +4,7 @@ use crate::{
     error,
     graph::{Graph, Model},
     info,
+    models::gpt8,
     tokens::Tokens,
 };
 use std::{
@@ -41,6 +42,15 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         let model = match input.split(' ').collect::<Vec<_>>()[0] {
             "gpt6" | "gpt6w" => Model::Gpt6,
             "gpt7" | "gpt7w" => Model::Gpt7,
+            "gpt8" => {
+                println!("{}", gpt8(&input).0);
+                continue;
+            }
+            "gpt8w" => {
+                let mut weights = gpt8(&input).1;
+                print_weights(&mut weights);
+                continue;
+            }
             _ => {
                 println!("invalid model");
                 continue;
@@ -69,29 +79,35 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
 
         // show weights
         if input.starts_with("gpt6w ") || input.starts_with("gpt7w ") {
-            let mut weights =
-                graph.weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model);
-            println!("{} possible completions:", weights.len());
-            weights.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-            for (token, weight) in weights.iter().take(25) {
-                println!(
-                    "{weight:.2}: {}",
-                    if *token == 0 {
-                        "<TERMINATE>".to_string()
-                    } else {
-                        tokens
-                            .resolve(*token)
-                            .cloned()
-                            .unwrap_or("<TERMINATE>".to_string())
-                    }
-                );
-            }
+            let mut weights = graph
+                .weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model)
+                .iter()
+                .map(|w| {
+                    let token = w.0;
+                    (
+                        if token == 0 {
+                            "<TERMINATE>".to_string()
+                        } else {
+                            tokens
+                                .resolve(token)
+                                .cloned()
+                                .unwrap_or("<TERMINATE>".to_string())
+                        },
+                        w.1,
+                    )
+                })
+                .collect::<Vec<_>>();
+            print_weights(&mut weights);
             continue;
         }
 
         complete(graph, &mut stream, &model);
         stream.drain(0..2);
-        println!("{}", detokenize(tokens, stream));
+        if strs.is_empty() {
+            println!("{}", detokenize(tokens, stream))
+        } else {
+            println!("{} {}", strs.join(" "), detokenize(tokens, stream))
+        };
     }
 }
 
@@ -159,4 +175,12 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
     println!();
 
     Ok(())
+}
+
+fn print_weights(weights: &mut [(String, f64)]) {
+    println!("{} possible completions:", weights.len());
+    weights.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+    for (token, weight) in weights.iter().take(25) {
+        println!("{weight:.2}: {}", token);
+    }
 }

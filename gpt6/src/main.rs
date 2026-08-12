@@ -2,6 +2,7 @@ use std::{env::args, error::Error};
 
 mod commands;
 mod graph;
+mod models;
 mod tokens;
 
 fn main() {
