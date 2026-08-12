@@ -25,6 +25,7 @@ const SOURCES: &[&str] = &[
     "Deutsche Bahn",
     "Arch Wiki",
     "Turning Point USA",
+    "Pornhub",
     "gov.il",
     "Polizei NRW",
     "GitHub",
@@ -57,24 +58,20 @@ fn add_sources(r: Gpt7Result) -> Gpt7Result {
     (text, r.1)
 }
 
-fn answer_nick(words: &[&str], words_lower: &[String]) -> Option<Gpt7Result> {
-    if words_lower.contains(&"nick".to_string()) {
+fn answer_nick(words: &[&str], words_esc: &[String]) -> Option<Gpt7Result> {
+    let pos = words_esc.iter().position(|w| w == "nick");
+    if let Some(pos) = pos {
         return Some((
             format!(
                 "Did you mean \"{}\"?",
                 words
                     .iter()
-                    .map(|w| {
-                        if w.to_lowercase() == "nick" {
-                            "_**Laura**_"
-                        } else {
-                            w
-                        }
-                    })
+                    .enumerate()
+                    .map(|(i, w)| { if i == pos { "_**Laura**_" } else { w } })
                     .collect::<Vec<_>>()
                     .join(" ")
             ),
-            vec![("Nick".to_string(), 1.0)],
+            vec![("<Mode:Nick>".to_string(), 1.0)],
         ));
     }
     None
@@ -124,10 +121,13 @@ pub fn gpt7(input: &str) -> Gpt7Result {
         .filter(|(i, s)| *i != 0 && !s.is_empty())
         .map(|(_, s)| s)
         .collect::<Vec<_>>();
-    let words_lower = words.iter().map(|s| s.to_lowercase()).collect::<Vec<_>>();
+    let words_esc = words
+        .iter()
+        .map(|s| s.to_lowercase().replace(|c: char| !c.is_alphanumeric(), ""))
+        .collect::<Vec<_>>();
     let input = words.join(" ");
 
-    step!(answer_nick(&words, &words_lower));
+    step!(answer_nick(&words, &words_esc));
     step!(answer_question(&input));
 
     select(FAILURE_RESPONSES, "Fail")
