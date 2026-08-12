@@ -134,7 +134,11 @@ async function specialMessages(message: Message<boolean>) {
   const chatmode = store.get(message.channelId, 'chatmode');
   if (chatmode || message.mentions.has(config.bot_uid)) {
     const model = getModel(chatmode) ?? Model.Gpt69Turbo;
-    const parts = message.content.split('\n');
+    const parts = message.content
+      .replaceAll(`<@${config.bot_uid}>`, '')
+      .trim()
+      .split('\n')
+      .filter((line) => line.length > 0);
     if (parts.length == 0) return;
     const out = await globalThis.gpt6(
       instructions.prompt(model, parts[parts.length - 1]),
