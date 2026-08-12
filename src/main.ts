@@ -19,6 +19,7 @@ import { appendFileSync } from 'node:fs';
 import { commands } from '$commands/list.ts';
 import './routines/gpt6.ts';
 import { saveMsg } from '$commands/admin/save.ts';
+import { getModel, instructions } from '@/lib/helpers/gpt6.ts';
 
 const token = config.discord_token;
 
@@ -129,6 +130,14 @@ client.on(Events.MessageCreate, async (message) => {
 
 async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
+
+  const chatmode = store.get(message.channelId, 'chatmode');
+  if (chatmode) {
+    const model = getModel(chatmode);
+    const out = await globalThis.gpt6(instructions.prompt(model, content));
+    await message.reply(out.trim().slice(0, 2000));
+    return;
+  }
 
   if (content.includes('!save')) return saveMsg(message);
 

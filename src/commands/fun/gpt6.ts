@@ -3,6 +3,12 @@ import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { getModel, instructions, Model } from '@/lib/helpers/gpt6.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
+export const models = [
+  { name: 'GPT-7', value: Model.Gpt7 },
+  { name: 'GPT-6', value: Model.Gpt6 },
+  { name: 'GPT-8 beta', value: Model.Gpt8 },
+];
+
 export default new Command(
   'gpt6',
   'wie /random nur noch besser',
@@ -54,11 +60,7 @@ export default new Command(
       description: 'Modell',
       type: ApplicationCommandOptionType.String,
       required: false,
-      choices: [
-        { name: 'GPT-7', value: Model.Gpt7 },
-        { name: 'GPT-6', value: Model.Gpt6 },
-        { name: 'GPT-8 beta', value: Model.Gpt8 },
-      ],
+      choices: models,
     },
   ],
 );
