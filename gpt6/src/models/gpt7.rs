@@ -1,3 +1,5 @@
+use std::time::SystemTime;
+
 use rand::random_range;
 
 pub type Gpt7Result = (String, Vec<(String, f64)>);
@@ -94,6 +96,33 @@ fn answer_question(input: &str) -> Option<Gpt7Result> {
                 "Einige auf jeden Fall.",
             ],
             "Question.Which",
+        )));
+    }
+    if input.contains("wann") {
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        return Some(add_sources(select(
+            &[
+                "Jetzt.",
+                "Gleich, hab mal bisschen Geduld junge",
+                "Nothing ever happens",
+                // bis 5 min
+                format!("<t:{}:R>", random_range(now..(now + 300))).as_str(),
+                // bis 1h
+                format!("<t:{}:R>", random_range(now..(now + 3600))).as_str(),
+                // bis 1w
+                format!("<t:{}:R>", random_range(now..(now + 604800))).as_str(),
+                format!("<t:{}:F>", random_range(now..(now + 604800))).as_str(),
+                // bis 1m
+                format!("<t:{}:R>", random_range(now..(now + 2592000))).as_str(),
+                format!("<t:{}:F>", random_range(now..(now + 2592000))).as_str(),
+                // 1900-2200
+                format!("<t:{}:R>", random_range(-2208988800i64..7258118400)).as_str(),
+                format!("<t:{}:F>", random_range(-2208988800i64..7258118400)).as_str(),
+            ],
+            "Question.When",
         )));
     }
 
