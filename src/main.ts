@@ -133,9 +133,17 @@ async function specialMessages(message: Message<boolean>) {
 
   const chatmode = store.get(message.channelId, 'chatmode');
   if (chatmode || message.mentions.has(config.bot_uid)) {
-    const model = getModel(chatmode) ?? Model.Gpt69Turbo;
+    let model = getModel(chatmode) ?? Model.Gpt69Turbo;
+    const modelOverride = message.content
+      .split(' ')
+      .find((word) => word.startsWith('!model='));
+    if (modelOverride) {
+      const modelName = modelOverride.split('=')[1];
+      model = getModel(modelName) ?? model;
+    }
     const parts = message.content
       .replaceAll(`<@${config.bot_uid}>`, '')
+      .replace(/!model=[^\s]+/g, '')
       .trim()
       .split('\n')
       .filter((line) => line.length > 0);
@@ -143,7 +151,7 @@ async function specialMessages(message: Message<boolean>) {
     const out = await globalThis.gpt6(
       instructions.prompt(model, parts[parts.length - 1]),
     );
-    if (out.trim().toLowerCase() != message.content.trim().toLowerCase()) {
+    if (out.trim().toLowerCase() != parts[parts.length - 1].toLowerCase()) {
       await message.reply(out.trim().slice(0, 2000));
       return;
     }
