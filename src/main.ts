@@ -141,7 +141,8 @@ async function specialMessages(message: Message<boolean>) {
       const modelName = modelOverride.split('=')[1];
       model = getModel(modelName) ?? model;
     }
-    const parts = message.content
+    const ref = message.reference ? await message.fetchReference() : null;
+    const parts = (ref ?? message).content
       .replaceAll(`<@${config.bot_uid}>`, '')
       .replace(/!model=[^\s]+/g, '')
       .trim()
@@ -152,7 +153,7 @@ async function specialMessages(message: Message<boolean>) {
       instructions.prompt(model, parts[parts.length - 1]),
     );
     if (out.trim().toLowerCase() != parts[parts.length - 1].toLowerCase()) {
-      await message.reply(out.trim().slice(0, 2000));
+      await (ref ?? message).reply(out.trim().slice(0, 2000));
       return;
     }
   }
