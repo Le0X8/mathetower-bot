@@ -12,7 +12,9 @@ export default new Command(
     const weights = interaction.options.getBoolean('weights', false) ?? false;
     const model = interaction.options.getString('model', false) ?? Model.Gpt7;
     const out = await globalThis.gpt6(
-      instructions.prompt(getModel(model), start),
+      weights
+        ? instructions.weights(getModel(model), start)
+        : instructions.prompt(getModel(model), start),
     );
     if (weights) {
       const lines = out.split('\n');
