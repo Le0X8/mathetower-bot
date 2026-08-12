@@ -15,13 +15,23 @@ fn select(responses: &[&str], mode: &str) -> Gpt7Result {
 }
 
 const SOURCES: &[&str] = &[
-    "Wikipedia EN",
+    "Wikipedia",
     "TU Dortmund",
     "YouTube",
     "StackOverflow",
     "Reddit",
     "Twitter",
     "Moodle",
+    "Deutsche Bahn",
+    "Arch Wiki",
+    "Turning Point USA",
+    "gov.il",
+    "Polizei NRW",
+    "GitHub",
+    "Charlie Kirk",
+    "Elon Musk",
+    "Grok",
+    "Grokipedia",
 ];
 
 fn add_sources(r: Gpt7Result) -> Gpt7Result {
@@ -45,6 +55,29 @@ fn add_sources(r: Gpt7Result) -> Gpt7Result {
     }
     text.push_str(&sources.join(", "));
     (text, r.1)
+}
+
+fn answer_nick(words: &[&str], words_lower: &[String]) -> Option<Gpt7Result> {
+    if words_lower.contains(&"nick".to_string()) {
+        return Some((
+            format!(
+                "Did you mean \"{}\"?",
+                words
+                    .iter()
+                    .map(|w| {
+                        if w.to_lowercase() == "nick" {
+                            "_**Laura**_"
+                        } else {
+                            w
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            vec![("Nick".to_string(), 1.0)],
+        ));
+    }
+    None
 }
 
 fn answer_question(input: &str) -> Option<Gpt7Result> {
@@ -76,18 +109,26 @@ const FAILURE_RESPONSES: &[&str] = &[
     include_str!("../../assets/gpt7/fail_2.txt"),
 ];
 
+macro_rules! step {
+    ($expr:expr) => {
+        if let Some(result) = $expr {
+            return result;
+        }
+    };
+}
+
 pub fn gpt7(input: &str) -> Gpt7Result {
-    let input = input
+    let words = input
         .split(' ')
         .enumerate()
         .filter(|(i, s)| *i != 0 && !s.is_empty())
         .map(|(_, s)| s)
-        .collect::<Vec<_>>()
-        .join(" ");
+        .collect::<Vec<_>>();
+    let words_lower = words.iter().map(|s| s.to_lowercase()).collect::<Vec<_>>();
+    let input = words.join(" ");
 
-    if let Some(result) = answer_question(&input) {
-        return result;
-    }
+    step!(answer_nick(&words, &words_lower));
+    step!(answer_question(&input));
 
     select(FAILURE_RESPONSES, "Fail")
 }
