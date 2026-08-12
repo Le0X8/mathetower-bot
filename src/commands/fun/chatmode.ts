@@ -5,7 +5,7 @@ import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default new Command(
   'chatmode',
-  'Aktiviert GPT-6 für den gesamten Channel',
+  'Aktiviert oder deaktivert GPT-6 für den gesamten Channel',
   async (interaction) => {
     if (
       !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)
@@ -17,7 +17,11 @@ export default new Command(
       return;
     }
 
-    if (interaction.options.getBoolean('disable', false)) {
+    const model = getModel(
+      interaction.options.getString('model', false) ?? Model.Gpt7,
+    );
+    const current = store.get(interaction.channelId, 'chatmode');
+    if (current === model) {
       store.clear('chatmode+' + interaction.channelId);
       await interaction.reply({
         content: `Chatmode wurde deaktiviert.`,
@@ -25,9 +29,6 @@ export default new Command(
       return;
     }
 
-    const model = getModel(
-      interaction.options.getString('model', false) ?? Model.Gpt7,
-    );
     const name = models.find((m) => m.value === model)!.name;
 
     store.set(interaction.channelId, 'chatmode', model);
@@ -43,12 +44,6 @@ export default new Command(
       description: 'Modell',
       type: ApplicationCommandOptionType.String,
       choices: models,
-      required: false,
-    },
-    {
-      name: 'disable',
-      description: 'Deaktiviert den Chatmode',
-      type: ApplicationCommandOptionType.Boolean,
       required: false,
     },
   ],

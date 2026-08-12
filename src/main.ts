@@ -135,8 +135,10 @@ async function specialMessages(message: Message<boolean>) {
   if (chatmode) {
     const model = getModel(chatmode);
     const out = await globalThis.gpt6(instructions.prompt(model, content));
-    await message.reply(out.trim().slice(0, 2000));
-    return;
+    if (out.trim().toLowerCase() != message.content.trim().toLowerCase()) {
+      await message.reply(out.trim().slice(0, 2000));
+      return;
+    }
   }
 
   if (content.includes('!save')) return saveMsg(message);
