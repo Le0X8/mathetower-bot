@@ -18,7 +18,7 @@ export default new Command(
     }
 
     const model = getModel(
-      interaction.options.getString('model', false) ?? Model.Gpt7,
+      interaction.options.getString('model', false) ?? Model.Gpt69Turbo,
     );
     const current = store.get(interaction.channelId, 'chatmode');
     if (current === model) {

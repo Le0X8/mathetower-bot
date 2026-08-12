@@ -1,8 +1,8 @@
 use rand::random_range;
 
-pub type Gpt8Result = (String, Vec<(String, f64)>);
+pub type Gpt7Result = (String, Vec<(String, f64)>);
 
-fn select(responses: &[&str], mode: &str) -> Gpt8Result {
+fn select(responses: &[&str], mode: &str) -> Gpt7Result {
     let index = random_range(0..responses.len());
     let mut weights = responses
         .iter()
@@ -24,7 +24,7 @@ const SOURCES: &[&str] = &[
     "Moodle",
 ];
 
-fn add_sources(r: Gpt8Result) -> Gpt8Result {
+fn add_sources(r: Gpt7Result) -> Gpt7Result {
     let mut text = r.0;
     let source_count = random_range(0..3);
     if source_count > 0 {
@@ -47,7 +47,7 @@ fn add_sources(r: Gpt8Result) -> Gpt8Result {
     (text, r.1)
 }
 
-fn answer_question(input: &str) -> Option<Gpt8Result> {
+fn answer_question(input: &str) -> Option<Gpt7Result> {
     if !input.ends_with('?') {
         return None;
     }
@@ -71,12 +71,12 @@ fn answer_question(input: &str) -> Option<Gpt8Result> {
 }
 
 const FAILURE_RESPONSES: &[&str] = &[
-    include_str!("../../assets/gpt8/fail_0.txt"),
-    include_str!("../../assets/gpt8/fail_1.txt"),
-    include_str!("../../assets/gpt8/fail_2.txt"),
+    include_str!("../../assets/gpt7/fail_0.txt"),
+    include_str!("../../assets/gpt7/fail_1.txt"),
+    include_str!("../../assets/gpt7/fail_2.txt"),
 ];
 
-pub fn gpt8(input: &str) -> Gpt8Result {
+pub fn gpt7(input: &str) -> Gpt7Result {
     let input = input
         .split(' ')
         .enumerate()

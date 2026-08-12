@@ -1,3 +1,3 @@
-mod gpt8;
+mod gpt7;
 
-pub use gpt8::gpt8;
+pub use gpt7::gpt7;

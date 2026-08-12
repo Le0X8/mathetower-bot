@@ -6,20 +6,20 @@ use zstd::stream::{read::Decoder, write::Encoder};
 
 pub enum Model {
     Gpt6,
-    Gpt7,
+    Gpt69Turbo,
 }
 
 #[derive(Debug)]
 pub struct Graph {
     pub gpt6: HashMap<u32, Vec<Freq>>,
-    pub gpt7: HashMap<(u32, u32), Vec<Freq>>,
+    pub gpt69_turbo: HashMap<(u32, u32), Vec<Freq>>,
 }
 
 impl Graph {
     pub fn new_empty() -> Self {
         Graph {
             gpt6: HashMap::new(),
-            gpt7: HashMap::new(),
+            gpt69_turbo: HashMap::new(),
         }
     }
 
@@ -28,7 +28,7 @@ impl Graph {
             token: to,
             freq: count,
         });
-        self.gpt7.entry(from).or_default().push(Freq {
+        self.gpt69_turbo.entry(from).or_default().push(Freq {
             token: to,
             freq: count,
         });
@@ -42,7 +42,7 @@ impl Graph {
             entry.push(Freq { token: to, freq: 1 });
         }
 
-        let entry = self.gpt7.entry(from).or_default();
+        let entry = self.gpt69_turbo.entry(from).or_default();
         if let Some(freq) = entry.iter_mut().find(|f| f.token == to) {
             freq.freq += 1;
         } else {
@@ -53,7 +53,7 @@ impl Graph {
     pub fn resolve(&self, from: (u32, u32), model: &Model) -> Option<&Vec<Freq>> {
         match model {
             Model::Gpt6 => self.gpt6.get(&from.1),
-            Model::Gpt7 => self.gpt7.get(&from),
+            Model::Gpt69Turbo => self.gpt69_turbo.get(&from),
         }
     }
 
@@ -89,14 +89,14 @@ impl Graph {
     }
 
     pub fn len(&self) -> usize {
-        self.gpt7.len()
+        self.gpt69_turbo.len()
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {
         info("Saving graph to graph.dat.zst...");
         let mut file = File::create("graph.dat.zst")?;
         let mut encoder = Encoder::new(&mut file, 9)?;
-        for ((from_a, from_b), to_list) in &self.gpt7 {
+        for ((from_a, from_b), to_list) in &self.gpt69_turbo {
             encoder.write_vu8(*from_a as u128)?;
             encoder.write_vu8(*from_b as u128)?;
             encoder.write_vu8(to_list.len() as u128)?;
@@ -137,7 +137,9 @@ impl Graph {
             } else {
                 graph.gpt6.insert(from_b as u32, to_list.clone());
             }
-            graph.gpt7.insert((from_a as u32, from_b as u32), to_list);
+            graph
+                .gpt69_turbo
+                .insert((from_a as u32, from_b as u32), to_list);
         }
         info(&format!("Graph loaded with {} source nodes.", graph.len()));
         Ok(graph)

@@ -19,7 +19,7 @@ import { appendFileSync } from 'node:fs';
 import { commands } from '$commands/list.ts';
 import './routines/gpt6.ts';
 import { saveMsg } from '$commands/admin/save.ts';
-import { getModel, instructions } from '@/lib/helpers/gpt6.ts';
+import { getModel, instructions, Model } from '@/lib/helpers/gpt6.ts';
 
 const token = config.discord_token;
 
@@ -132,8 +132,8 @@ async function specialMessages(message: Message<boolean>) {
   const content = message.content.toLowerCase();
 
   const chatmode = store.get(message.channelId, 'chatmode');
-  if (chatmode) {
-    const model = getModel(chatmode);
+  if (chatmode || message.mentions.has(config.bot_uid)) {
+    const model = getModel(chatmode) ?? Model.Gpt69Turbo;
     const parts = message.content.split('\n');
     if (parts.length == 0) return;
     const out = await globalThis.gpt6(

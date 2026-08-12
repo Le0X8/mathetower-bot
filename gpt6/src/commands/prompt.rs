@@ -4,7 +4,7 @@ use crate::{
     error,
     graph::{Graph, Model},
     info,
-    models::gpt8,
+    models::gpt7,
     tokens::Tokens,
 };
 use std::{
@@ -41,13 +41,13 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
 
         let model = match input.split(' ').collect::<Vec<_>>()[0] {
             "gpt6" | "gpt6w" => Model::Gpt6,
-            "gpt7" | "gpt7w" => Model::Gpt7,
-            "gpt8" => {
-                println!("{}", gpt8(&input).0);
+            "gpt6.9-turbo" | "gpt6.9-turbow" => Model::Gpt69Turbo,
+            "gpt7" => {
+                println!("{}", gpt7(&input).0);
                 continue;
             }
-            "gpt8w" => {
-                let mut weights = gpt8(&input).1;
+            "gpt7w" => {
+                let mut weights = gpt7(&input).1;
                 print_weights(&mut weights);
                 continue;
             }
@@ -78,7 +78,7 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         }
 
         // show weights
-        if input.starts_with("gpt6w ") || input.starts_with("gpt7w ") {
+        if input.starts_with("gpt6w ") || input.starts_with("gpt6.9-turbow ") {
             let mut weights = graph
                 .weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model)
                 .iter()

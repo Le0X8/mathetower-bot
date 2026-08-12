@@ -4,9 +4,9 @@ import { getModel, instructions, Model } from '@/lib/helpers/gpt6.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export const models = [
-  { name: 'GPT-7', value: Model.Gpt7 },
+  { name: 'GPT-6.9 Turbo', value: Model.Gpt69Turbo },
   { name: 'GPT-6', value: Model.Gpt6 },
-  { name: 'GPT-8 beta', value: Model.Gpt8 },
+  { name: 'GPT-7 beta', value: Model.Gpt7 },
 ];
 
 export default new Command(
@@ -15,7 +15,8 @@ export default new Command(
   async (interaction) => {
     const start = interaction.options.getString('start', false) ?? '';
     const weights = interaction.options.getBoolean('weights', false) ?? false;
-    const model = interaction.options.getString('model', false) ?? Model.Gpt7;
+    const model =
+      interaction.options.getString('model', false) ?? Model.Gpt69Turbo;
     const out = await globalThis.gpt6(
       weights
         ? instructions.weights(getModel(model), start)
