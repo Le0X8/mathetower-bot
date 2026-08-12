@@ -14,6 +14,37 @@ fn select(responses: &[&str], mode: &str) -> Gpt8Result {
     (responses[index].to_string(), weights)
 }
 
+const SOURCES: &[&str] = &[
+    "Wikipedia EN",
+    "TU Dortmund",
+    "YouTube",
+    "StackOverflow",
+    "Reddit",
+    "Twitter",
+    "Moodle",
+];
+
+fn add_sources(r: Gpt8Result) -> Gpt8Result {
+    let mut text = r.0;
+    let source_count = random_range(0..3);
+    if source_count > 0 {
+        text.push_str("\n-# Sources: ");
+    }
+    for _ in 0..source_count {
+        let source = SOURCES[random_range(0..SOURCES.len())];
+        let domain = source
+            .to_lowercase()
+            .replace(|c: char| !c.is_ascii_alphanumeric(), "-");
+        let path = text[0..text.len().min(20)].replace(|c: char| !c.is_ascii_alphanumeric(), "-");
+
+        text.push_str(&format!(
+            "[{}](https://{}.com.example/{})",
+            source, domain, path
+        ));
+    }
+    (text, r.1)
+}
+
 fn answer_question(input: &str) -> Option<Gpt8Result> {
     if !input.ends_with('?') {
         return None;
@@ -21,7 +52,7 @@ fn answer_question(input: &str) -> Option<Gpt8Result> {
 
     let input = input.trim_end_matches('?').to_lowercase();
     if input.contains("welche") {
-        return Some(select(
+        return Some(add_sources(select(
             &[
                 "Naja das kann man nicht so genau sagen.",
                 "Alle, denn sie sind gleich wichtig.",
@@ -31,13 +62,13 @@ fn answer_question(input: &str) -> Option<Gpt8Result> {
                 "Einige auf jeden Fall.",
             ],
             "Question.Which",
-        ));
+        )));
     }
 
     None
 }
 
-static FAILURE_RESPONSES: &[&str] = &[
+const FAILURE_RESPONSES: &[&str] = &[
     include_str!("../../assets/gpt8/fail_0.txt"),
     include_str!("../../assets/gpt8/fail_1.txt"),
     include_str!("../../assets/gpt8/fail_2.txt"),
