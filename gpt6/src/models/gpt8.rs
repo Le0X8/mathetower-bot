@@ -30,6 +30,7 @@ fn add_sources(r: Gpt8Result) -> Gpt8Result {
     if source_count > 0 {
         text.push_str("\n-# Sources: ");
     }
+    let mut sources = vec![];
     for _ in 0..source_count {
         let source = SOURCES[random_range(0..SOURCES.len())];
         let domain = source
@@ -37,11 +38,12 @@ fn add_sources(r: Gpt8Result) -> Gpt8Result {
             .replace(|c: char| !c.is_ascii_alphanumeric(), "-");
         let path = text[0..text.len().min(20)].replace(|c: char| !c.is_ascii_alphanumeric(), "-");
 
-        text.push_str(&format!(
+        sources.push(format!(
             "[{}](https://{}.com.example/{})",
             source, domain, path
         ));
     }
+    text.push_str(&sources.join(", "));
     (text, r.1)
 }
 
