@@ -5,3 +5,4 @@ commands.json
 *.zst
 dataset.txt
 dist
+gpt7_cache.json

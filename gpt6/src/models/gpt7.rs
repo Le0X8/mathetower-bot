@@ -1,6 +1,10 @@
+use rand::random_range;
 use std::time::SystemTime;
 
-use rand::random_range;
+use crate::models::gpt7::cache::Gpt7Cache;
+
+mod cache;
+mod lookup;
 
 pub type Gpt7Result = (String, Vec<(String, f64)>);
 
@@ -49,7 +53,11 @@ fn add_sources(r: Gpt7Result) -> Gpt7Result {
         let domain = source
             .to_lowercase()
             .replace(|c: char| !c.is_ascii_alphanumeric(), "-");
-        let path = text[0..text.len().min(20)].replace(|c: char| !c.is_ascii_alphanumeric(), "-");
+        let path = text
+            .chars()
+            .take(20)
+            .collect::<String>()
+            .replace(|c: char| !c.is_ascii_alphanumeric(), "-");
 
         sources.push(format!(
             "[{}](https://{}.com.example/{})",
@@ -79,7 +87,7 @@ fn answer_nick(words: &[&str], words_esc: &[String]) -> Option<Gpt7Result> {
     None
 }
 
-fn answer_question(input: &str) -> Option<Gpt7Result> {
+fn answer_question(input: &str, c: &mut Gpt7Cache) -> Option<Gpt7Result> {
     if !input.ends_with('?') {
         return None;
     }
@@ -125,6 +133,53 @@ fn answer_question(input: &str) -> Option<Gpt7Result> {
             "Question.When",
         )));
     }
+    if input.contains("was ist") || input.contains("wer ist") {
+        let search = input
+            .trim_start_matches("was ist")
+            .trim_start_matches("wer ist")
+            .trim()
+            .trim_start_matches("der ")
+            .trim_start_matches("die ")
+            .trim_start_matches("das ")
+            .trim_start_matches("ein ")
+            .trim_start_matches("eine ")
+            .trim();
+        let result = if random_range(0..3) != 0 {
+            lookup::lookup(search, None, c)
+        } else {
+            None
+        };
+        return Some(add_sources(match result {
+            Some(r) => (
+                {
+                    let mut r = r.split(".").collect::<Vec<_>>();
+                    r.truncate(random_range(1..=r.len()));
+                    let r = r.join(".").trim().to_string();
+                    if r.ends_with('.') {
+                        r
+                    } else {
+                        format!("{}.", r)
+                    }
+                },
+                vec![("<Mode:Wikipedia>".to_string(), 1.0)],
+            ),
+            None => select(
+                &[
+                    "Ich weiß es nicht.",
+                    "Das kann ich dir nicht sagen.",
+                    "Keine Ahnung.",
+                    "Junge was ist das für eine Frage?",
+                    "Warum fragst du mich sowas?",
+                    &format!("{search} ist eine Programmiersprache."),
+                    &format!("{search} ist ein Tier."),
+                    &format!("{search} ist ein Mensch."),
+                    &format!("{search} ist ein Ort."),
+                    &format!("{search} ist ein Unternehmen."),
+                ],
+                "Question.WhatIs",
+            ),
+        }));
+    }
 
     None
 }
@@ -144,6 +199,8 @@ macro_rules! step {
 }
 
 pub fn gpt7(input: &str) -> Gpt7Result {
+    let mut c = cache::Gpt7Cache::load();
+
     let words = input
         .split(' ')
         .enumerate()
@@ -157,7 +214,7 @@ pub fn gpt7(input: &str) -> Gpt7Result {
     let input = words.join(" ");
 
     step!(answer_nick(&words, &words_esc));
-    step!(answer_question(&input));
+    step!(answer_question(&input, &mut c));
 
     select(FAILURE_RESPONSES, "Fail")
 }
