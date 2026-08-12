@@ -199,6 +199,7 @@ macro_rules! step {
 }
 
 pub fn gpt7(input: &str) -> Gpt7Result {
+    let input = input.trim();
     let mut c = cache::Gpt7Cache::load();
 
     let words = input
