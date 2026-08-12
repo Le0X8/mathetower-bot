@@ -1,6 +1,11 @@
 use rand::RngExt;
 
-use crate::{error, graph::Graph, info, tokens::Tokens};
+use crate::{
+    error,
+    graph::{Graph, Model},
+    info,
+    tokens::Tokens,
+};
 use std::{
     error::Error,
     fs::File,
@@ -17,15 +22,15 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         input = input.trim().to_string();
 
         // training mode
-        if input == "\0" {
+        if input == "train" {
             train(tokens, graph).unwrap_or_else(|e| error(&e.to_string()));
             continue;
         }
 
         // random mode
-        if input.starts_with("\x01") {
+        if input.starts_with("random ") {
             let mut count = input
-                .trim_start_matches("\x01")
+                .trim_start_matches("random ")
                 .parse::<usize>()
                 .unwrap_or(rand::rng().random_range(1..255));
             count = count.clamp(1, 255);
@@ -33,11 +38,21 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
             continue;
         }
 
-        // gpt6 mode
-        let filtered_input = input.replace('\x02', "");
-        let strs: Vec<_> = filtered_input
+        let model = match input.split(' ').collect::<Vec<_>>()[0] {
+            "gpt6" | "gpt6w" => Model::Gpt6,
+            "gpt7" | "gpt7w" => Model::Gpt7,
+            _ => {
+                println!("invalid model");
+                continue;
+            }
+        };
+
+        // completion mode
+        let strs: Vec<_> = input
             .split(' ')
-            .filter(|s| !s.is_empty())
+            .enumerate()
+            .filter(|(i, s)| *i != 0 && !s.is_empty())
+            .map(|(_, s)| s)
             .collect();
 
         let mut stream = vec![];
@@ -53,8 +68,9 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         }
 
         // show weights
-        if input.starts_with("\x02") {
-            let mut weights = graph.weights((stream[stream.len() - 2], stream[stream.len() - 1]));
+        if input.starts_with("gpt6w ") || input.starts_with("gpt7w ") {
+            let mut weights =
+                graph.weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model);
             println!("{} possible completions:", weights.len());
             weights.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
             for (token, weight) in weights.iter().take(25) {
@@ -73,16 +89,16 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
             continue;
         }
 
-        complete(graph, &mut stream);
+        complete(graph, &mut stream, &model);
         stream.drain(0..2);
         println!("{}", detokenize(tokens, stream));
     }
 }
 
-fn complete(graph: &Graph, stream: &mut Vec<u32>) {
+fn complete(graph: &Graph, stream: &mut Vec<u32>, model: &Model) {
     let mut i = 0u8;
     while let Some(next) =
-        graph.weighted_resolve((stream[stream.len() - 2], stream[stream.len() - 1]))
+        graph.weighted_resolve((stream[stream.len() - 2], stream[stream.len() - 1]), model)
     {
         stream.push(next);
         if next == 0 || i == u8::MAX {

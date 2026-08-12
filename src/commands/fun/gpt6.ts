@@ -1,25 +1,25 @@
 import { Command } from '$commands';
 import { replace } from '$commands/owner/replacewords.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
+import { getModel, instructions, Model } from '@/lib/helpers/gpt6.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
   'gpt6',
   'wie /random nur noch besser',
   async (interaction) => {
-    const start = (interaction.options.getString('start', false) ?? '')
-      .replaceAll('\0', '')
-      .replaceAll('\x01', '')
-      .replaceAll('\x02', '');
+    const start = interaction.options.getString('start', false) ?? '';
     const weights = interaction.options.getBoolean('weights', false) ?? false;
-    const out = await globalThis.gpt6((weights ? '\x02' : '') + start);
+    const model = interaction.options.getString('model', false) ?? Model.Gpt7;
+    const out = await globalThis.gpt6(
+      instructions.prompt(getModel(model), start),
+    );
     if (weights) {
       const lines = out.split('\n');
       await interaction.reply({
         embeds: [
           await buildEmbed(
-            'GPT-6 Completion Weights for ' +
-              (start.length > 0 ? start : '<START>'),
+            'Completion Weights for ' + (start.length > 0 ? start : '<START>'),
             lines[0],
             lines.slice(1).map((line) => {
               const completion = line.split(': ');
@@ -50,6 +50,16 @@ export default new Command(
       description: 'Zeige die 25 wahrscheinlichsten nächsten Tokens',
       type: ApplicationCommandOptionType.Boolean,
       required: false,
+    },
+    {
+      name: 'model',
+      description: 'Modell',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+      choices: [
+        { name: 'GPT-7', value: Model.Gpt7 },
+        { name: 'GPT-6', value: Model.Gpt6 },
+      ],
     },
   ],
 );

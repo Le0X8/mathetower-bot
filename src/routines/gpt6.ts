@@ -1,6 +1,7 @@
 import { existsSync, truncateSync } from 'node:fs';
 import config from '$config' with { type: 'json' };
 import { spawn } from 'node:child_process';
+import { instructions } from '@/lib/helpers/gpt6.ts';
 
 const gpt6TrainInterval = 10 * 60 * 1000;
 
@@ -56,7 +57,7 @@ if (!existsSync(gpt6Path)) {
 }
 
 async function gpt6Training() {
-  await globalThis.gpt6('\0');
+  await globalThis.gpt6(instructions.train());
   truncateSync('./dataset.txt', 0);
 }
 

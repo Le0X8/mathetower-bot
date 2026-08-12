@@ -4,23 +4,45 @@ use rand::RngExt;
 use std::{collections::HashMap, error::Error, fs::File};
 use zstd::stream::{read::Decoder, write::Encoder};
 
+pub enum Model {
+    Gpt6,
+    Gpt7,
+}
+
 #[derive(Debug)]
-pub struct Graph(pub HashMap<(u32, u32), Vec<Freq>>);
+pub struct Graph {
+    pub gpt6: HashMap<u32, Vec<Freq>>,
+    pub gpt7: HashMap<(u32, u32), Vec<Freq>>,
+}
 
 impl Graph {
     pub fn new_empty() -> Self {
-        Graph(HashMap::new())
+        Graph {
+            gpt6: HashMap::new(),
+            gpt7: HashMap::new(),
+        }
     }
 
     pub fn add(&mut self, from: (u32, u32), to: u32, count: u32) {
-        self.0.entry(from).or_default().push(Freq {
+        self.gpt6.entry(from.1).or_default().push(Freq {
+            token: to,
+            freq: count,
+        });
+        self.gpt7.entry(from).or_default().push(Freq {
             token: to,
             freq: count,
         });
     }
 
     pub fn connect(&mut self, from: (u32, u32), to: u32) {
-        let entry = self.0.entry(from).or_default();
+        let entry = self.gpt6.entry(from.1).or_default();
+        if let Some(freq) = entry.iter_mut().find(|f| f.token == to) {
+            freq.freq += 1;
+        } else {
+            entry.push(Freq { token: to, freq: 1 });
+        }
+
+        let entry = self.gpt7.entry(from).or_default();
         if let Some(freq) = entry.iter_mut().find(|f| f.token == to) {
             freq.freq += 1;
         } else {
@@ -28,12 +50,15 @@ impl Graph {
         }
     }
 
-    pub fn resolve(&self, from: (u32, u32)) -> Option<&Vec<Freq>> {
-        self.0.get(&from)
+    pub fn resolve(&self, from: (u32, u32), model: &Model) -> Option<&Vec<Freq>> {
+        match model {
+            Model::Gpt6 => self.gpt6.get(&from.1),
+            Model::Gpt7 => self.gpt7.get(&from),
+        }
     }
 
-    pub fn weights(&self, from: (u32, u32)) -> Vec<(u32, f64)> {
-        if let Some(freqs) = self.resolve(from) {
+    pub fn weights(&self, from: (u32, u32), model: &Model) -> Vec<(u32, f64)> {
+        if let Some(freqs) = self.resolve(from, model) {
             freqs
                 .iter()
                 .map(|f| (f.token, (f.freq as f64 + 1.0).log2()))
@@ -43,8 +68,8 @@ impl Graph {
         }
     }
 
-    pub fn weighted_resolve(&self, from: (u32, u32)) -> Option<u32> {
-        let weights = self.weights(from);
+    pub fn weighted_resolve(&self, from: (u32, u32), model: &Model) -> Option<u32> {
+        let weights = self.weights(from, model);
         if weights.is_empty() {
             return None;
         }
@@ -64,14 +89,14 @@ impl Graph {
     }
 
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.gpt7.len()
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {
         info("Saving graph to graph.dat.zst...");
         let mut file = File::create("graph.dat.zst")?;
         let mut encoder = Encoder::new(&mut file, 9)?;
-        for ((from_a, from_b), to_list) in &self.0 {
+        for ((from_a, from_b), to_list) in &self.gpt7 {
             encoder.write_vu8(*from_a as u128)?;
             encoder.write_vu8(*from_b as u128)?;
             encoder.write_vu8(to_list.len() as u128)?;
@@ -107,7 +132,12 @@ impl Graph {
                     freq: freq as u32,
                 });
             }
-            graph.0.insert((from_a as u32, from_b as u32), to_list);
+            if let Some(entry) = graph.gpt6.get_mut(&(from_b as u32)) {
+                entry.extend(to_list.iter().cloned());
+            } else {
+                graph.gpt6.insert(from_b as u32, to_list.clone());
+            }
+            graph.gpt7.insert((from_a as u32, from_b as u32), to_list);
         }
         info(&format!("Graph loaded with {} source nodes.", graph.len()));
         Ok(graph)

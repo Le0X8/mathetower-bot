@@ -1,5 +1,6 @@
 import { Command } from '$commands';
 import { replace } from '$commands/owner/replacewords.ts';
+import { instructions } from '@/lib/helpers/gpt6.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 export default new Command(
@@ -7,7 +8,7 @@ export default new Command(
   'wie /gpt6 nur in noch dümmer',
   async (interaction) => {
     let out = await globalThis.gpt6(
-      '\x01' + interaction.options.getInteger('count', false),
+      instructions.random(interaction.options.getInteger('count', false)),
     );
     await interaction.reply(replace(out.trim()).slice(0, 2000));
   },
