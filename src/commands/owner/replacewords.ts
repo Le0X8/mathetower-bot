@@ -2,14 +2,6 @@ import { Command } from '$commands';
 import config from '$config' with { type: 'json' };
 import { ApplicationCommandOptionType } from 'discord.js';
 
-export function replace(input: string): string {
-  const replacements: Record<string, string> = store.get('replacements') ?? {};
-  for (const [word, replacement] of Object.entries(replacements)) {
-    input = input.replaceAll(word, replacement);
-  }
-  return input;
-}
-
 export default new Command(
   'zzz-owner-replacewords',
   '[Owner-exclusive] Tauscht im /random-Command einen Substring gegen was anderes aus',

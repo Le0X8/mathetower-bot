@@ -1,5 +1,4 @@
 import { Command } from '$commands';
-import { replace } from '$commands/owner/replacewords.ts';
 import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { getModel, instructions, Model } from '@/lib/helpers/gpt6.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
@@ -25,10 +24,7 @@ export default new Command(
             lines[0],
             lines.slice(1).map((line) => {
               const completion = line.split(': ');
-              return [
-                replace(`${start} **${completion[1]}**`.trim()),
-                completion[0],
-              ];
+              return [`${start} **${completion[1]}**`.trim(), completion[0]];
             }),
             null,
           ),
@@ -37,7 +33,7 @@ export default new Command(
       });
       return;
     }
-    await interaction.reply(replace((start + ' ' + out).trim()).slice(0, 2000));
+    await interaction.reply(out.trim().slice(0, 2000));
   },
   false,
   [
