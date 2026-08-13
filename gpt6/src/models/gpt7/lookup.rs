@@ -16,7 +16,9 @@ pub fn lookup(text: &str, old: Option<&str>, c: &mut Gpt7Cache) -> Option<String
         .split(' ')
         .map(|s| {
             let mut v: Vec<char> = s.chars().collect();
-            v[0] = v[0].to_uppercase().next().unwrap();
+            if !v.is_empty() {
+                v[0] = v[0].to_uppercase().next().unwrap();
+            }
             v.into_iter().collect::<String>()
         })
         .collect::<Vec<_>>()
