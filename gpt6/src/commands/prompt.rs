@@ -4,7 +4,7 @@ use crate::{
     error,
     graph::{Graph, Model},
     info,
-    models::gpt7,
+    models::{fable6, gpt7},
     tokens::Tokens,
 };
 use std::{
@@ -20,7 +20,11 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         stdout().flush()?;
         input.clear();
         stdin().read_line(&mut input)?;
-        input = input.trim().to_string();
+        input = input
+            .to_lowercase()
+            .replace(|c: char| !c.is_alphanumeric() && c != ' ', "")
+            .trim()
+            .to_owned();
 
         // training mode
         if input == "train" {
@@ -42,12 +46,23 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         let model = match input.split(' ').collect::<Vec<_>>()[0] {
             "gpt6" | "gpt6w" => Model::Gpt6,
             "gpt6.9-turbo" | "gpt6.9-turbow" => Model::Gpt69Turbo,
+            "gpt6r" | "gpt6rw" => Model::Gpt6r,
+            "gpt6.9r-turbo" | "gpt6.9r-turbow" => Model::Gpt69rTurbo,
             "gpt7" => {
                 println!("{}", gpt7(&input).0);
                 continue;
             }
             "gpt7w" => {
                 let mut weights = gpt7(&input).1;
+                print_weights(&mut weights);
+                continue;
+            }
+            "fable6" => {
+                println!("{}", fable6(&input, tokens, graph).0);
+                continue;
+            }
+            "fable6w" => {
+                let mut weights = fable6(&input, tokens, graph).1;
                 print_weights(&mut weights);
                 continue;
             }
@@ -78,7 +93,11 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
         }
 
         // show weights
-        if input.starts_with("gpt6w ") || input.starts_with("gpt6.9-turbow ") {
+        if input.starts_with("gpt6w ")
+            || input.starts_with("gpt6.9-turbow ")
+            || input.starts_with("gpt6rw ")
+            || input.starts_with("gpt6.9r-turbow ")
+        {
             let mut weights = graph
                 .weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model)
                 .iter()
@@ -142,7 +161,12 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
         .flat_map(|line| {
             line.unwrap_or_default()
                 .split(". ")
-                .map(|s| s.trim().to_string())
+                .map(|s| {
+                    s.to_lowercase()
+                        .replace(|c: char| !c.is_alphanumeric() && c != ' ', "")
+                        .trim()
+                        .to_owned()
+                })
                 .collect::<Vec<_>>()
         })
         .filter(|s| !s.is_empty())
@@ -164,6 +188,12 @@ fn train(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Error>> {
     sentences.iter().for_each(|sentence| {
         let mut stream = vec![0, 0];
         sentence.iter().for_each(|&token| {
+            stream.push(token);
+            graph.connect((stream[stream.len() - 3], stream[stream.len() - 2]), token);
+            stream.drain(0..1);
+        });
+        let mut stream = vec![0, 0];
+        sentence.iter().rev().for_each(|&token| {
             stream.push(token);
             graph.connect((stream[stream.len() - 3], stream[stream.len() - 2]), token);
             stream.drain(0..1);

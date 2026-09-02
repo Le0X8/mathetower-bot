@@ -7,12 +7,16 @@ use zstd::stream::{read::Decoder, write::Encoder};
 pub enum Model {
     Gpt6,
     Gpt69Turbo,
+    Gpt6r,
+    Gpt69rTurbo,
 }
 
 #[derive(Debug)]
 pub struct Graph {
     pub gpt6: HashMap<u32, Vec<Freq>>,
     pub gpt69_turbo: HashMap<(u32, u32), Vec<Freq>>,
+    pub gpt6r: HashMap<u32, Vec<Freq>>,
+    pub gpt69r_turbo: HashMap<(u32, u32), Vec<Freq>>,
 }
 
 impl Graph {
@@ -20,6 +24,8 @@ impl Graph {
         Graph {
             gpt6: HashMap::new(),
             gpt69_turbo: HashMap::new(),
+            gpt6r: HashMap::new(),
+            gpt69r_turbo: HashMap::new(),
         }
     }
 
@@ -50,10 +56,28 @@ impl Graph {
         }
     }
 
+    pub fn connect_reverse(&mut self, from: (u32, u32), to: u32) {
+        let entry = self.gpt6r.entry(from.1).or_default();
+        if let Some(freq) = entry.iter_mut().find(|f| f.token == to) {
+            freq.freq += 1;
+        } else {
+            entry.push(Freq { token: to, freq: 1 });
+        }
+
+        let entry = self.gpt69r_turbo.entry(from).or_default();
+        if let Some(freq) = entry.iter_mut().find(|f| f.token == to) {
+            freq.freq += 1;
+        } else {
+            entry.push(Freq { token: to, freq: 1 });
+        }
+    }
+
     pub fn resolve(&self, from: (u32, u32), model: &Model) -> Option<&Vec<Freq>> {
         match model {
             Model::Gpt6 => self.gpt6.get(&from.1),
             Model::Gpt69Turbo => self.gpt69_turbo.get(&from),
+            Model::Gpt6r => self.gpt6r.get(&from.1),
+            Model::Gpt69rTurbo => self.gpt69r_turbo.get(&from),
         }
     }
 
