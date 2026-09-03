@@ -1,6 +1,6 @@
 export enum Model {
   Gpt6 = 'gpt6',
-  Gpt69Turbo = 'gpt6.9-turbo',
+  Gpt69Turbo = 'gpt69turbo',
   Gpt7 = 'gpt7',
 }
 

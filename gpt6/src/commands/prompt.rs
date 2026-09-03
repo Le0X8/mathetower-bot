@@ -45,9 +45,9 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
 
         let model = match input.split(' ').collect::<Vec<_>>()[0] {
             "gpt6" | "gpt6w" => Model::Gpt6,
-            "gpt6.9-turbo" | "gpt6.9-turbow" => Model::Gpt69Turbo,
+            "gpt69turbo" | "gpt69turbow" => Model::Gpt69Turbo,
             "gpt6r" | "gpt6rw" => Model::Gpt6r,
-            "gpt6.9r-turbo" | "gpt6.9r-turbow" => Model::Gpt69rTurbo,
+            "gpt69rturbo" | "gpt69rturbow" => Model::Gpt69rTurbo,
             "gpt7" => {
                 println!("{}", gpt7(&input).0);
                 continue;
@@ -94,9 +94,9 @@ pub fn prompt(tokens: &mut Tokens, graph: &mut Graph) -> Result<(), Box<dyn Erro
 
         // show weights
         if input.starts_with("gpt6w ")
-            || input.starts_with("gpt6.9-turbow ")
+            || input.starts_with("gpt69turbow ")
             || input.starts_with("gpt6rw ")
-            || input.starts_with("gpt6.9r-turbow ")
+            || input.starts_with("gpt69rturbow ")
         {
             let mut weights = graph
                 .weights((stream[stream.len() - 2], stream[stream.len() - 1]), &model)
