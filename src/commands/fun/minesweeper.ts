@@ -6,8 +6,8 @@ const presets: Record<
   { width: number; height: number; mines: number }
 > = {
   easy: { width: 5, height: 5, mines: 2 },
-  medium: { width: 8, height: 8, mines: 16 },
-  hard: { width: 11, height: 9, mines: 50 },
+  medium: { width: 8, height: 8, mines: 8 },
+  hard: { width: 11, height: 9, mines: 20 },
 };
 
 export default new Command(
@@ -23,7 +23,7 @@ export default new Command(
 
     width = Math.min(Math.max(width, 1), 11);
     height = Math.min(Math.max(height, 1), 9);
-    mines = Math.min(Math.max(mines, 1), width * height);
+    mines = Math.min(Math.max(mines, 0), width * height);
 
     let minesLeft = mines;
     const field: string[][] = Array.from({ length: height }, () =>
@@ -39,6 +39,7 @@ export default new Command(
       }
     }
 
+    let uncovered = 0;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (field[y][x] === '||💣||') continue;
@@ -56,7 +57,12 @@ export default new Command(
             }
           }
         }
-        field[y][x] = count > 0 ? `||${count}\ufe0f\u20e3||` : '||⬜||';
+        field[y][x] =
+          count > 0
+            ? `||${count}\ufe0f\u20e3||`
+            : uncovered < 1
+              ? '⬜'
+              : '||⬜||';
       }
     }
 
@@ -76,11 +82,11 @@ export default new Command(
           value: 'easy',
         },
         {
-          name: 'Mittel (8x8, 16 Minen)',
+          name: 'Mittel (8x8, 8 Minen)',
           value: 'medium',
         },
         {
-          name: 'Schwer (11x9, 50 Minen)',
+          name: 'Schwer (11x9, 20 Minen)',
           value: 'hard',
         },
       ],
