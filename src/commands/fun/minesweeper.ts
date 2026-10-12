@@ -63,6 +63,7 @@ export default new Command(
             : uncovered < 1
               ? '⬜'
               : '||⬜||';
+        if (field[y][x] === '⬜') uncovered++;
       }
     }
 
