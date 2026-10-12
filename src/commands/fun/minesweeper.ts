@@ -17,6 +17,10 @@ export default new Command(
     const preset = interaction.options.getString('preset', false) ?? 'medium';
     let { width, height, mines } = presets[preset] ?? presets['medium'];
 
+    width = interaction.options.getInteger('width', false) ?? width;
+    height = interaction.options.getInteger('height', false) ?? height;
+    mines = interaction.options.getInteger('mines', false) ?? mines;
+
     width = Math.min(Math.max(width, 1), 16);
     height = Math.min(Math.max(height, 1), 25);
     mines = Math.min(Math.max(mines, 1), width * height - 1);
@@ -80,6 +84,24 @@ export default new Command(
           value: 'medium',
         },
       ],
+    },
+    {
+      name: 'width',
+      description: 'Breite des Spielfeldes',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+    },
+    {
+      name: 'height',
+      description: 'Höhe des Spielfeldes',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+    },
+    {
+      name: 'mines',
+      description: 'Anzahl der Minen',
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
     },
   ],
 );
