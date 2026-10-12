@@ -56,9 +56,13 @@ export default new Command(
       }
     }
 
-    const message = field
+    const message2 = field
       .map((row) => row.map((char) => `||${char}||`).join(' '))
       .join('\n');
+    const message = `||⬜||||1️⃣||||1️⃣||||1️⃣||||⬜||||⬜||||⬜||||1️⃣||||💣||
+||⬜||||1️⃣||||💣||||2️⃣||||2️⃣||||1️⃣||||1️⃣||||1️⃣||||1️⃣||
+||⬜||||1️⃣||||2️⃣||||💣||||2️⃣||||💣||||1️⃣||||⬜||||⬜||
+||⬜||||⬜||||1️⃣||||1️⃣||||2️⃣||||1️⃣||||1️⃣||||⬜||||⬜||`;
     await interaction.reply(message);
   },
   false,
