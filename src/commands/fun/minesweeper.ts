@@ -7,7 +7,7 @@ const presets: Record<
   { width: number; height: number; mines: number }
 > = {
   easy: { width: 8, height: 8, mines: 10 },
-  medium: { width: 16, height: 16, mines: 40 },
+  medium: { width: 10, height: 10, mines: 40 },
 };
 
 export default new Command(
