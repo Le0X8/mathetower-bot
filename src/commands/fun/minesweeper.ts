@@ -57,7 +57,7 @@ export default new Command(
     }
 
     const message = field
-      .map((row) => row.map((char) => `||${char}||`).join(''))
+      .map((row) => row.map((char) => `||${char}||`).join(' '))
       .join('\n');
     await interaction.reply(message);
   },
