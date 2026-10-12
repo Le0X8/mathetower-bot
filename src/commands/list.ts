@@ -32,6 +32,7 @@ import zzz_owner_editcash from './owner/editcash.ts';
 import zzz_owner_setrole from './owner/setrole.ts';
 import zzz_owner_replacewords from './owner/replacewords.ts';
 import chatmode from './fun/chatmode.ts';
+import minesweeper from './fun/minesweeper.ts';
 
 export const commands: Record<string, Command> = {
   alias,
@@ -63,6 +64,7 @@ export const commands: Record<string, Command> = {
   novx,
   r,
   chatmode,
+  minesweeper,
   zzz_owner_editcash,
   zzz_owner_setrole,
   zzz_owner_replacewords,
