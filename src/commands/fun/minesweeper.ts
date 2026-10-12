@@ -1,13 +1,13 @@
 import { Command } from '$commands';
-import { buildEmbed } from '@/lib/embeds/default-embed.ts';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 const presets: Record<
   string,
   { width: number; height: number; mines: number }
 > = {
-  easy: { width: 8, height: 8, mines: 10 },
-  medium: { width: 10, height: 10, mines: 40 },
+  easy: { width: 5, height: 5, mines: 2 },
+  medium: { width: 8, height: 8, mines: 16 },
+  hard: { width: 11, height: 9, mines: 50 },
 };
 
 export default new Command(
@@ -21,9 +21,9 @@ export default new Command(
     height = interaction.options.getInteger('height', false) ?? height;
     mines = interaction.options.getInteger('mines', false) ?? mines;
 
-    width = Math.min(Math.max(width, 1), 16);
-    height = Math.min(Math.max(height, 1), 25);
-    mines = Math.min(Math.max(mines, 1), width * height - 1);
+    width = Math.min(Math.max(width, 1), 11);
+    height = Math.min(Math.max(height, 1), 9);
+    mines = Math.min(Math.max(mines, 1), width * height);
 
     let minesLeft = mines;
     const field: string[][] = Array.from({ length: height }, () =>
@@ -56,15 +56,11 @@ export default new Command(
             }
           }
         }
-        field[y][x] = count > 0 ? `||1️⃣||` : '||⬜||';
+        field[y][x] = count > 0 ? `||${count}\ufe0f\u20e3||` : '||⬜||';
       }
     }
 
     const message = field.map((row) => row.join('')).join('\n');
-    const message2 = `||⬜||||1️⃣||||1️⃣||||1️⃣||||⬜||||⬜||||⬜||||1️⃣||||💣||
-||⬜||||1️⃣||||💣||||2️⃣||||2️⃣||||1️⃣||||1️⃣||||1️⃣||||1️⃣||
-||⬜||||1️⃣||||2️⃣||||💣||||2️⃣||||💣||||1️⃣||||⬜||||⬜||
-||⬜||||⬜||||1️⃣||||1️⃣||||2️⃣||||1️⃣||||1️⃣||||⬜||||⬜||`;
     await interaction.reply(message);
   },
   false,
@@ -76,12 +72,16 @@ export default new Command(
       required: false,
       choices: [
         {
-          name: 'Einfach (8x8, 10 Mines)',
+          name: 'Einfach (5x5, 2 Minen)',
           value: 'easy',
         },
         {
-          name: 'Mittel (16x16, 40 Mines)',
+          name: 'Mittel (8x8, 16 Minen)',
           value: 'medium',
+        },
+        {
+          name: 'Schwer (11x9, 50 Minen)',
+          value: 'hard',
         },
       ],
     },
