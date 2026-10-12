@@ -23,21 +23,21 @@ export default new Command(
 
     let minesLeft = mines;
     const field: string[][] = Array.from({ length: height }, () =>
-      Array.from({ length: width }, () => '⬜'),
+      Array.from({ length: width }, () => '||⬜||'),
     );
 
     while (minesLeft > 0) {
       const x = Math.floor(Math.random() * width);
       const y = Math.floor(Math.random() * height);
-      if (field[y][x] === '⬜') {
-        field[y][x] = '💣';
+      if (field[y][x] === '||⬜||') {
+        field[y][x] = '||💣||';
         minesLeft--;
       }
     }
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (field[y][x] === '💣') continue;
+        if (field[y][x] === '||💣||') continue;
         let count = 0;
         for (let dy = -1; dy <= 1; dy++) {
           for (let dx = -1; dx <= 1; dx++) {
@@ -46,20 +46,18 @@ export default new Command(
               y + dy < height &&
               x + dx >= 0 &&
               x + dx < width &&
-              field[y + dy][x + dx] === '💣'
+              field[y + dy][x + dx] === '||💣||'
             ) {
               count++;
             }
           }
         }
-        field[y][x] = count > 0 ? `:${count}:` : '⬜';
+        field[y][x] = count > 0 ? `||1️⃣||` : '||⬜||';
       }
     }
 
-    const message2 = field
-      .map((row) => row.map((char) => `||${char}||`).join(' '))
-      .join('\n');
-    const message = `||⬜||||1️⃣||||1️⃣||||1️⃣||||⬜||||⬜||||⬜||||1️⃣||||💣||
+    const message = field.map((row) => row.join('')).join('\n');
+    const message2 = `||⬜||||1️⃣||||1️⃣||||1️⃣||||⬜||||⬜||||⬜||||1️⃣||||💣||
 ||⬜||||1️⃣||||💣||||2️⃣||||2️⃣||||1️⃣||||1️⃣||||1️⃣||||1️⃣||
 ||⬜||||1️⃣||||2️⃣||||💣||||2️⃣||||💣||||1️⃣||||⬜||||⬜||
 ||⬜||||⬜||||1️⃣||||1️⃣||||2️⃣||||1️⃣||||1️⃣||||⬜||||⬜||`;
